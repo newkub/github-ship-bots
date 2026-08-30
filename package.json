@@ -1,26 +1,26 @@
 {
-  "name": "github-ship-bots",
+  "name": "ship-feed",
   "version": "0.0.1",
-  "module": "src/index.ts",
   "type": "module",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "probot run ./src/index.ts",
-    "start": "probot run ./src/index.ts",
-    "lint": "tsc --noEmit",
-    "test": "bun test",
-    "deploy": "wrangler deploy"
+    "dev:bot": "bun --filter @ship-feed/bot dev",
+    "dev:api": "bun --filter @ship-feed/api dev",
+    "dev:mobile": "bun --filter @ship-feed/mobile dev",
+    "dev:web": "bun --filter @ship-feed/web dev",
+    "dev:landing": "bun --filter @ship-feed/landing dev",
+    "build": "bun --filter '*' build",
+    "lint": "bun --filter '*' lint",
+    "test": "bun --filter '*' test",
+    "deploy:bot": "bun --filter @ship-feed/bot deploy",
+    "deploy:api": "bun --filter @ship-feed/api deploy"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.0"
-  },
-  "peerDependencies": {
+    "@types/bun": "^1.4.0",
     "typescript": "^7.0.2"
-  },
-  "dependencies": {
-    "@octokit/app": "^16.1.4",
-    "@octokit/rest": "^22.0.1",
-    "@octokit/webhooks": "^14.2.0",
-    "probot": "^14.3.2"
   }
 }

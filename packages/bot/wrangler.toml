@@ -3,5 +3,5 @@ main = "src/worker.ts"
 compatibility_date = "2024-08-01"
 
 [assets]
-directory = "docs"
+directory = "../../docs"
 binding = "ASSETS"

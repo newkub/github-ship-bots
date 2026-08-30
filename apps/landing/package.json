@@ -1,5 +1,5 @@
 {
-  "name": "github-ship-bots-landing",
+  "name": "@ship-feed/landing",
   "private": true,
   "version": "0.0.1",
   "type": "module",

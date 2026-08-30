@@ -1,8 +1,17 @@
 > ![Status](https://img.shields.io/badge/status-verified_on_worker-brightgreen)
 
-# github-ship-bots
+# ship-feed
 
-GitHub App for the ship-feed card-driven autonomous development workflow.
+Card-driven autonomous development ecosystem:
+- `apps/mobile` — TikTok-like PWA for approve/reject cards
+- `apps/web` — dashboard for bot customization, billing, web inspector
+- `apps/landing` — marketing landing page
+- `packages/bot` — GitHub App worker (Probot)
+- `packages/api` — backend: WorkOS auth, Stripe payments, evidence, oracle, learning loop
+- `packages/shared` — types and utilities
+- `packages/orchestrator` — Devin skill for the continuous ship loop
+
+GitHub App: [wrikka-ship-bot](https://github.com/apps/wrikka-ship-bot)
 
 [![Deploy](https://img.shields.io/badge/deploy-Cloudflare%20Workers-f48120)](https://workers.cloudflare.com)
 [![Install](https://img.shields.io/badge/install-GitHub%20Apps-181717)](https://github.com/apps/wrikka-ship-bot)

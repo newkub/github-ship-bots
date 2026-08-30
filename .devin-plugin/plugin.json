@@ -1,0 +1,23 @@
+{
+  "name": "ship-feed",
+  "version": "0.0.1",
+  "description": "Card-driven autonomous development plugin ecosystem",
+  "author": "newkub",
+  "repository": "https://github.com/newkub/github-ship-bots",
+  "entry": {
+    "orchestrator": "packages/orchestrator/SKILL.md"
+  },
+  "commands": [
+    "/ship-feed",
+    "/approve",
+    "/reject",
+    "/swipe"
+  ],
+  "env": [
+    "WORKOS_API_KEY",
+    "WORKOS_CLIENT_ID",
+    "STRIPE_SECRET_KEY",
+    "GITHUB_APP_ID",
+    "GITHUB_APP_PRIVATE_KEY"
+  ]
+}

@@ -6,9 +6,9 @@ export default defineConfig({
   plugins: [UnoCSS(), solid()],
   base: "./",
   server: {
-    port: 5173,
+    port: 5175,
   },
   build: {
-    outDir: "dist",
+    outDir: "../../docs",
   },
 });

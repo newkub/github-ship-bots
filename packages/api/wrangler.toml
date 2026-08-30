@@ -1,0 +1,26 @@
+name = "ship-feed-api"
+main = "src/index.ts"
+compatibility_date = "2024-08-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ship-feed-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[[r2_buckets]]
+binding = "EVIDENCE_BUCKET"
+bucket_name = "ship-feed-evidence"
+
+[[r2_buckets]]
+binding = "BASELINE_BUCKET"
+bucket_name = "ship-feed-baselines"
+
+[[kv_namespaces]]
+binding = "SESSION_KV"
+id = "00000000000000000000000000000000"
+
+[vars]
+PUBLIC_APP_URL = "https://github-ship-bots.newkubise.workers.dev"
+WORKOS_CLIENT_ID = "client_01M19F99TQW7CRED4Q65YAE0DH"
+
+# Secrets: WORKOS_API_KEY, WORKOS_COOKIE_PASSWORD, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_PRO
