@@ -41,7 +41,7 @@ export default function CommandCards() {
                 { text: "approved", color: "emerald" },
                 { text: "ship-feed", color: "zinc" },
               ]}
-              botReply="Merged by ship-feed bot."
+              botReply="Merged by github-ship-bots."
             />
           </div>
         </div>
@@ -75,7 +75,7 @@ export default function CommandCards() {
                 { text: "rejected", color: "rose" },
                 { text: "ship-feed", color: "zinc" },
               ]}
-              botReply="Rejected and closed by ship-feed bot."
+              botReply="Rejected and closed by github-ship-bots."
             />
           </div>
         </div>

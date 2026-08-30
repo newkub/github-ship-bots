@@ -89,7 +89,7 @@ export default function GitHubCard(props: GitHubCardProps) {
         <div class="mt-3 rounded-xl bg-orange-500/10 p-3 border border-orange-500/20">
           <p class="text-xs text-orange-400 mb-1 flex items-center gap-1">
             <span class="h-2 w-2 rounded-full bg-orange-500" />
-            ship-feed bot
+            github-ship-bots
           </p>
           <p class="text-sm text-zinc-200">{props.botReply}</p>
         </div>

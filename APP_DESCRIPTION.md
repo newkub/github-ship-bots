@@ -6,7 +6,7 @@ Card-driven approve/reject bot for GitHub issues and pull requests. Comment `/ap
 
 ## Full description for app page
 
-ship-feed-bot turns every new issue and pull request into a clear approve/reject voting card.
+github-ship-bots turns every new issue and pull request into a clear approve/reject voting card.
 
 Maintainers and contributors can vote by simply replying with `/approve` or `/reject` in a comment.
 
@@ -48,4 +48,4 @@ The bot is deployed on Cloudflare Workers and needs these secrets:
 ### Logo and homepage
 
 - Upload the repository logo `assets/bot-logo.png` as the GitHub App logo.
-- Set the homepage URL to `https://ship-feed-bot.newkubise.workers.dev`.
+- Set the homepage URL to `https://github-ship-bots.newkubise.workers.dev`.

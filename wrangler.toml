@@ -1,4 +1,4 @@
-name = "ship-feed-bot"
+name = "github-ship-bots"
 main = "src/worker.ts"
 compatibility_date = "2024-08-01"
 

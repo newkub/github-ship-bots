@@ -47,7 +47,7 @@ export function issuesHandler(webhooks: ShipFeedWebhooks) {
       owner: payload.repository.owner.login,
       repo: payload.repository.name,
       issue_number: issue.number,
-      body: `ship-feed bot: **${command}** by @${comment.user?.login ?? "unknown"}`,
+      body: `github-ship-bots: **${command}** by @${comment.user?.login ?? "unknown"}`,
     });
 
     if (shouldClose) {

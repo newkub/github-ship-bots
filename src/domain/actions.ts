@@ -13,7 +13,7 @@ export function renderCard(card: Card): string {
       : card.status === "rejected"
         ? "rejected"
         : "pending";
-  return `## ship-feed card: ${card.title}
+  return `## github-ship-bots card: ${card.title}
 
 | Status | Value |
 |---|---|

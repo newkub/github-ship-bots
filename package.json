@@ -1,5 +1,5 @@
 {
-  "name": "ship-feed-bot",
+  "name": "github-ship-bots",
   "version": "0.0.1",
   "module": "src/index.ts",
   "type": "module",

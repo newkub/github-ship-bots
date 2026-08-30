@@ -54,7 +54,7 @@ describe("pull request handler", () => {
     }
 
     expect(ctx.calls.length).toBe(1);
-    expect(ctx.calls[0].args.body).toContain("ship-feed card");
+    expect(ctx.calls[0].args.body).toContain("github-ship-bots card");
   });
 
   test("merges PR on /approve", async () => {

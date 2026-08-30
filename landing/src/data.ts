@@ -67,7 +67,7 @@ export const features: Feature[] = [
 export const steps: Step[] = [
   { text: "Install the GitHub App on your repositories.", icon: Download },
   { text: "Open a new issue or pull request.", icon: GitPullRequest },
-  { text: "The bot posts a ship-feed voting card.", icon: MessageSquare },
+  { text: "The bot posts a github-ship-bots voting card.", icon: MessageSquare },
   { text: "Comment /approve or /reject to vote.", icon: MousePointerClick },
   { text: "The bot updates labels and runs the chosen action.", icon: Settings },
 ];

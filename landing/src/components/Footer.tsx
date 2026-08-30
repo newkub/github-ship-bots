@@ -6,7 +6,7 @@ export default function Footer() {
       <p>
         Built for the ship-feed card-driven workflow. Open source on{" "}
         <ExternalLink
-          href="https://github.com/newkub/ship-feed-bot"
+          href="https://github.com/newkub/github-ship-bots"
           class="text-orange-400 hover:text-orange-300"
         >
           GitHub

@@ -13,7 +13,7 @@ export default function About() {
     <section class="py-24 sm:py-32">
       <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-10 border border-zinc-800">
         <h2 class="text-2xl sm:text-3xl font-bold text-center mb-4">
-          What is ship-feed bot?
+          What is github-ship-bots?
         </h2>
         <p class="text-zinc-300 leading-relaxed text-center mb-10 max-w-2xl mx-auto">
           A GitHub App that turns every issue and pull request into a card. Your

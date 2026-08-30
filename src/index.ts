@@ -9,6 +9,6 @@ export default (app: Probot) => {
   pullRequestHandler(webhooks);
 
   app.on("ping", async () => {
-    app.log.info("ship-feed bot is alive");
+    app.log.info("github-ship-bots is alive");
   });
 };

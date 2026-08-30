@@ -63,12 +63,12 @@ export default function Sidebar(props: SidebarProps) {
       >
         <img
           src="assets/bot-logo.png"
-          alt="ship-feed bot logo"
+          alt="github-ship-bots logo"
           class="h-10 w-10 rounded-lg"
           width="40"
           height="40"
         />
-        <span class="text-lg font-bold text-white">ship-feed</span>
+        <span class="text-lg font-bold text-white">github-ship-bots</span>
       </a>
 
       <ul class="space-y-2 flex-1 overflow-y-auto">

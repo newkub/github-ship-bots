@@ -22,7 +22,7 @@ export default function FeatureGrid() {
             state="open"
             number={12}
             labels={[{ text: "ship-feed", color: "zinc" }]}
-            botReply="Reply with /approve or /reject to vote."
+            botReply="Reply with /approve or /reject to vote on github-ship-bots."
           />
         </div>
 
@@ -44,7 +44,7 @@ export default function FeatureGrid() {
               { text: "ship-feed", color: "zinc" },
             ]}
             comment="/approve"
-            botReply="Merged by ship-feed bot."
+            botReply="Merged by github-ship-bots."
           />
         </div>
 
@@ -66,7 +66,7 @@ export default function FeatureGrid() {
               { text: "ship-feed", color: "zinc" },
             ]}
             comment="/reject"
-            botReply="Rejected and closed by ship-feed bot."
+            botReply="Rejected and closed by github-ship-bots."
           />
         </div>
       </div>

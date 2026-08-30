@@ -52,7 +52,7 @@ describe("issues handler", () => {
     }
 
     expect(ctx.calls.length).toBe(1);
-    expect(ctx.calls[0].args.body).toContain("ship-feed card");
+    expect(ctx.calls[0].args.body).toContain("github-ship-bots card");
     expect(ctx.calls[0].args.body).toContain("`/approve` or `/reject`");
   });
 

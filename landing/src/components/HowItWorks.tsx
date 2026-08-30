@@ -51,7 +51,7 @@ export default function HowItWorks() {
               { text: "ship-feed", color: "zinc" },
             ]}
             comment="/approve"
-            botReply="Merged by ship-feed bot."
+            botReply="Merged by github-ship-bots."
           />
         </div>
       </div>

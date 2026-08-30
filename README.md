@@ -1,6 +1,6 @@
 > ![Status](https://img.shields.io/badge/status-verified_on_worker-brightgreen)
 
-# ship-feed-bot
+# github-ship-bots
 
 GitHub App for the ship-feed card-driven autonomous development workflow.
 
@@ -11,7 +11,7 @@ Turn issues and pull requests into approve/reject cards. Comment `/approve` or `
 
 ```text
 +-------------------+
-|   ship-feed bot   |
+|   github-ship-bots   |
 +--------+ +--------+
 | Issue  | |   PR   |
 |  card  | |  card  |
@@ -93,7 +93,7 @@ wrangler deploy
 
 ### GitHub App webhook configuration
 
-- **Webhook URL:** `https://ship-feed-bot.newkubise.workers.dev/webhook`
+- **Webhook URL:** `https://github-ship-bots.newkubise.workers.dev/webhook`
 - **Content type:** `application/json`
 - **Events:** `Issues`, `Issue comment`, `Pull request`
 
@@ -134,7 +134,7 @@ bun test
 ## Architecture
 
 ```text
-ship-feed-bot/
+github-ship-bots/
 ├── src/
 │   ├── worker.ts         # Cloudflare Worker entry
 │   ├── index.ts          # Probot server for local dev

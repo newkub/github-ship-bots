@@ -11,8 +11,7 @@ export default function Hero() {
             <span>GitHub App</span>
           </div>
           <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white">
-            ship-feed
-            <span class="block text-orange-500">bot</span>
+            github-ship-bots
           </h1>
           <p class="mt-6 text-lg sm:text-xl text-zinc-400 max-w-lg mx-auto lg:mx-0">
             Turn issues and pull requests into card-driven approve/reject
@@ -26,7 +25,7 @@ export default function Hero() {
               Install on GitHub
             </ExternalLink>
             <ExternalLink
-              href="https://github.com/newkub/ship-feed-bot"
+              href="https://github.com/newkub/github-ship-bots"
               class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-800 px-6 py-3.5 text-base font-semibold text-white shadow hover:bg-zinc-700 transition"
             >
               View source
@@ -66,7 +65,7 @@ export default function Hero() {
                   <div class="h-3 w-40 rounded bg-zinc-700" />
                   <div class="mt-2 h-2 w-56 rounded bg-zinc-800" />
                   <div class="mt-4 inline-flex items-center gap-1 rounded-md bg-orange-500/10 px-2 py-1 text-xs font-medium text-orange-400">
-                    <Bot size={12} /> ship-feed bot
+                    <Bot size={12} /> github-ship-bots
                   </div>
                 </div>
               </div>
@@ -75,7 +74,7 @@ export default function Hero() {
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex h-24 w-24 items-center justify-center rounded-2xl bg-zinc-950 border-4 border-orange-500 shadow-2xl shadow-orange-500/30">
               <img
                 src="assets/bot-logo.png"
-                alt="ship-feed bot logo"
+                alt="github-ship-bots logo"
                 class="h-16 w-16 rounded-lg"
               />
             </div>
