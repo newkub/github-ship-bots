@@ -44,3 +44,8 @@ The bot is deployed on Cloudflare Workers and needs these secrets:
 - Issues
 - Issue comment
 - Pull request
+
+### Logo and homepage
+
+- Upload the repository logo `assets/bot-logo.png` as the GitHub App logo.
+- Set the homepage URL to `https://ship-feed-bot.newkubise.workers.dev`.

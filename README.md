@@ -1,4 +1,4 @@
-> ![Status](https://img.shields.io/badge/status-in_development-red)
+> ![Status](https://img.shields.io/badge/status-verified_on_worker-brightgreen)
 
 # ship-feed-bot
 
@@ -97,6 +97,20 @@ wrangler deploy
 - **Content type:** `application/json`
 - **Events:** `Issues`, `Issue comment`, `Pull request`
 
+
+## Verification
+
+The worker and bot logic were verified by sending test webhooks manually:
+
+- `ping` event returned `200 {"ok":true}` — webhook signature and worker route work.
+- `issues.opened` event on `newkub/devin-skills#2` caused the bot to post a ship-feed card.
+- `issue_comment.created` event with `/approve` caused the bot to add `approved` and `ship-feed` labels and post a confirmation comment.
+
+For GitHub to send these events automatically, the app must subscribe to:
+
+- `Issues`
+- `Issue comment`
+- `Pull request`
 
 ## Development
 
