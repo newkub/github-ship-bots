@@ -1,50 +1,83 @@
-import { CheckCircle2, XCircle } from "lucide-solid";
+import { ArrowRight, CheckCircle2, XCircle } from "lucide-solid";
+import GitHubCard from "./GitHubCard";
 
 export default function CommandCards() {
   return (
     <section class="py-24 sm:py-32">
-      <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12">
+      <h2 class="text-3xl sm:text-4xl font-bold text-center mb-4">
         Commands
       </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-8 border border-zinc-800 hover:border-emerald-500/50 transition">
-          <div class="flex items-center gap-3 mb-5">
-            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400">
-              <CheckCircle2 size={32} />
+      <p class="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
+        Vote by commenting. The bot reads the command and takes action.
+      </p>
+
+      <div class="space-y-8">
+        <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-8 border border-zinc-800 hover:border-emerald-500/30 transition">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400">
+              <CheckCircle2 size={24} />
             </div>
             <code class="text-2xl font-bold text-white font-mono">/approve</code>
           </div>
-          <p class="text-zinc-400 mb-6">Approve the idea or merge the pull request.</p>
-          <ul class="space-y-3 text-zinc-300">
-            <li class="flex items-center gap-2">
-              <span class="h-2 w-2 rounded-full bg-emerald-500" />
-              On issue: adds <span class="text-emerald-400">approved</span> label
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="h-2 w-2 rounded-full bg-emerald-500" />
-              On pull request: merges with squash
-            </li>
-          </ul>
+
+          <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-4 items-center">
+            <GitHubCard
+              title="Add dark mode"
+              type="pull-request"
+              state="open"
+              number={42}
+              labels={[{ text: "ship-feed", color: "zinc" }]}
+              comment="/approve"
+            />
+            <div class="flex justify-center">
+              <ArrowRight size={28} class="text-zinc-600" />
+            </div>
+            <GitHubCard
+              title="Add dark mode"
+              type="pull-request"
+              state="merged"
+              number={42}
+              labels={[
+                { text: "approved", color: "emerald" },
+                { text: "ship-feed", color: "zinc" },
+              ]}
+              botReply="Merged by ship-feed bot."
+            />
+          </div>
         </div>
 
-        <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-8 border border-zinc-800 hover:border-rose-500/50 transition">
-          <div class="flex items-center gap-3 mb-5">
-            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400">
-              <XCircle size={32} />
+        <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-8 border border-zinc-800 hover:border-rose-500/30 transition">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400">
+              <XCircle size={24} />
             </div>
             <code class="text-2xl font-bold text-white font-mono">/reject</code>
           </div>
-          <p class="text-zinc-400 mb-6">Reject the idea or block the pull request.</p>
-          <ul class="space-y-3 text-zinc-300">
-            <li class="flex items-center gap-2">
-              <span class="h-2 w-2 rounded-full bg-rose-500" />
-              On issue: adds <span class="text-rose-400">rejected</span> label and closes
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="h-2 w-2 rounded-full bg-rose-500" />
-              On pull request: adds <span class="text-rose-400">rejected</span> label
-            </li>
-          </ul>
+
+          <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-4 items-center">
+            <GitHubCard
+              title="Switch to Ruby"
+              type="issue"
+              state="open"
+              number={7}
+              labels={[{ text: "ship-feed", color: "zinc" }]}
+              comment="/reject"
+            />
+            <div class="flex justify-center">
+              <ArrowRight size={28} class="text-zinc-600" />
+            </div>
+            <GitHubCard
+              title="Switch to Ruby"
+              type="issue"
+              state="closed"
+              number={7}
+              labels={[
+                { text: "rejected", color: "rose" },
+                { text: "ship-feed", color: "zinc" },
+              ]}
+              botReply="Rejected and closed by ship-feed bot."
+            />
+          </div>
         </div>
       </div>
     </section>

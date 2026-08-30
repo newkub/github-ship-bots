@@ -1,37 +1,44 @@
 import { For } from "solid-js";
-import { Bot, MessageSquare, MousePointerClick, ShieldCheck } from "lucide-solid";
+import { ArrowRight, Bot, MessageSquare, MousePointerClick, ShieldCheck } from "lucide-solid";
 
 const steps = [
-  { icon: Bot, text: "Bot posts a voting card" },
-  { icon: MousePointerClick, text: "Team comments /approve or /reject" },
-  { icon: MessageSquare, text: "Bot labels and acts automatically" },
-  { icon: ShieldCheck, text: "Decision is recorded and shipped" },
+  { icon: Bot, text: "Open an issue or PR" },
+  { icon: MessageSquare, text: "Bot posts a voting card" },
+  { icon: MousePointerClick, text: "Comment /approve or /reject" },
+  { icon: ShieldCheck, text: "Bot labels and ships" },
 ];
 
 export default function About() {
   return (
     <section class="py-24 sm:py-32">
       <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-10 border border-zinc-800">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/10 text-orange-500">
-            <Bot size={20} />
-          </div>
-          <h2 class="text-2xl sm:text-3xl font-bold">What is ship-feed bot?</h2>
-        </div>
-        <p class="text-zinc-300 leading-relaxed mb-8">
-          A GitHub App that turns every new issue and pull request into a simple
-          card. Your team votes with a comment, and the bot handles labels,
-          merging, and closing.
+        <h2 class="text-2xl sm:text-3xl font-bold text-center mb-4">
+          What is ship-feed bot?
+        </h2>
+        <p class="text-zinc-300 leading-relaxed text-center mb-10 max-w-2xl mx-auto">
+          A GitHub App that turns every issue and pull request into a card. Your
+          team votes with a comment, and the bot handles the rest.
         </p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 items-center">
           <For each={steps}>
-            {(step) => {
+            {(step, i) => {
               const Icon = step.icon;
+              const isLast = i() === steps.length - 1;
               return (
-                <div class="flex items-center gap-3 rounded-xl bg-zinc-950/50 p-4 border border-zinc-800">
-                  <Icon size={20} class="text-orange-400" />
-                  <span class="text-zinc-300 text-sm">{step.text}</span>
-                </div>
+                <>
+                  <div class="relative rounded-2xl bg-zinc-950/50 p-5 border border-zinc-800 text-center">
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/10 text-orange-500 mb-3">
+                      <Icon size={24} />
+                    </div>
+                    <p class="text-zinc-200 text-sm font-medium">{step.text}</p>
+                  </div>
+                  {!isLast && (
+                    <div class="hidden lg:flex justify-center">
+                      <ArrowRight size={20} class="text-zinc-600" />
+                    </div>
+                  )}
+                </>
               );
             }}
           </For>
