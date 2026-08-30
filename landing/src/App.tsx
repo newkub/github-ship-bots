@@ -16,29 +16,41 @@ async function fetchAppInfo(): Promise<AppInfo> {
 const features = [
   {
     title: "Auto card",
-    body: "Every new issue and PR gets a ship-feed voting card with clear approve/reject instructions.",
+    body: "Every new issue and pull request gets a clear voting card so your team can decide quickly.",
   },
   {
     title: "/approve",
-    body: "Approve an idea or merge a pull request with one comment.",
+    body: "Approve an idea or merge a pull request with a single comment. The bot labels and acts for you.",
   },
   {
     title: "/reject",
-    body: "Reject an idea to close the issue, or reject a PR to block it.",
+    body: "Reject an issue to close it, or reject a PR to block it. The bot keeps the status visible with labels.",
   },
 ];
 
 const steps = [
   "Install the GitHub App on your repositories.",
   "Open a new issue or pull request.",
-  "The bot posts a voting card.",
+  "The bot posts a ship-feed voting card with instructions.",
   "Comment /approve or /reject to vote.",
+  "The bot updates labels and runs the chosen action automatically.",
 ];
 
 const commands = [
   { cmd: "/approve", issue: "Adds approved label", pr: "Adds approved label and merges" },
   { cmd: "/reject", issue: "Adds rejected label and closes", pr: "Adds rejected label" },
 ];
+
+const ExternalLink = (props: { href: string; children: any; class?: string }) => (
+  <a
+    href={props.href}
+    target="_blank"
+    rel="noopener noreferrer"
+    class={props.class}
+  >
+    {props.children}
+  </a>
+);
 
 export default function App() {
   const appQuery = createQuery(() => ({
@@ -62,22 +74,40 @@ export default function App() {
           </h1>
           <p class="mt-4 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto">
             Turn GitHub issues and pull requests into card-driven approve/reject
-            decisions. Vote with a comment, let the bot do the rest.
+            decisions. Your team votes with comments; the bot handles the rest.
           </p>
           <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <a
+            <ExternalLink
               href="https://github.com/apps/wrikka-ship-bot"
               class="inline-flex items-center justify-center rounded-xl bg-indigo-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg hover:bg-indigo-600 transition"
             >
               Install on GitHub
-            </a>
-            <a
+            </ExternalLink>
+            <ExternalLink
               href="https://github.com/newkub/ship-feed-bot"
               class="inline-flex items-center justify-center rounded-xl bg-slate-800 px-6 py-3.5 text-base font-semibold text-white shadow hover:bg-slate-700 transition"
             >
               View source
-            </a>
+            </ExternalLink>
           </div>
+        </section>
+
+        <section class="mt-20 sm:mt-24 rounded-2xl bg-slate-900 p-6 sm:p-10 border border-slate-800">
+          <h2 class="text-2xl sm:text-3xl font-bold mb-4">What is ship-feed bot?</h2>
+          <p class="text-slate-300 leading-relaxed">
+            It is a GitHub App that brings a simple approve/reject workflow to your
+            repositories. When someone opens an issue or a pull request, the bot posts
+            a card. Team members reply with{" "}
+            <code class="bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono text-indigo-300">
+              /approve
+            </code>{" "}
+            or{" "}
+            <code class="bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono text-red-300">
+              /reject
+            </code>
+            . Approved PRs are merged, rejected issues are closed, and every
+            decision is labeled automatically.
+          </p>
         </section>
 
         <section class="mt-20 sm:mt-24">
@@ -87,7 +117,7 @@ export default function App() {
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <For each={features}>
               {(item) => (
-                <div class="rounded-2xl bg-slate-900 p-6 sm:p-8 shadow-lg border border-slate-800">
+                <div class="rounded-2xl bg-slate-900 p-6 sm:p-8 shadow-lg border border-slate-800 hover:border-indigo-500/50 transition">
                   <h3 class="text-xl font-semibold text-white">{item.title}</h3>
                   <p class="mt-3 text-slate-400 leading-relaxed">{item.body}</p>
                 </div>
@@ -98,7 +128,7 @@ export default function App() {
 
         <section class="mt-20 sm:mt-24">
           <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-10">
-            How to use
+            How it works
           </h2>
           <ol class="max-w-2xl mx-auto space-y-4">
             <For each={steps}>
@@ -144,7 +174,7 @@ export default function App() {
           </div>
         </section>
 
-        <section class="mt-20 sm:mt-24 rounded-2xl bg-slate-900 p-6 sm:p-8 border border-slate-800">
+        <section class="mt-20 sm:mt-24 rounded-2xl bg-slate-900 p-6 sm:p-10 border border-slate-800">
           <h2 class="text-2xl font-bold mb-4">App status</h2>
           <Show when={appQuery.isLoading}>
             <p class="text-slate-400">Loading app info...</p>
@@ -154,12 +184,12 @@ export default function App() {
           </Show>
           <Show when={!appQuery.isLoading && !appQuery.isError}>
             <p class="text-slate-300">
-              <a
-                href={appQuery.data?.html_url}
+              <ExternalLink
+                href={appQuery.data?.html_url ?? "#"}
                 class="text-indigo-400 hover:text-indigo-300 font-medium"
               >
                 {appQuery.data?.name}
-              </a>
+              </ExternalLink>
               <br />
               <span class="text-slate-400">
                 {appQuery.data?.description || "No description set yet."}
@@ -168,15 +198,29 @@ export default function App() {
           </Show>
         </section>
 
+        <section class="mt-20 sm:mt-24 rounded-2xl bg-indigo-900/20 p-8 sm:p-12 text-center border border-indigo-500/30">
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-3">Ready to ship faster?</h2>
+          <p class="text-slate-300 mb-8 max-w-xl mx-auto">
+            Install the GitHub App, open your first issue, and start voting with
+            /approve and /reject.
+          </p>
+          <ExternalLink
+            href="https://github.com/apps/wrikka-ship-bot"
+            class="inline-flex items-center justify-center rounded-xl bg-indigo-500 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-indigo-600 transition"
+          >
+            Install on GitHub
+          </ExternalLink>
+        </section>
+
         <footer class="mt-20 sm:mt-24 text-center text-slate-500 text-sm">
           <p>
             Built for the ship-feed card-driven workflow. Open source on{" "}
-            <a
+            <ExternalLink
               href="https://github.com/newkub/ship-feed-bot"
               class="text-indigo-400 hover:text-indigo-300"
             >
               GitHub
-            </a>
+            </ExternalLink>
             .
           </p>
         </footer>

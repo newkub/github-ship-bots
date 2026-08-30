@@ -83,6 +83,21 @@ wrangler secret put WEBHOOK_SECRET
 wrangler deploy
 ```
 
+### Where the secrets come from
+
+| Secret | Where to get it |
+|--------|-----------------|
+| `APP_ID` | GitHub App settings page. It is a numeric ID like `4769384`. |
+| `PRIVATE_KEY` | GitHub App settings > **Private keys** > **Generate a private key**. Convert the downloaded `.pem` to PKCS#8 with `openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in private-key.pem -out private-key-pkcs8.pem`. |
+| `WEBHOOK_SECRET` | Any secure random string. Set the same value in GitHub App webhook settings and in Cloudflare Worker secrets. |
+
+### GitHub App webhook configuration
+
+- **Webhook URL:** `https://ship-feed-bot.newkubise.workers.dev/webhook`
+- **Content type:** `application/json`
+- **Events:** `Issues`, `Issue comment`, `Pull request`
+
+
 ## Development
 
 ```bash
