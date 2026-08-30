@@ -88,7 +88,7 @@ wrangler deploy
 | Secret | Where to get it |
 |--------|-----------------|
 | `APP_ID` | GitHub App settings page. It is a numeric ID like `4769384`. |
-| `PRIVATE_KEY` | GitHub App settings > **Private keys** > **Generate a private key**. Convert the downloaded `.pem` to PKCS#8 with `openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in private-key.pem -out private-key-pkcs8.pem`. |
+| `PRIVATE_KEY` | GitHub App settings > **Private keys** > **Generate a private key**. Convert the downloaded `.pem` to PKCS#8 with `bun run scripts/convert-private-key.ts private-key.pem`. |
 | `WEBHOOK_SECRET` | Any secure random string. Set the same value in GitHub App webhook settings and in Cloudflare Worker secrets. |
 
 ### GitHub App webhook configuration

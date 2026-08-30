@@ -30,7 +30,7 @@ Maintainers and contributors can vote by simply replying with `/approve` or `/re
 The bot is deployed on Cloudflare Workers and needs these secrets:
 
 - `APP_ID`: the numeric App ID from this GitHub App settings page.
-- `PRIVATE_KEY`: generate a private key below, then convert it to PKCS#8 format.
+- `PRIVATE_KEY`: generate a private key below, then convert it to PKCS#8 format with the included `scripts/convert-private-key.ts`.
 - `WEBHOOK_SECRET`: any secure random string. Set the same value in GitHub App webhook settings and in Cloudflare Worker secrets.
 
 ### Permissions
