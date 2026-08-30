@@ -6,20 +6,33 @@ import FeatureGrid from "./components/FeatureGrid";
 import Footer from "./components/Footer";
 import Hero from "./components/Hero";
 import HowItWorks from "./components/HowItWorks";
+import Layout from "./components/Layout";
 
 export default function App() {
   return (
-    <div class="min-h-screen bg-zinc-950 text-zinc-50 font-sans antialiased">
-      <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <Layout>
+      <section id="home">
         <Hero />
-        <About />
-        <FeatureGrid />
-        <HowItWorks />
-        <CommandTable />
-        <AppStatus />
-        <CTA />
+      </section>
+      <div class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
+        <section id="about">
+          <About />
+        </section>
+        <section id="features">
+          <FeatureGrid />
+        </section>
+        <section id="how-it-works">
+          <HowItWorks />
+        </section>
+        <section id="commands">
+          <CommandTable />
+        </section>
+        <section id="install">
+          <CTA />
+          <AppStatus />
+        </section>
         <Footer />
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }

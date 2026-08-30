@@ -1,4 +1,5 @@
 import { For } from "solid-js";
+import { CheckCircle2, XCircle } from "lucide-solid";
 import { commands } from "../data";
 
 export default function CommandTable() {
@@ -20,8 +21,15 @@ export default function CommandTable() {
             <For each={commands}>
               {(row) => (
                 <tr>
-                  <td class="px-4 sm:px-6 py-4 font-mono font-medium text-white">
-                    {row.cmd}
+                  <td class="px-4 sm:px-6 py-4">
+                    <span class="inline-flex items-center gap-2 font-mono font-medium text-white">
+                      {row.cmd === "/approve" ? (
+                        <CheckCircle2 size={16} class="text-emerald-400" />
+                      ) : (
+                        <XCircle size={16} class="text-rose-400" />
+                      )}
+                      {row.cmd}
+                    </span>
                   </td>
                   <td class="px-4 sm:px-6 py-4">{row.issue}</td>
                   <td class="px-4 sm:px-6 py-4">{row.pr}</td>

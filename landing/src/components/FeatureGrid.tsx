@@ -1,12 +1,5 @@
 import { For } from "solid-js";
-import { Bot, CheckCircle2, MessageSquare, XCircle } from "lucide-solid";
 import { features } from "../data";
-
-const iconMap: Record<string, typeof Bot> = {
-  "Auto card": MessageSquare,
-  "/approve": CheckCircle2,
-  "/reject": XCircle,
-};
 
 export default function FeatureGrid() {
   return (
@@ -17,7 +10,7 @@ export default function FeatureGrid() {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <For each={features}>
           {(item) => {
-            const Icon = iconMap[item.title] ?? Bot;
+            const Icon = item.icon;
             return (
               <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-8 shadow-lg border border-zinc-800 hover:border-orange-500/50 transition">
                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 mb-5">
