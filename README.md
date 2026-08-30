@@ -1,80 +1,122 @@
+> ![Status](https://img.shields.io/badge/status-in_development-red)
+
 # ship-feed-bot
 
-GitHub bot for the [ship-feed](https://github.com/newkub/devin-skills/issues/1) card-driven autonomous development workflow.
+GitHub App for the ship-feed card-driven autonomous development workflow.
 
-## What it does
+[![Deploy](https://img.shields.io/badge/deploy-Cloudflare%20Workers-f48120)](https://workers.cloudflare.com)
+[![Install](https://img.shields.io/badge/install-GitHub%20Apps-181717)](https://github.com/apps/wrikka-ship-bot)
 
-- Comments a voting card on every new issue and pull request
-- Listens for `/approve` and `/reject` commands in comments
-- Adds `approved` or `rejected` labels
-- Closes rejected issues
-- Merges approved pull requests
+Turn issues and pull requests into approve/reject cards. Comment `/approve` or `/reject` to vote.
 
-## Quick start
+```text
++-------------------+
+|   ship-feed bot   |
++--------+ +--------+
+| Issue  | |   PR   |
+|  card  | |  card  |
++---^----+ +---^----+
+    |          |
+  /approve     /approve
+  /reject      /reject
+```
 
-1. Install the GitHub App: https://github.com/apps/wrikka-ship-bot
-2. Choose the repositories the bot can access
-3. Open a new issue or pull request
-4. The bot posts a card with voting instructions
-5. Reply with `/approve` or `/reject`
+## Get Started
 
-## Commands
-
-| Command | Effect |
-|---------|--------|
-| `/approve` | Marks approved. On a PR, the bot merges it. |
-| `/reject` | Marks rejected. On an issue, the bot closes it. |
-
-## Landing page
-
-The landing page is built with Solid and TanStack Query.
+1. Install the GitHub App at https://github.com/apps/wrikka-ship-bot and choose repositories.
+2. Deploy the worker to Cloudflare Workers and set `APP_ID`, `PRIVATE_KEY`, `WEBHOOK_SECRET` secrets.
+3. Open a new issue or pull request and the bot posts a voting card.
 
 ```bash
-cd landing
+# local development
 bun install
 bun run dev
 ```
 
-Build for production:
+## Features
+
+| Icon | Feature | Description |
+|------|---------|-------------|
+| <img src="https://api.iconify.design/lucide/message-square-text.svg?color=%236366f1" width="20" height="20" /> | Card comments | Posts a voting card on every new issue and PR |
+| <img src="https://api.iconify.design/lucide/circle-check.svg?color=%236366f1" width="20" height="20" /> | Approve command | `/approve` labels and merges approved PRs |
+| <img src="https://api.iconify.design/lucide/circle-x.svg?color=%236366f1" width="20" height="20" /> | Reject command | `/reject` labels and closes rejected issues |
+| <img src="https://api.iconify.design/lucide/rocket.svg?color=%236366f1" width="20" height="20" /> | Cloudflare Workers | Runs as a serverless worker with static landing |
+| <img src="https://api.iconify.design/lucide/settings.svg?color=%236366f1" width="20" height="20" /> | CI/CD | GitHub Actions run lint, tests, build, and deploy |
+
+## Usage
+
+### Web
+
+Visit the landing page after deploy to see the install link and current app status.
+
+### GitHub
+
+1. Create or open an issue or pull request.
+2. The bot comments a card.
+3. Reply with `/approve` or `/reject`.
+
+### Commands
+
+| Command | On issue | On pull request |
+|---------|----------|-----------------|
+| `/approve` | Adds `approved` label | Adds `approved` label and merges |
+| `/reject` | Adds `rejected` label and closes | Adds `rejected` label |
+
+### Cloudflare Workers deploy
 
 ```bash
-cd landing
-bun run build
-```
+# install dependencies
+bun install
 
-Static output is in `landing/dist/`. The `docs/` folder is the same build for GitHub Pages.
+# build landing static assets
+cd landing
+bun install
+bun run build
+cp -r dist ../docs
+
+# set secrets
+wrangler secret put APP_ID
+wrangler secret put PRIVATE_KEY
+wrangler secret put WEBHOOK_SECRET
+
+# deploy
+wrangler deploy
+```
 
 ## Development
 
 ```bash
 bun install
-bun run dev
-```
-
-## Tests
-
-```bash
+bun run lint
 bun test
 ```
 
-## Configuration
+## Tech Stack
 
-Create a `.env` file from `.env.example` and fill the GitHub App credentials:
+| Layer | Technology | Version | Description |
+|-------|------------|---------|-------------|
+| Runtime | Bun | 1.4 | JavaScript runtime and package manager |
+| Bot | Probot / Octokit | 14.x | GitHub App webhook framework |
+| Worker | Cloudflare Workers | - | Serverless edge runtime |
+| Landing | Solid + TanStack Query | 1.x / 5.x | Reactive UI with data fetching |
+| Styling | UnoCSS | 66.x | Atomic CSS engine |
+| CI/CD | GitHub Actions | - | Lint, test, build, deploy |
 
-- `APP_ID` from the GitHub App settings
-- `PRIVATE_KEY` from the GitHub App private key file
-- `WEBHOOK_SECRET` from the GitHub App webhook settings
+## Architecture
 
-## Permissions
+```text
+ship-feed-bot/
+├── src/
+│   ├── worker.ts         # Cloudflare Worker entry
+│   ├── index.ts          # Probot server for local dev
+│   ├── handlers/         # issues & pull request handlers
+│   └── lib/verify.ts     # webhook signature verification
+├── landing/              # Solid + UnoCSS landing page
+├── docs/                 # built static assets
+├── wrangler.toml         # Workers configuration
+└── .github/workflows/    # CI/CD
+```
 
-The app needs the following permissions:
+## License
 
-- Issues: read & write
-- Pull requests: read & write
-- Contents: read & write
-
-Events to subscribe:
-
-- Issues
-- Issue comment
-- Pull request
+[MIT](LICENSE)

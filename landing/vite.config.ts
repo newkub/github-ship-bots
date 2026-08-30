@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
+import UnoCSS from "unocss/vite";
 
 export default defineConfig({
-  plugins: [solid()],
-  base: "/ship-feed-bot/",
+  plugins: [UnoCSS(), solid()],
+  base: "./",
   server: {
     port: 5173,
   },

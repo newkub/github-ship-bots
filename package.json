@@ -8,15 +8,18 @@
     "dev": "probot run ./src/index.ts",
     "start": "probot run ./src/index.ts",
     "lint": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "^1.4.0"
   },
   "peerDependencies": {
-    "typescript": "^7"
+    "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@octokit/app": "^16.1.4",
+    "@octokit/rest": "^22.0.1",
     "@octokit/webhooks": "^14.2.0",
     "probot": "^14.3.2"
   }
