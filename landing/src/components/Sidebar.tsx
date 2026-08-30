@@ -11,11 +11,20 @@ export default function Sidebar(props: SidebarProps) {
   onMount(() => {
     if (!props.mainRef) return;
 
+    const initialHash = window.location.hash.replace("#", "");
+    if (initialHash && document.getElementById(initialHash)) {
+      setActive(initialHash);
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-            setActive(entry.target.id);
+            const id = entry.target.id;
+            setActive(id);
+            if (window.location.hash !== `#${id}`) {
+              history.replaceState(null, "", `#${id}`);
+            }
           }
         });
       },
@@ -38,6 +47,7 @@ export default function Sidebar(props: SidebarProps) {
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
       setActive(id);
+      history.pushState(null, "", `#${id}`);
     }
   }
 
@@ -55,6 +65,8 @@ export default function Sidebar(props: SidebarProps) {
           src="assets/bot-logo.png"
           alt="ship-feed bot logo"
           class="h-10 w-10 rounded-lg"
+          width="40"
+          height="40"
         />
         <span class="text-lg font-bold text-white">ship-feed</span>
       </a>
@@ -77,6 +89,7 @@ export default function Sidebar(props: SidebarProps) {
                     "bg-orange-500/10 text-orange-400": isActive(),
                     "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200": !isActive(),
                   }}
+                  aria-current={isActive() ? "page" : undefined}
                 >
                   <Icon size={18} />
                   {section.label}

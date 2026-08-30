@@ -1,4 +1,12 @@
-import { Bot } from "lucide-solid";
+import { For } from "solid-js";
+import { Bot, MessageSquare, MousePointerClick, ShieldCheck } from "lucide-solid";
+
+const steps = [
+  { icon: Bot, text: "Bot posts a voting card" },
+  { icon: MousePointerClick, text: "Team comments /approve or /reject" },
+  { icon: MessageSquare, text: "Bot labels and acts automatically" },
+  { icon: ShieldCheck, text: "Decision is recorded and shipped" },
+];
 
 export default function About() {
   return (
@@ -10,20 +18,24 @@ export default function About() {
           </div>
           <h2 class="text-2xl sm:text-3xl font-bold">What is ship-feed bot?</h2>
         </div>
-        <p class="text-zinc-300 leading-relaxed">
-          It is a GitHub App that brings a card-driven approve/reject workflow to
-          your repositories. When someone opens an issue or a pull request, the
-          bot posts a voting card. Team members reply with{" "}
-          <code class="bg-zinc-800 px-1.5 py-0.5 rounded text-sm font-mono text-orange-400">
-            /approve
-          </code>{" "}
-          or{" "}
-          <code class="bg-zinc-800 px-1.5 py-0.5 rounded text-sm font-mono text-rose-400">
-            /reject
-          </code>
-          . Approved PRs are merged, rejected issues are closed, and every
-          decision is labeled automatically.
+        <p class="text-zinc-300 leading-relaxed mb-8">
+          A GitHub App that turns every new issue and pull request into a simple
+          card. Your team votes with a comment, and the bot handles labels,
+          merging, and closing.
         </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <For each={steps}>
+            {(step) => {
+              const Icon = step.icon;
+              return (
+                <div class="flex items-center gap-3 rounded-xl bg-zinc-950/50 p-4 border border-zinc-800">
+                  <Icon size={20} class="text-orange-400" />
+                  <span class="text-zinc-300 text-sm">{step.text}</span>
+                </div>
+              );
+            }}
+          </For>
+        </div>
       </div>
     </section>
   );

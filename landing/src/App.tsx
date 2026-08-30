@@ -1,7 +1,6 @@
 import About from "./components/About";
-import AppStatus from "./components/AppStatus";
 import CTA from "./components/CTA";
-import CommandTable from "./components/CommandTable";
+import CommandCards from "./components/CommandCards";
 import FeatureGrid from "./components/FeatureGrid";
 import Footer from "./components/Footer";
 import Hero from "./components/Hero";
@@ -25,11 +24,10 @@ export default function App() {
           <HowItWorks />
         </section>
         <section id="commands">
-          <CommandTable />
+          <CommandCards />
         </section>
         <section id="install">
           <CTA />
-          <AppStatus />
         </section>
         <Footer />
       </div>
