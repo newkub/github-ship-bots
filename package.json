@@ -1,0 +1,23 @@
+{
+  "name": "ship-feed-bot",
+  "version": "0.0.1",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "probot run ./src/index.ts",
+    "start": "probot run ./src/index.ts",
+    "lint": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "dependencies": {
+    "@octokit/webhooks": "^14.2.0",
+    "probot": "^14.3.2"
+  }
+}
