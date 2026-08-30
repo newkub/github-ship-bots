@@ -14,20 +14,30 @@ export interface Env {
   ASSETS: AssetFetcher;
 }
 
+function createApp(env: Env) {
+  return new App({
+    appId: env.APP_ID,
+    privateKey: env.PRIVATE_KEY,
+    webhooks: { secret: env.WEBHOOK_SECRET },
+  });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    const app = new App({
-      appId: env.APP_ID,
-      privateKey: env.PRIVATE_KEY,
-      webhooks: { secret: env.WEBHOOK_SECRET },
-    });
-
-    issuesHandler(app.webhooks as any);
-    pullRequestHandler(app.webhooks as any);
-
     if (request.method === "POST" && url.pathname === "/webhook") {
+      if (!env.PRIVATE_KEY || !env.APP_ID || !env.WEBHOOK_SECRET) {
+        return new Response(JSON.stringify({ error: "Missing app credentials" }), {
+          status: 503,
+          headers: { "content-type": "application/json" },
+        });
+      }
+
+      const app = createApp(env);
+      issuesHandler(app.webhooks as any);
+      pullRequestHandler(app.webhooks as any);
+
       const id = request.headers.get("x-github-delivery") ?? "";
       const name = request.headers.get("x-github-event") ?? "";
       const signature = request.headers.get("x-hub-signature-256") ?? "";
