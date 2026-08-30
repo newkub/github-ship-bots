@@ -1,18 +1,22 @@
-import type { Octokit } from "@octokit/rest";
+import {
+  type ShipFeedWebhooks,
+  type IssueOpenedPayload,
+  type IssueCommentPayload,
+} from "../types.ts";
 import { parseCommand, renderCard } from "../domain/actions.ts";
 
-interface Context {
-  octokit: Octokit;
-  payload: any;
+function isApprove(command: "approve" | "reject"): boolean {
+  return command === "approve";
 }
 
-export function issuesHandler(
-  app: { on: (event: string, handler: (ctx: Context) => Promise<void>) => void },
-) {
-  app.on("issues.opened", async ({ octokit, payload }: Context) => {
+export function issuesHandler(webhooks: ShipFeedWebhooks) {
+  webhooks.on<IssueOpenedPayload>("issues.opened", async ({ octokit, payload }) => {
     const { issue } = payload;
-    const title = issue.title ?? "New idea";
-    const body = renderCard({ title, number: issue.number, status: "pending" });
+    const body = renderCard({
+      title: issue.title,
+      number: issue.number,
+      status: "pending",
+    });
 
     await octokit.rest.issues.createComment({
       owner: payload.repository.owner.login,
@@ -22,13 +26,15 @@ export function issuesHandler(
     });
   });
 
-  app.on("issue_comment.created", async ({ octokit, payload }: Context) => {
+  webhooks.on<IssueCommentPayload>("issue_comment.created", async ({ octokit, payload }) => {
     const { comment, issue } = payload;
+    if (issue.pull_request) return;
+
     const command = parseCommand(comment.body ?? "");
     if (!command) return;
 
-    const label = command === "approve" ? "approved" : "rejected";
-    const state = command === "approve" ? "open" : "closed";
+    const label = isApprove(command) ? "approved" : "rejected";
+    const shouldClose = !isApprove(command);
 
     await octokit.rest.issues.addLabels({
       owner: payload.repository.owner.login,
@@ -44,7 +50,7 @@ export function issuesHandler(
       body: `ship-feed bot: **${command}** by @${comment.user?.login ?? "unknown"}`,
     });
 
-    if (state === "closed") {
+    if (shouldClose) {
       await octokit.rest.issues.update({
         owner: payload.repository.owner.login,
         repo: payload.repository.name,

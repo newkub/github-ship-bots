@@ -1,19 +1,19 @@
-import type { Octokit } from "@octokit/rest";
+import {
+  type ShipFeedWebhooks,
+  type PullRequestOpenedPayload,
+  type IssueCommentPayload,
+} from "../types.ts";
 import { parseCommand, renderCard } from "../domain/actions.ts";
 
-interface Context {
-  octokit: Octokit;
-  payload: any;
+function isApprove(command: "approve" | "reject"): boolean {
+  return command === "approve";
 }
 
-export function pullRequestHandler(
-  app: { on: (event: string, handler: (ctx: Context) => Promise<void>) => void },
-) {
-  app.on("pull_request.opened", async ({ octokit, payload }: Context) => {
+export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
+  webhooks.on<PullRequestOpenedPayload>("pull_request.opened", async ({ octokit, payload }) => {
     const { pull_request } = payload;
-    const title = pull_request.title ?? "New PR";
     const body = renderCard({
-      title,
+      title: pull_request.title,
       number: pull_request.number,
       status: "pending",
     });
@@ -26,14 +26,14 @@ export function pullRequestHandler(
     });
   });
 
-  app.on("issue_comment.created", async ({ octokit, payload }: Context) => {
+  webhooks.on<IssueCommentPayload>("issue_comment.created", async ({ octokit, payload }) => {
     const { comment, issue } = payload;
-    if (!("pull_request" in issue) || !issue.pull_request) return;
+    if (!issue.pull_request) return;
 
     const command = parseCommand(comment.body ?? "");
     if (!command) return;
 
-    const label = command === "approve" ? "approved" : "rejected";
+    const label = isApprove(command) ? "approved" : "rejected";
 
     await octokit.rest.issues.addLabels({
       owner: payload.repository.owner.login,
@@ -49,7 +49,7 @@ export function pullRequestHandler(
       body: `ship-feed bot: **${command}** by @${comment.user?.login ?? "unknown"}`,
     });
 
-    if (command === "approve") {
+    if (isApprove(command)) {
       await octokit.rest.pulls.merge({
         owner: payload.repository.owner.login,
         repo: payload.repository.name,

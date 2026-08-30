@@ -1,8 +1,8 @@
-import { App } from "@octokit/app";
-import { Octokit } from "@octokit/rest";
+import { createShipFeedApp } from "./app.ts";
 import { verifyWebhookSignature } from "./lib/verify.ts";
 import { issuesHandler } from "./handlers/issues.ts";
 import { pullRequestHandler } from "./handlers/pull-request.ts";
+import type { ShipFeedWebhooks } from "./types.ts";
 
 interface AssetFetcher {
   fetch: (request: Request) => Promise<Response>;
@@ -13,15 +13,6 @@ export interface Env {
   PRIVATE_KEY: string;
   WEBHOOK_SECRET: string;
   ASSETS: AssetFetcher;
-}
-
-function createApp(env: Env) {
-  return new App({
-    appId: env.APP_ID,
-    privateKey: env.PRIVATE_KEY,
-    webhooks: { secret: env.WEBHOOK_SECRET },
-    Octokit,
-  });
 }
 
 export default {
@@ -36,9 +27,10 @@ export default {
         });
       }
 
-      const app = createApp(env);
-      issuesHandler(app.webhooks as any);
-      pullRequestHandler(app.webhooks as any);
+      const app = createShipFeedApp(env);
+      const webhooks = app.webhooks as unknown as ShipFeedWebhooks;
+      issuesHandler(webhooks);
+      pullRequestHandler(webhooks);
 
       const id = request.headers.get("x-github-delivery") ?? "";
       const name = request.headers.get("x-github-event") ?? "";
