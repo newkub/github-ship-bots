@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "lint": "bun --bun tsc --noEmit"
+    "lint": "bun --bun tsc --noEmit",
+    "test": "bun test"
   },
   "dependencies": {
     "@ship-feed/shared": "workspace:*"
