@@ -1,6 +1,8 @@
-import { describe, test, expect, beforeEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { Probot } from "probot";
 import { issuesHandler } from "../../src/handlers/issues.ts";
+import { setBotEnv } from "../../src/lib/api.ts";
+import { createBotEnv } from "../../src/types.ts";
 
 function createMockContext(payload: any) {
   const calls: any[] = [];
@@ -30,8 +32,23 @@ function createMockContext(payload: any) {
 describe("issues handler", () => {
   let app: Probot;
   let handlers: Record<string, ((ctx: any) => Promise<void>)[]>;
+  let fetchCalls: { url: string; init: any }[];
+  let originalFetch: typeof fetch;
 
   beforeEach(() => {
+    fetchCalls = [];
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      fetchCalls.push({ url, init });
+      return new Response(JSON.stringify({ ok: true, card: { id: "card-123", score: 7.5 } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    };
+
+    setBotEnv(createBotEnv({ API_URL: "https://test", API_TOKEN: "token" }));
+
     app = new Probot({ appId: 1, privateKey: "test", secret: "test" });
     handlers = {} as any;
     (app as any).on = (event: string, fn: any) => {
@@ -41,19 +58,27 @@ describe("issues handler", () => {
     issuesHandler(app as any);
   });
 
-  test("comments a card when issue opened", async () => {
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  test("creates a card and comments when issue opened", async () => {
     const ctx = createMockContext({
       repository: { owner: { login: "newkub" }, name: "devin-skills" },
-      issue: { number: 1, title: "[Plan] ship-feed" },
+      issue: { number: 1, title: "[Plan] ship-feed", body: "" },
     });
 
     for (const fn of handlers["issues.opened"] || []) {
       await fn(ctx);
     }
 
+    expect(fetchCalls.length).toBe(1);
+    expect(fetchCalls[0].url).toBe("https://test/api/cards/webhook");
+
     expect(ctx.calls.length).toBe(1);
     expect(ctx.calls[0].args.body).toContain("github-ship-bots card");
     expect(ctx.calls[0].args.body).toContain("`/approve` or `/reject`");
+    expect(ctx.calls[0].args.body).toContain("card-123");
   });
 
   test("labels approved and comments on /approve", async () => {

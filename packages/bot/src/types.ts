@@ -1,4 +1,23 @@
 import type { Octokit } from "@octokit/rest";
+import type { D1Database } from "@cloudflare/workers-types";
+
+export interface BotEnv {
+  APP_ID: string;
+  PRIVATE_KEY: string;
+  WEBHOOK_SECRET: string;
+  API_URL?: string;
+  API_TOKEN?: string;
+  DB?: D1Database;
+}
+
+export function createBotEnv(overrides?: Partial<BotEnv>): BotEnv {
+  return {
+    APP_ID: "",
+    PRIVATE_KEY: "",
+    WEBHOOK_SECRET: "",
+    ...overrides,
+  };
+}
 
 export interface Repository {
   owner: { login: string };
@@ -8,11 +27,13 @@ export interface Repository {
 export interface Issue {
   number: number;
   title: string;
+  body?: string | null;
 }
 
 export interface PullRequest {
   number: number;
   title: string;
+  body?: string | null;
 }
 
 export interface IssueOpenedPayload {

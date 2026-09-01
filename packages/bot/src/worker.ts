@@ -2,16 +2,14 @@ import { createShipFeedApp } from "./app.ts";
 import { verifyWebhookSignature } from "./lib/verify.ts";
 import { issuesHandler } from "./handlers/issues.ts";
 import { pullRequestHandler } from "./handlers/pull-request.ts";
-import type { ShipFeedWebhooks } from "./types.ts";
+import { setBotEnv } from "./lib/api.ts";
+import type { BotEnv, ShipFeedWebhooks } from "./types.ts";
 
 interface AssetFetcher {
   fetch: (request: Request) => Promise<Response>;
 }
 
-export interface Env {
-  APP_ID: string;
-  PRIVATE_KEY: string;
-  WEBHOOK_SECRET: string;
+export interface Env extends BotEnv {
   ASSETS: AssetFetcher;
 }
 
@@ -26,6 +24,8 @@ export default {
           headers: { "content-type": "application/json" },
         });
       }
+
+      setBotEnv(env);
 
       const app = createShipFeedApp(env);
       const webhooks = app.webhooks as unknown as ShipFeedWebhooks;

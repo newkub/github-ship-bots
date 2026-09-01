@@ -4,6 +4,7 @@ import {
   type IssueCommentPayload,
 } from "../types.ts";
 import { parseCommand, renderCard } from "../domain/actions.ts";
+import { createCardFromWebhook } from "../lib/api.ts";
 
 function isApprove(command: "approve" | "reject" | "ship"): boolean {
   return command === "approve";
@@ -12,11 +13,22 @@ function isApprove(command: "approve" | "reject" | "ship"): boolean {
 export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
   webhooks.on<PullRequestOpenedPayload>("pull_request.opened", async ({ octokit, payload }) => {
     const { pull_request } = payload;
+
+    const card = await createCardFromWebhook({
+      kind: "merge",
+      title: pull_request.title,
+      description: pull_request.body ?? "",
+      repoFullName: `${payload.repository.owner.login}/${payload.repository.name}`,
+      pullNumber: pull_request.number,
+    });
+
     const body = renderCard({
       title: pull_request.title,
       number: pull_request.number,
       status: "pending",
       showShip: true,
+      cardId: card.card.id,
+      score: card.card.score,
     });
 
     await octokit.rest.issues.createComment({
