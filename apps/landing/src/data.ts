@@ -47,9 +47,12 @@ export const appSlug = "github-ship-bots";
 export const sections: Section[] = [
   { id: "home", label: "Home", icon: Sparkles },
   { id: "about", label: "What is it?", icon: HelpCircle },
+  { id: "pipeline", label: "Pipeline", icon: GitPullRequest },
   { id: "features", label: "What it does", icon: Zap },
+  { id: "ecosystem", label: "Ecosystem", icon: Layers },
   { id: "how-it-works", label: "How it works", icon: ListOrdered },
-  { id: "commands", label: "Commands", icon: Terminal },
+  { id: "demo", label: "Demo", icon: Terminal },
+  { id: "commands", label: "Commands", icon: MessageSquare },
   { id: "install", label: "Install", icon: Rocket },
 ];
 
