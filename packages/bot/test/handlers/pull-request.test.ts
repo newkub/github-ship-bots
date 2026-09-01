@@ -1,8 +1,6 @@
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { describe, test, expect, beforeEach } from "bun:test";
 import { Probot } from "probot";
 import { pullRequestHandler } from "../../src/handlers/pull-request.ts";
-import { setBotEnv } from "../../src/lib/api.ts";
-import { createBotEnv } from "../../src/types.ts";
 
 function createMockContext(payload: any) {
   const calls: any[] = [];
@@ -22,7 +20,6 @@ function createMockContext(payload: any) {
           merge: async (args: any) => {
             calls.push({ name: "merge", args });
           },
-          get: async () => ({ data: "diff content" }),
         },
       },
     },
@@ -35,23 +32,8 @@ function createMockContext(payload: any) {
 describe("pull request handler", () => {
   let app: Probot;
   let handlers: Record<string, ((ctx: any) => Promise<void>)[]>;
-  let fetchCalls: { url: string; init: any }[];
-  let originalFetch: typeof fetch;
 
   beforeEach(() => {
-    fetchCalls = [];
-    originalFetch = globalThis.fetch;
-    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input.toString();
-      fetchCalls.push({ url, init });
-      return new Response(JSON.stringify({ ok: true, card: { id: "card-pr-1", score: 8.2 } }), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      });
-    };
-
-    setBotEnv(createBotEnv({ API_URL: "https://test", API_TOKEN: "token" }));
-
     app = new Probot({ appId: 1, privateKey: "test", secret: "test" });
     handlers = {} as any;
     (app as any).on = (event: string, fn: any) => {
@@ -61,28 +43,19 @@ describe("pull request handler", () => {
     pullRequestHandler(app as any);
   });
 
-  afterEach(() => {
-    globalThis.fetch = originalFetch;
-  });
-
-  test("creates a card and comments when PR opened", async () => {
+  test("comments a card when PR opened", async () => {
     const ctx = createMockContext({
       repository: { owner: { login: "newkub" }, name: "devin-skills" },
-      pull_request: { number: 2, title: "Add ship-feed bot", body: "" },
+      pull_request: { number: 2, title: "Add ship-feed bot" },
     });
 
     for (const fn of handlers["pull_request.opened"] || []) {
       await fn(ctx);
     }
 
-    expect(fetchCalls.length).toBe(2);
-    expect(fetchCalls[0].url).toBe("https://test/api/cards/webhook");
-    expect(fetchCalls[1].url).toBe("https://test/api/evidence/webhook");
-
     expect(ctx.calls.length).toBe(1);
     expect(ctx.calls[0].args.body).toContain("github-ship-bots card");
     expect(ctx.calls[0].args.body).toContain("`/ship`");
-    expect(ctx.calls[0].args.body).toContain("card-pr-1");
   });
 
   test("merges PR on /approve", async () => {

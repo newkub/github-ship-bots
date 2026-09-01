@@ -47,49 +47,6 @@ function scoreColor(score: number) {
   return "bg-rose-500";
 }
 
-function scoreStroke(score: number) {
-  if (score >= 8) return "#10b981";
-  if (score >= 5) return "#f59e0b";
-  return "#f43f5e";
-}
-
-function ScoreRing(props: { score: number; size?: number }) {
-  const size = props.size ?? 44;
-  const stroke = 4;
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const pct = Math.max(0, Math.min(1, props.score / 10));
-  const dash = `${pct * circumference} ${circumference}`;
-
-  return (
-    <div class="relative" style={{ width: `${size}px`, height: `${size}px` }}>
-      <svg width={size} height={size} class="-rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="#e5e7eb"
-          stroke-width={stroke}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={scoreStroke(props.score)}
-          stroke-width={stroke}
-          stroke-dasharray={dash}
-          stroke-linecap="round"
-        />
-      </svg>
-      <span class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700">
-        {props.score.toFixed(1)}
-      </span>
-    </div>
-  );
-}
-
 export default function Cards() {
   const queryClient = useQueryClient();
   const query = useQuery(() => ({ queryKey: ["cards"], queryFn: fetchCards }));
@@ -112,24 +69,12 @@ export default function Cards() {
     }
   };
 
-  const counts = createMemo(() => {
-    const data = query.data ?? [];
-    return {
-      total: data.length,
-      pending: data.filter((c) => c.status === "pending").length,
-      approved: data.filter((c) => c.status === "approved").length,
-      shipped: data.filter((c) => c.status === "shipped").length,
-    };
-  });
-
   return (
     <div>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">Cards</h1>
-          <p class="text-sm text-gray-500 mt-1">
-            {counts().pending} pending &middot; {counts().approved} approved &middot; {counts().shipped} shipped &middot; {counts().total} total
-          </p>
+          <p class="text-sm text-gray-500 mt-1">Approve or reject ship cards across your repositories.</p>
         </div>
         <div class="flex items-center gap-2">
           <For each={["all", "pending", "approved", "rejected", "shipped"] as const}>
@@ -175,11 +120,17 @@ export default function Cards() {
                             <div class="text-sm text-gray-500">{card.repoFullName}</div>
                           </div>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2">
                           <span class={`text-xs font-medium px-2.5 py-1 rounded-full ${statusMeta[card.status].class}`}>
                             {statusMeta[card.status].label}
                           </span>
-                          <ScoreRing score={card.score} />
+                          <span
+                            class={`text-xs font-bold text-white px-2.5 py-1 rounded-full ${scoreColor(
+                              card.score,
+                            )}`}
+                          >
+                            {card.score.toFixed(1)}
+                          </span>
                         </div>
                       </div>
 
