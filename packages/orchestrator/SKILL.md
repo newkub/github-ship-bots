@@ -6,7 +6,7 @@ related:
   - follow-tool-vite
   - follow-test
   - run-deploy
-  - ship
+  - ship-verify-cicd
 ---
 
 # ship-feed orchestrator
@@ -45,3 +45,4 @@ Controls the full card-driven autonomous development loop.
 - `GITHUB_APP_ID`
 - `GITHUB_APP_PRIVATE_KEY`
 - `PUBLIC_APP_URL`
+
