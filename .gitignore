@@ -6,7 +6,11 @@ landing/node_modules
 out
 dist
 landing/dist
+docs
 *.tgz
+
+# pnpm lock (project uses bun.lock)
+pnpm-lock.yaml
 
 # code coverage
 coverage
