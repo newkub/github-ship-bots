@@ -14,9 +14,12 @@ import ExternalLink from "./ExternalLink";
 export default function Hero() {
   return (
     <section class="relative min-h-screen flex items-center overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950" />
+      <div class="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 animate-gradient" />
       <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/10 via-transparent to-transparent" />
       <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-orange-500/10 via-transparent to-transparent" />
+      <div class="absolute inset-0 hero-grid opacity-60" />
+      <div class="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl animate-pulse-glow" />
+      <div class="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-orange-500/10 blur-3xl animate-pulse-glow" style="animation-delay: -4s" />
 
       <div class="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -103,7 +106,7 @@ export default function Hero() {
 
               <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex h-24 w-24 items-center justify-center rounded-2xl bg-zinc-950 border-4 border-indigo-500 shadow-2xl shadow-indigo-500/30">
                 <img
-                  src="assets/bot-logo.png"
+                  src="/assets/bot-logo.png"
                   alt="ship-feed logo"
                   class="h-16 w-16 rounded-lg"
                 />
@@ -147,7 +150,7 @@ function Card(props: {
   };
 
   const style: any = {
-    transform: `rotate(${props.rotate}deg)`,
+    "--rotate": `${props.rotate}deg`,
     zIndex: 1,
   };
   if (props.top !== undefined) style.top = `${props.top}rem`;
@@ -157,7 +160,7 @@ function Card(props: {
 
   return (
     <div
-      class={`absolute w-64 sm:w-72 rounded-2xl bg-zinc-900/90 p-5 shadow-2xl border ${colorMap[props.color]} backdrop-blur`}
+      class={`absolute w-64 sm:w-72 rounded-2xl bg-zinc-900/90 p-5 shadow-2xl border ${colorMap[props.color]} backdrop-blur animate-float`}
       style={style}
     >
       <div class="flex items-start gap-3">

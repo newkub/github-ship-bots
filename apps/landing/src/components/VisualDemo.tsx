@@ -1,4 +1,4 @@
-import { Terminal } from "lucide-solid";
+import MockApp from "./MockApp";
 
 export default function VisualDemo() {
   return (
@@ -37,28 +37,7 @@ export default function VisualDemo() {
             </ul>
           </div>
 
-          <div class="rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl overflow-hidden">
-            <div class="bg-zinc-950 px-4 py-3 border-b border-zinc-800 flex items-center gap-2">
-              <div class="h-3 w-3 rounded-full bg-rose-500" />
-              <div class="h-3 w-3 rounded-full bg-amber-500" />
-              <div class="h-3 w-3 rounded-full bg-emerald-500" />
-              <div class="ml-2 flex items-center gap-2 text-zinc-500 text-xs">
-                <Terminal size={14} />
-                <span>ship-feed ~ zsh</span>
-              </div>
-            </div>
-            <div class="p-5 font-mono text-sm leading-relaxed overflow-x-auto">
-              <p class="text-zinc-500">$ gh issue comment 2 -b "/approve"</p>
-              <p class="text-emerald-400 mt-2">
-                [ship-feed] approved idea #2
-              </p>
-              <p class="text-indigo-400">→ creating work card</p>
-              <p class="text-indigo-400">→ running tests</p>
-              <p class="text-indigo-400">→ collecting evidence</p>
-              <p class="text-purple-400">→ shipped release v1.2.0</p>
-              <p class="text-zinc-500 mt-4">$</p>
-            </div>
-          </div>
+          <MockApp />
         </div>
       </div>
     </section>
