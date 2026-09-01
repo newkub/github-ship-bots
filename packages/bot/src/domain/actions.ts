@@ -5,15 +5,11 @@ export interface Card {
   number?: number;
   status: CardStatus;
   showShip?: boolean;
+  cardId?: string;
+  score?: number;
 }
 
 export function renderCard(card: Card): string {
-  const emoji =
-    card.status === "approved"
-      ? "approved"
-      : card.status === "rejected"
-        ? "rejected"
-        : "pending";
   const actions = card.showShip
     ? "Reply with \`/approve\`, \`/reject\` or \`/ship\` to vote."
     : "Reply with \`/approve\` or \`/reject\` to vote.";
@@ -22,6 +18,8 @@ export function renderCard(card: Card): string {
 | Status | Value |
 |---|---|
 | number | ${card.number ?? "-"} |
+| cardId | \`${card.cardId ?? "-"}\` |
+| score | \`${card.score ?? "-"}\` |
 | status | \`${card.status}\` |
 
 ${actions}`;

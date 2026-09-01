@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { updateLearningWeights } from "../lib/learning";
+import { autoScore } from "../lib/score";
 import type { Env, ShipCard, SwipeEvent } from "@ship-feed/shared";
 
 const cards = new Hono<{ Bindings: Env }>();
@@ -114,6 +115,112 @@ cards.post("/:id/status", async (c) => {
     .bind(body.status, now(), id)
     .run();
   return c.json({ ok: true });
+});
+
+async function insertCard(
+  db: Env["DB"],
+  card: Omit<ShipCard, "id" | "score" | "createdAt" | "updatedAt" | "evidenceIds">
+): Promise<ShipCard> {
+  const id = generateId();
+  const score = await autoScore(db, card.repoFullName, {
+    kind: card.kind,
+    impact: card.impact,
+    risk: card.risk,
+    effect: card.effect,
+    phase: card.phase,
+  });
+  const evidenceIds: string[] = [];
+  await db
+    .prepare(
+      `INSERT INTO cards (id, kind, title, description, status, repo_full_name, issue_number, pull_number, impact, risk, effect, phase, score, evidence_ids, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .bind(
+      id,
+      card.kind,
+      card.title,
+      card.description,
+      card.status,
+      card.repoFullName,
+      card.issueNumber ?? null,
+      card.pullNumber ?? null,
+      card.impact,
+      card.risk,
+      card.effect,
+      card.phase,
+      score,
+      JSON.stringify(evidenceIds),
+      now(),
+      now()
+    )
+    .run();
+  return { ...card, id, score, evidenceIds, createdAt: now(), updatedAt: now() };
+}
+
+cards.post("/webhook", async (c) => {
+  const token = c.req.header("x-bot-token");
+  if (!c.env.BOT_TOKEN || token !== c.env.BOT_TOKEN) {
+    return c.json({ error: "unauthorized" }, 401);
+  }
+  const body = await c.req.json<{
+    kind: ShipCard["kind"];
+    title: string;
+    description: string;
+    repoFullName: string;
+    issueNumber?: number;
+    pullNumber?: number;
+    impact?: ShipCard["impact"];
+    risk?: ShipCard["risk"];
+    effect?: ShipCard["effect"];
+    phase?: ShipCard["phase"];
+  }>();
+
+  const card = await insertCard(c.env.DB, {
+    kind: body.kind,
+    title: body.title,
+    description: body.description,
+    status: "pending",
+    repoFullName: body.repoFullName,
+    issueNumber: body.issueNumber,
+    pullNumber: body.pullNumber,
+    impact: body.impact ?? "medium",
+    risk: body.risk ?? "medium",
+    effect: body.effect ?? "medium",
+    phase: body.phase ?? "mvp",
+  });
+
+  return c.json({ ok: true, card });
+});
+
+cards.post("/", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const body = await c.req.json<{
+    kind: ShipCard["kind"];
+    title: string;
+    description: string;
+    repoFullName: string;
+    issueNumber?: number;
+    pullNumber?: number;
+    impact?: ShipCard["impact"];
+    risk?: ShipCard["risk"];
+    effect?: ShipCard["effect"];
+    phase?: ShipCard["phase"];
+  }>();
+  const card = await insertCard(c.env.DB, {
+    kind: body.kind,
+    title: body.title,
+    description: body.description,
+    status: "pending",
+    repoFullName: body.repoFullName,
+    issueNumber: body.issueNumber,
+    pullNumber: body.pullNumber,
+    impact: body.impact ?? "medium",
+    risk: body.risk ?? "medium",
+    effect: body.effect ?? "medium",
+    phase: body.phase ?? "mvp",
+  });
+  return c.json({ ok: true, card });
 });
 
 export default cards;
