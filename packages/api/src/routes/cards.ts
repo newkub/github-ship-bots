@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
+import { updateLearningWeights } from "../lib/learning";
 import type { Env, ShipCard, SwipeEvent } from "@ship-feed/shared";
 
 const cards = new Hono<{ Bindings: Env }>();
@@ -24,6 +25,12 @@ function rowToCard(row: Record<string, unknown>): ShipCard {
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
+}
+
+async function fetchCardById(db: Env["DB"], id: string): Promise<ShipCard | undefined> {
+  const row = await db.prepare("SELECT * FROM cards WHERE id = ?").bind(id).first<Record<string, unknown>>();
+  if (!row) return undefined;
+  return rowToCard(row);
 }
 
 async function ensureDemoCard(db: Env["DB"]) {
@@ -71,10 +78,15 @@ cards.post("/:id/swipe", async (c) => {
   const body = await c.req.json<{ direction: SwipeEvent["direction"] }>();
   const id = c.req.param("id");
 
+  const card = await fetchCardById(c.env.DB, id);
+  if (!card) return c.json({ error: "card not found" }, 404);
+
   const status = body.direction === "approve" ? "approved" : "rejected";
   await c.env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
     .bind(status, now(), id)
     .run();
+
+  await updateLearningWeights(c.env.DB, card, body.direction);
 
   const swipeId = generateId();
   await c.env.DB.prepare("INSERT INTO swipes (id, card_id, user_id, direction, created_at) VALUES (?, ?, ?, ?, ?)")
@@ -89,6 +101,15 @@ cards.post("/:id/status", async (c) => {
   if (!session) return c.json({ error: "unauthorized" }, 401);
   const body = await c.req.json<{ status: ShipCard["status"] }>();
   const id = c.req.param("id");
+
+  if (body.status === "approved" || body.status === "rejected") {
+    const card = await fetchCardById(c.env.DB, id);
+    if (card) {
+      const direction = body.status === "approved" ? "approve" : "reject";
+      await updateLearningWeights(c.env.DB, card, direction);
+    }
+  }
+
   await c.env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
     .bind(body.status, now(), id)
     .run();
