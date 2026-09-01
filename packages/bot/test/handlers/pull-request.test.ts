@@ -55,6 +55,7 @@ describe("pull request handler", () => {
 
     expect(ctx.calls.length).toBe(1);
     expect(ctx.calls[0].args.body).toContain("github-ship-bots card");
+    expect(ctx.calls[0].args.body).toContain("`/ship`");
   });
 
   test("merges PR on /approve", async () => {
@@ -72,5 +73,28 @@ describe("pull request handler", () => {
     expect(merge).toBeDefined();
     expect(merge.args.pull_number).toBe(2);
     expect(merge.args.merge_method).toBe("squash");
+  });
+
+  test("queues ship pipeline on /ship", async () => {
+    const ctx = createMockContext({
+      repository: { owner: { login: "newkub" }, name: "devin-skills" },
+      issue: { number: 2, pull_request: {} },
+      comment: { body: "/ship", user: { login: "newkub" } },
+    });
+
+    for (const fn of handlers["issue_comment.created"] || []) {
+      await fn(ctx);
+    }
+
+    const merge = ctx.calls.find((c) => c.name === "merge");
+    expect(merge).toBeUndefined();
+
+    const labels = ctx.calls.find((c) => c.name === "addLabels");
+    expect(labels).toBeDefined();
+    expect(labels.args.labels).toContain("shipped");
+
+    const comment = ctx.calls.find((c) => c.name === "createComment");
+    expect(comment).toBeDefined();
+    expect(comment.args.body).toContain("ship");
   });
 });

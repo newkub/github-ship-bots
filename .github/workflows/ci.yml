@@ -1,57 +1,20 @@
-name: CI/CD
+name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: 1.4.0
       - run: bun install
       - run: bun run lint
-      - run: bun test
-
-  build-landing:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - run: bun install
-        working-directory: landing
+      - run: bun run test
       - run: bun run build
-        working-directory: landing
-      - run: cp -r landing/dist docs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: docs
-          path: docs
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: [verify, build-landing]
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - run: bun install
-        working-directory: landing
-      - run: bun run build
-        working-directory: landing
-      - run: cp -r landing/dist docs
-      - uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: .
-          command: deploy

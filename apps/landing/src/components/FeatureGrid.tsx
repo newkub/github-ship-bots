@@ -1,73 +1,57 @@
-import { CheckCircle2, MessageSquare, XCircle } from "lucide-solid";
-import GitHubCard from "./GitHubCard";
+import { For } from "solid-js";
+import { features } from "../data";
 
 export default function FeatureGrid() {
+  const colorClass = (i: number) => {
+    const palette = [
+      "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+      "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+      "text-rose-400 bg-rose-500/10 border-rose-500/30",
+      "text-purple-400 bg-purple-500/10 border-purple-500/30",
+      "text-orange-400 bg-orange-500/10 border-orange-500/30",
+      "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+    ];
+    return palette[i % palette.length];
+  };
+
   return (
-    <section class="py-24 sm:py-32">
-      <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12">
-        What it does
-      </h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-8 border border-zinc-800 hover:border-orange-500/50 transition">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 mb-5">
-            <MessageSquare size={24} />
-          </div>
-          <h3 class="text-xl font-semibold text-white mb-2">Auto card</h3>
-          <p class="text-zinc-400 leading-relaxed mb-6">
-            Every new issue and PR gets a clear voting card.
+    <section class="py-24 sm:py-32 bg-zinc-950 relative">
+      <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
+
+      <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
+            What ship-feed does
+          </h2>
+          <p class="text-zinc-400 max-w-2xl mx-auto">
+            From the first spark of an idea to a shipped release, every step is a
+            card your team can see, score, and vote on.
           </p>
-          <GitHubCard
-            title="Dark mode toggle"
-            type="issue"
-            state="open"
-            number={12}
-            labels={[{ text: "ship-feed", color: "zinc" }]}
-            botReply="Reply with /approve or /reject to vote on github-ship-bots."
-          />
         </div>
 
-        <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-8 border border-zinc-800 hover:border-emerald-500/50 transition">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 mb-5">
-            <CheckCircle2 size={24} />
-          </div>
-          <h3 class="text-xl font-semibold text-white mb-2">/approve</h3>
-          <p class="text-zinc-400 leading-relaxed mb-6">
-            Approve and merge with a single comment.
-          </p>
-          <GitHubCard
-            title="Add login page"
-            type="pull-request"
-            state="merged"
-            number={8}
-            labels={[
-              { text: "approved", color: "emerald" },
-              { text: "ship-feed", color: "zinc" },
-            ]}
-            comment="/approve"
-            botReply="Merged by github-ship-bots."
-          />
-        </div>
-
-        <div class="rounded-2xl bg-zinc-900/70 p-6 sm:p-8 border border-zinc-800 hover:border-rose-500/50 transition">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-rose-500/10 text-rose-400 mb-5">
-            <XCircle size={24} />
-          </div>
-          <h3 class="text-xl font-semibold text-white mb-2">/reject</h3>
-          <p class="text-zinc-400 leading-relaxed mb-6">
-            Reject and close or block an idea.
-          </p>
-          <GitHubCard
-            title="Rewrite in Perl"
-            type="issue"
-            state="closed"
-            number={3}
-            labels={[
-              { text: "rejected", color: "rose" },
-              { text: "ship-feed", color: "zinc" },
-            ]}
-            comment="/reject"
-            botReply="Rejected and closed by github-ship-bots."
-          />
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <For each={features}>
+            {(feature, i) => {
+              const Icon = feature.icon;
+              return (
+                <div
+                  class={`rounded-2xl bg-zinc-900/60 p-8 border border-zinc-800 hover:scale-[1.02] hover:border-indigo-500/40 transition group ${i() === 0 ? "lg:col-span-1" : ""}`}
+                >
+                  <div
+                    class={`flex h-12 w-12 items-center justify-center rounded-xl mb-5 border ${colorClass(i())}`}
+                  >
+                    <Icon size={24} />
+                  </div>
+                  <h3 class="text-xl font-semibold text-white mb-2">
+                    {feature.title}
+                  </h3>
+                  <p class="text-zinc-400 leading-relaxed">
+                    {feature.body}
+                  </p>
+                </div>
+              );
+            }}
+          </For>
         </div>
       </div>
     </section>

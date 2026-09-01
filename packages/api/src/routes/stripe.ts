@@ -10,7 +10,7 @@ stripe.post("/checkout", async (c) => {
   const session = await getSession(c);
   if (!session) return c.json({ error: "unauthorized" }, 401);
 
-  const client = new Stripe(c.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
+  const client = new Stripe(c.env.STRIPE_SECRET_KEY, { apiVersion: "2025-02-24.acacia" });
   const url = await client.checkout.sessions.create({
     customer_email: session.email,
     line_items: [{ price: c.env.STRIPE_PRICE_PRO, quantity: 1 }],
@@ -26,7 +26,7 @@ stripe.post("/webhook", async (c) => {
   const sig = c.req.header("stripe-signature");
   if (!sig) return c.text("Missing signature", 400);
 
-  const client = new Stripe(c.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
+  const client = new Stripe(c.env.STRIPE_SECRET_KEY, { apiVersion: "2025-02-24.acacia" });
   const body = await c.req.text();
   let event;
   try {

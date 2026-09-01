@@ -5,7 +5,7 @@ import {
 } from "../types.ts";
 import { parseCommand, renderCard } from "../domain/actions.ts";
 
-function isApprove(command: "approve" | "reject"): boolean {
+function isApprove(command: "approve" | "reject" | "ship"): boolean {
   return command === "approve";
 }
 
@@ -32,6 +32,7 @@ export function issuesHandler(webhooks: ShipFeedWebhooks) {
 
     const command = parseCommand(comment.body ?? "");
     if (!command) return;
+    if (command === "ship") return;
 
     const label = isApprove(command) ? "approved" : "rejected";
     const shouldClose = !isApprove(command);

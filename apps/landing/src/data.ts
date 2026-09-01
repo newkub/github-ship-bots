@@ -5,13 +5,16 @@ import {
   Download,
   GitPullRequest,
   HelpCircle,
+  Layers,
   ListOrdered,
   MessageSquare,
   MousePointerClick,
   Rocket,
   Settings,
   Sparkles,
+  Terminal,
   XCircle,
+  Zap,
 } from "lucide-solid";
 
 export interface Feature {
@@ -37,44 +40,67 @@ export interface Section {
   icon: Component<{ size?: number; class?: string }>;
 }
 
+export const appName = "ship-feed";
+
+export const appSlug = "github-ship-bots";
+
 export const sections: Section[] = [
   { id: "home", label: "Home", icon: Sparkles },
   { id: "about", label: "What is it?", icon: HelpCircle },
-  { id: "features", label: "What it does", icon: Bot },
-  { id: "how-it-works", label: "How to use", icon: ListOrdered },
+  { id: "pipeline", label: "Pipeline", icon: GitPullRequest },
+  { id: "features", label: "What it does", icon: Zap },
+  { id: "ecosystem", label: "Ecosystem", icon: Layers },
+  { id: "how-it-works", label: "How it works", icon: ListOrdered },
+  { id: "demo", label: "Demo", icon: Terminal },
   { id: "commands", label: "Commands", icon: MessageSquare },
   { id: "install", label: "Install", icon: Rocket },
 ];
 
 export const features: Feature[] = [
   {
-    title: "Auto card",
-    body: "Every new issue and pull request gets a clear voting card so your team can decide quickly.",
-    icon: MessageSquare,
+    title: "Card-driven ideas",
+    body: "Every issue and PR becomes a ship card with impact, risk, and effect scores that humans can approve or reject.",
+    icon: Layers,
   },
   {
-    title: "/approve",
-    body: "Approve an idea or merge a pull request with a single comment.",
+    title: "Autonomous implementation",
+    body: "Approved cards are picked up by agent workflows that implement, test, gather evidence, and ship.",
+    icon: Bot,
+  },
+  {
+    title: "/approve or /reject",
+    body: "Vote with a single comment. The bot updates labels, merges, closes, or blocks based on your decision.",
     icon: CheckCircle2,
   },
   {
-    title: "/reject",
-    body: "Reject an issue to close it, or reject a PR to block it.",
-    icon: XCircle,
+    title: "Evidence vault",
+    body: "Every ship produces traceable evidence, baselines, and oracle results so you can audit and learn.",
+    icon: MessageSquare,
+  },
+  {
+    title: "Web & mobile dashboards",
+    body: "Swipe cards on the PWA, customize plans and repos on the web dashboard, and inspect live pages.",
+    icon: MousePointerClick,
+  },
+  {
+    title: "Continuous learning",
+    body: "The system updates learning weights from every outcome, improving future ideas and risk scoring.",
+    icon: Settings,
   },
 ];
 
 export const steps: Step[] = [
-  { text: "Install the GitHub App on your repositories.", icon: Download },
-  { text: "Open a new issue or pull request.", icon: GitPullRequest },
-  { text: "The bot posts a github-ship-bots voting card.", icon: MessageSquare },
-  { text: "Comment /approve or /reject to vote.", icon: MousePointerClick },
-  { text: "The bot updates labels and runs the chosen action.", icon: Settings },
+  { text: "Install the GitHub App and connect your repositories.", icon: Download },
+  { text: "Open an idea, pull request, or release proposal.", icon: GitPullRequest },
+  { text: "ship-feed turns it into a scored card on web and mobile.", icon: Layers },
+  { text: "Comment /approve or /reject to move it forward.", icon: MousePointerClick },
+  { text: "The orchestrator implements, verifies, ships, and learns.", icon: Rocket },
 ];
 
 export const commands: Command[] = [
-  { cmd: "/approve", issue: "Adds approved label", pr: "Adds approved label and merges" },
-  { cmd: "/reject", issue: "Adds rejected label and closes", pr: "Adds rejected label" },
+  { cmd: "/approve", issue: "Labels approved and queues implementation", pr: "Labels approved and merges when safe" },
+  { cmd: "/reject", issue: "Labels rejected and closes the idea", pr: "Labels rejected and blocks merge" },
+  { cmd: "/ship", issue: "N/A", pr: "Triggers the full verify → ship → deploy pipeline" },
 ];
 
 export interface AppInfo {

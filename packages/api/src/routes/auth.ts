@@ -3,6 +3,7 @@ import { WorkOS } from "@workos-inc/node";
 import { setSession, getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import type { Env, User } from "@ship-feed/shared";
+import { getSignedCookie, deleteCookie } from "hono/cookie";
 
 const auth = new Hono<{ Bindings: Env }>();
 
@@ -33,12 +34,10 @@ auth.get("/callback", async (c) => {
   const resp = await workos.userManagement.authenticateWithCode({
     clientId: c.env.WORKOS_CLIENT_ID,
     code,
-    redirectUri,
   });
 
   const profile = resp.user;
-  const github = resp.user.identities?.find((i) => i.provider === "GitHubOAuth");
-  const githubLogin = github?.rawAttributes?.login ?? profile.email?.split("@")[0] ?? "user";
+  const githubLogin = profile.email.split("@")[0] ?? profile.email;
 
   let user = await c.env.DB.prepare("SELECT * FROM users WHERE github_login = ?")
     .bind(githubLogin)
@@ -61,7 +60,7 @@ auth.get("/callback", async (c) => {
     };
   }
 
-  await setSession(c, user);
+  await setSession(c, user as User);
   return c.redirect(`${c.env.PUBLIC_APP_URL}/`);
 });
 
@@ -72,8 +71,9 @@ auth.get("/session", async (c) => {
 });
 
 auth.post("/logout", async (c) => {
-  const sessionId = c.req.cookie("ship_feed_session");
+  const sessionId = await getSignedCookie(c, c.env.WORKOS_COOKIE_PASSWORD, "ship_feed_session");
   if (sessionId) await c.env.SESSION_KV.delete(`session:${sessionId}`);
+  deleteCookie(c, "ship_feed_session");
   return c.json({ ok: true });
 });
 

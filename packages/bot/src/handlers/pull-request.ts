@@ -5,7 +5,7 @@ import {
 } from "../types.ts";
 import { parseCommand, renderCard } from "../domain/actions.ts";
 
-function isApprove(command: "approve" | "reject"): boolean {
+function isApprove(command: "approve" | "reject" | "ship"): boolean {
   return command === "approve";
 }
 
@@ -16,6 +16,7 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
       title: pull_request.title,
       number: pull_request.number,
       status: "pending",
+      showShip: true,
     });
 
     await octokit.rest.issues.createComment({
@@ -33,7 +34,7 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
     const command = parseCommand(comment.body ?? "");
     if (!command) return;
 
-    const label = isApprove(command) ? "approved" : "rejected";
+    const label = command === "ship" ? "shipped" : isApprove(command) ? "approved" : "rejected";
 
     await octokit.rest.issues.addLabels({
       owner: payload.repository.owner.login,
@@ -49,7 +50,7 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
       body: `github-ship-bots: **${command}** by @${comment.user?.login ?? "unknown"}`,
     });
 
-    if (isApprove(command)) {
+    if (command === "approve") {
       await octokit.rest.pulls.merge({
         owner: payload.repository.owner.login,
         repo: payload.repository.name,

@@ -1,0 +1,36 @@
+{
+  "name": "ship-feed",
+  "version": "0.0.1",
+  "description": "Card-driven autonomous development plugin ecosystem",
+  "phases": [
+    "manifest",
+    "mobile-pwa",
+    "evidence-vault",
+    "test-oracle",
+    "github-bot",
+    "continuous-ship",
+    "learning-loop",
+    "web-inspector",
+    "docs-publishing"
+  ],
+  "plugins": [
+    {
+      "name": "github-ship-bots",
+      "package": "packages/bot",
+      "entry": "src/index.ts",
+      "triggers": ["issues.opened", "pull_request.opened", "issue_comment.created", "pull_request_review_comment.created"]
+    },
+    {
+      "name": "ship-feed-api",
+      "package": "packages/api",
+      "entry": "src/index.ts",
+      "routes": ["/auth", "/api/cards", "/api/evidence", "/api/oracle", "/api/inspector", "/api/learning", "/api/stripe"]
+    },
+    {
+      "name": "ship-feed-orchestrator",
+      "package": "packages/orchestrator",
+      "entry": "src/index.ts",
+      "loop": "runShipLoop"
+    }
+  ]
+}

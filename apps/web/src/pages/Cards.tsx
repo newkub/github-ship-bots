@@ -1,61 +1,222 @@
-import { For } from "solid-js";
-import { useQuery } from "@tanstack/solid-query";
+import { For, Show, createMemo, createSignal } from "solid-js";
+import { useQuery, useQueryClient } from "@tanstack/solid-query";
+import {
+  Bot,
+  Check,
+  GitMerge,
+  GitPullRequest,
+  Layers,
+  Package,
+  Rocket,
+  ThumbsDown,
+  ThumbsUp,
+  X,
+} from "lucide-solid";
+import type { ShipCard, CardStatus, Impact, Risk, Effect, Phase } from "@ship-feed/shared";
 import { fetchCards, updateCardStatus } from "../api";
-import { Check, X } from "lucide-solid";
+
+const kindMeta: Record<
+  ShipCard["kind"],
+  { label: string; icon: typeof Bot; gradient: string; border: string; text: string }
+> = {
+  idea: { label: "Idea", icon: Layers, gradient: "from-indigo-500 to-purple-600", border: "border-indigo-200", text: "text-indigo-700" },
+  work: { label: "Work", icon: Rocket, gradient: "from-emerald-500 to-cyan-600", border: "border-emerald-200", text: "text-emerald-700" },
+  merge: { label: "Merge", icon: GitMerge, gradient: "from-orange-500 to-rose-600", border: "border-orange-200", text: "text-orange-700" },
+  release: { label: "Release", icon: Package, gradient: "from-purple-500 to-pink-600", border: "border-purple-200", text: "text-purple-700" },
+};
+
+const statusMeta: Record<CardStatus, { label: string; class: string }> = {
+  pending: { label: "Pending", class: "bg-gray-100 text-gray-700" },
+  approved: { label: "Approved", class: "bg-emerald-100 text-emerald-700" },
+  rejected: { label: "Rejected", class: "bg-rose-100 text-rose-700" },
+  shipped: { label: "Shipped", class: "bg-indigo-100 text-indigo-700" },
+};
+
+const levelPill = (label: string, value: Impact | Risk | Effect | Phase, palette: Record<string, string>) => (
+  <span class={`text-xs font-medium px-2 py-1 rounded-md ${palette[value] ?? palette.low}`}>{label} {value}</span>
+);
+
+const impactPalette = { high: "bg-rose-100 text-rose-700", medium: "bg-amber-100 text-amber-700", low: "bg-emerald-100 text-emerald-700" };
+const riskPalette = { high: "bg-rose-100 text-rose-700", medium: "bg-amber-100 text-amber-700", low: "bg-emerald-100 text-emerald-700" };
+const effectPalette = { high: "bg-emerald-100 text-emerald-700", medium: "bg-sky-100 text-sky-700", low: "bg-gray-100 text-gray-700" };
+const phasePalette = { mvp: "bg-indigo-100 text-indigo-700", v2: "bg-purple-100 text-purple-700", done: "bg-emerald-100 text-emerald-700" };
+
+function scoreColor(score: number) {
+  if (score >= 8) return "bg-emerald-500";
+  if (score >= 5) return "bg-amber-500";
+  return "bg-rose-500";
+}
 
 export default function Cards() {
+  const queryClient = useQueryClient();
   const query = useQuery(() => ({ queryKey: ["cards"], queryFn: fetchCards }));
+  const [filter, setFilter] = createSignal<"all" | CardStatus>("all");
+  const [pendingId, setPendingId] = createSignal<string | null>(null);
 
-  const onStatus = async (id: string, status: "approved" | "rejected") => {
-    await updateCardStatus(id, status);
-    query.refetch();
+  const cards = createMemo(() => {
+    const data = query.data ?? [];
+    if (filter() === "all") return data;
+    return data.filter((c) => c.status === filter());
+  });
+
+  const onStatus = async (id: string, status: CardStatus) => {
+    setPendingId(id);
+    try {
+      await updateCardStatus(id, status);
+      await queryClient.invalidateQueries({ queryKey: ["cards"] });
+    } finally {
+      setPendingId(null);
+    }
   };
 
   return (
     <div>
-      <h1 class="text-2xl font-bold mb-6">Cards</h1>
-      <div class="grid gap-4">
-        <For each={query.data}>
-          {(card) => (
-            <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <div class="flex justify-between items-start mb-2">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs uppercase tracking-wide font-semibold text-indigo-600">{card.kind}</span>
-                  <span class="text-xs text-gray-500">{card.repoFullName}</span>
-                </div>
-                <span
-                  class={`text-xs px-2 py-1 rounded-full ${
-                    card.status === "approved"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : card.status === "rejected"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {card.status}
-                </span>
-              </div>
-              <h3 class="font-semibold text-lg mb-1">{card.title}</h3>
-              <p class="text-gray-600 text-sm mb-4">{card.description}</p>
-
-              <div class="flex items-center gap-2">
-                <button
-                  onClick={() => onStatus(card.id, "approved")}
-                  class="flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700"
-                >
-                  <Check size={16} /> Approve
-                </button>
-                <button
-                  onClick={() => onStatus(card.id, "rejected")}
-                  class="flex items-center gap-2 px-3 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700"
-                >
-                  <X size={16} /> Reject
-                </button>
-              </div>
-            </div>
-          )}
-        </For>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Cards</h1>
+          <p class="text-sm text-gray-500 mt-1">Approve or reject ship cards across your repositories.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <For each={["all", "pending", "approved", "rejected", "shipped"] as const}>
+            {(key) => (
+              <button
+                onClick={() => setFilter(key)}
+                class={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+                  filter() === key
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                {key[0]!.toUpperCase() + key.slice(1)}
+              </button>
+            )}
+          </For>
+        </div>
       </div>
+
+      <Show when={!query.isLoading} fallback={<p class="text-gray-500">Loading cards...</p>}>
+        <Show
+          when={query.error}
+          fallback={
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <For each={cards()}>
+                {(card) => {
+                  const meta = kindMeta[card.kind];
+                  const Icon = meta.icon;
+                  const isPending = card.status === "pending";
+                  const busy = pendingId() === card.id;
+
+                  return (
+                    <div class="group rounded-2xl bg-white border border-gray-200 p-5 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition">
+                      <div class="flex items-start justify-between gap-4 mb-4">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${meta.gradient} text-white shadow-sm`}
+                          >
+                            <Icon size={20} />
+                          </div>
+                          <div>
+                            <span class={`text-xs font-semibold uppercase tracking-wide ${meta.text}`}>{meta.label}</span>
+                            <div class="text-sm text-gray-500">{card.repoFullName}</div>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <span class={`text-xs font-medium px-2.5 py-1 rounded-full ${statusMeta[card.status].class}`}>
+                            {statusMeta[card.status].label}
+                          </span>
+                          <span
+                            class={`text-xs font-bold text-white px-2.5 py-1 rounded-full ${scoreColor(
+                              card.score,
+                            )}`}
+                          >
+                            {card.score.toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <h3 class="text-lg font-bold text-gray-900 leading-tight mb-2">{card.title}</h3>
+                      <p class={`text-sm text-gray-600 mb-4 ${card.description.length > 120 ? "line-clamp-2" : ""}`}>
+                        {card.description}
+                      </p>
+
+                      <div class="flex flex-wrap items-center gap-2 mb-4">
+                        {levelPill("Impact", card.impact, impactPalette)}
+                        {levelPill("Risk", card.risk, riskPalette)}
+                        {levelPill("Effect", card.effect, effectPalette)}
+                        {levelPill("Phase", card.phase, phasePalette)}
+                        {card.issueNumber && (
+                          <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+                            <GitPullRequest size={12} /> #{card.issueNumber}
+                          </span>
+                        )}
+                        {card.pullNumber && (
+                          <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+                            <GitPullRequest size={12} /> PR #{card.pullNumber}
+                          </span>
+                        )}
+                      </div>
+
+                      <div class="flex items-center justify-between gap-3 pt-4 border-t border-gray-100">
+                        <Show
+                          when={isPending}
+                          fallback={
+                            <div class="flex items-center gap-2 text-sm text-gray-500">
+                              {card.status === "approved" ? (
+                                <>
+                                  <Check size={16} class="text-emerald-600" /> Approved
+                                </>
+                              ) : card.status === "rejected" ? (
+                                <>
+                                  <X size={16} class="text-rose-600" /> Rejected
+                                </>
+                              ) : (
+                                <>
+                                  <Package size={16} class="text-indigo-600" /> Shipped
+                                </>
+                              )}
+                            </div>
+                          }
+                        >
+                          <div class="flex items-center gap-2">
+                            <button
+                              onClick={() => onStatus(card.id, "rejected")}
+                              disabled={busy}
+                              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-rose-200 text-rose-700 text-sm font-medium hover:bg-rose-50 disabled:opacity-50"
+                            >
+                              <ThumbsDown size={16} /> Reject
+                            </button>
+                            <button
+                              onClick={() => onStatus(card.id, "approved")}
+                              disabled={busy}
+                              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 shadow-sm"
+                            >
+                              <ThumbsUp size={16} /> Approve
+                            </button>
+                          </div>
+                        </Show>
+                      </div>
+                    </div>
+                  );
+                }}
+              </For>
+            </div>
+          }
+        >
+          <div class="rounded-2xl bg-rose-50 border border-rose-100 p-6 text-rose-700">
+            <p>Failed to load cards. Is the API running?</p>
+          </div>
+        </Show>
+      </Show>
+
+      <Show when={!query.isLoading && cards().length === 0}>
+        <div class="rounded-2xl bg-white border border-gray-200 p-10 text-center">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-500 mb-4">
+            <Package size={24} />
+          </div>
+          <h3 class="text-lg font-medium text-gray-900">No cards yet</h3>
+          <p class="text-sm text-gray-500 mt-1">Open an issue or pull request to see it here.</p>
+        </div>
+      </Show>
     </div>
   );
 }
