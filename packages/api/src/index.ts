@@ -8,6 +8,7 @@ import oracle from "./routes/oracle";
 import inspector from "./routes/inspector";
 import stripe from "./routes/stripe";
 import learning from "./routes/learning";
+import push from "./routes/push";
 import type { Env } from "@ship-feed/shared";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -33,5 +34,6 @@ app.route("/api/oracle", oracle);
 app.route("/api/inspector", inspector);
 app.route("/api/stripe", stripe);
 app.route("/api/learning", learning);
+app.route("/api/push", push);
 
 export default app;

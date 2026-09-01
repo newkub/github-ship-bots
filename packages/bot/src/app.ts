@@ -1,8 +1,8 @@
 import { App } from "@octokit/app";
 import { Octokit } from "@octokit/rest";
-import type { Env } from "./worker.ts";
+import type { BotEnv } from "./types.ts";
 
-export function createShipFeedApp(env: Env) {
+export function createShipFeedApp(env: BotEnv) {
   return new App({
     appId: env.APP_ID,
     privateKey: env.PRIVATE_KEY,
