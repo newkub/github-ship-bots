@@ -104,6 +104,8 @@
       "name": "@ship-feed/orchestrator",
       "version": "0.0.1",
       "dependencies": {
+        "@octokit/app": "^16.1.4",
+        "@octokit/rest": "^22.0.1",
         "@ship-feed/shared": "workspace:*",
       },
       "devDependencies": {
