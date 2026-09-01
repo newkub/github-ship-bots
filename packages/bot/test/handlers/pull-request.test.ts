@@ -22,6 +22,7 @@ function createMockContext(payload: any) {
           merge: async (args: any) => {
             calls.push({ name: "merge", args });
           },
+          get: async () => ({ data: "diff content" }),
         },
       },
     },
@@ -74,8 +75,9 @@ describe("pull request handler", () => {
       await fn(ctx);
     }
 
-    expect(fetchCalls.length).toBe(1);
+    expect(fetchCalls.length).toBe(2);
     expect(fetchCalls[0].url).toBe("https://test/api/cards/webhook");
+    expect(fetchCalls[1].url).toBe("https://test/api/evidence/webhook");
 
     expect(ctx.calls.length).toBe(1);
     expect(ctx.calls[0].args.body).toContain("github-ship-bots card");

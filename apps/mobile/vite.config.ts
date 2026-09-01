@@ -9,6 +9,11 @@ export default defineConfig({
     UnoCSS(),
     VitePWA({
       registerType: "autoUpdate",
+      workbox: {
+        importScripts: ["/push-handler.js"],
+        skipWaiting: true,
+        clientsClaim: true,
+      },
       manifest: {
         name: "ship-feed",
         short_name: "ship-feed",

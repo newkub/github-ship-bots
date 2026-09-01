@@ -10,6 +10,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@mmmike/web-push": "^1.3.0",
     "@ship-feed/shared": "workspace:*",
     "@solidjs/router": "^0.15.0",
     "@tanstack/solid-query": "^5.102.8",

@@ -122,4 +122,7 @@ export interface Env {
   GITHUB_WEBHOOK_SECRET: string;
   PUBLIC_APP_URL: string;
   BOT_TOKEN?: string;
+  VAPID_PUBLIC_KEY?: string;
+  VAPID_PRIVATE_KEY?: string;
+  VAPID_SUBJECT?: string;
 }

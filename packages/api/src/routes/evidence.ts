@@ -5,27 +5,57 @@ import type { Env } from "@ship-feed/shared";
 
 const evidence = new Hono<{ Bindings: Env }>();
 
-evidence.post("/", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const body = await c.req.json<{ cardId?: string; kind: string; data: string; ciRunUrl?: string }>();
-  const bytes = Uint8Array.from(atob(body.data), (c) => c.charCodeAt(0));
-  const key = `evidence/${generateId()}.${body.kind === "video" ? "mp4" : "png"}`;
+function base64ToBytes(base64: string) {
+  const clean = base64.replace(/^data:[^;]+;base64,/, "");
+  return Uint8Array.from(atob(clean), (c) => c.charCodeAt(0));
+}
+
+function extensionFor(kind: string) {
+  if (kind === "video") return "mp4";
+  if (kind === "log") return "log";
+  if (kind === "diff") return "diff";
+  return "png";
+}
+
+async function storeEvidence(
+  env: Env,
+  body: { cardId?: string; kind: string; data: string; ciRunUrl?: string }
+): Promise<{ id: string; key: string; hash: string }> {
+  const bytes = base64ToBytes(body.data);
+  const key = `evidence/${generateId()}.${extensionFor(body.kind)}`;
   const sha256 = await crypto.subtle.digest("SHA-256", bytes);
   const hash = Array.from(new Uint8Array(sha256))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-  await c.env.EVIDENCE_BUCKET.put(key, bytes);
+  await env.EVIDENCE_BUCKET.put(key, bytes);
 
   const id = generateId();
-  await c.env.DB.prepare(
+  await env.DB.prepare(
     "INSERT INTO evidence (id, card_id, kind, r2_key, sha256, ci_run_url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
   )
     .bind(id, body.cardId ?? null, body.kind, key, hash, body.ciRunUrl ?? null, now())
     .run();
 
-  return c.json({ id, key, hash });
+  return { id, key, hash };
+}
+
+evidence.post("/", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const body = await c.req.json<{ cardId?: string; kind: string; data: string; ciRunUrl?: string }>();
+  const result = await storeEvidence(c.env, body);
+  return c.json(result);
+});
+
+evidence.post("/webhook", async (c) => {
+  const token = c.req.header("x-bot-token");
+  if (!c.env.BOT_TOKEN || token !== c.env.BOT_TOKEN) {
+    return c.json({ error: "unauthorized" }, 401);
+  }
+  const body = await c.req.json<{ cardId?: string; kind: string; data: string; ciRunUrl?: string }>();
+  const result = await storeEvidence(c.env, body);
+  return c.json(result);
 });
 
 evidence.get("/:id", async (c) => {

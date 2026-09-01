@@ -4,7 +4,7 @@ import {
   type IssueCommentPayload,
 } from "../types.ts";
 import { parseCommand, renderCard } from "../domain/actions.ts";
-import { createCardFromWebhook } from "../lib/api.ts";
+import { createCardFromWebhook, uploadEvidence } from "../lib/api.ts";
 
 function isApprove(command: "approve" | "reject" | "ship"): boolean {
   return command === "approve";
@@ -21,6 +21,25 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
       repoFullName: `${payload.repository.owner.login}/${payload.repository.name}`,
       pullNumber: pull_request.number,
     });
+
+    try {
+      const { data: diff } = await octokit.rest.pulls.get({
+        owner: payload.repository.owner.login,
+        repo: payload.repository.name,
+        pull_number: pull_request.number,
+        mediaType: { format: "diff" },
+      });
+      if (typeof diff === "string") {
+        const encoded = btoa(diff);
+        await uploadEvidence({
+          cardId: card.card.id,
+          kind: "diff",
+          data: encoded,
+        });
+      }
+    } catch {
+      // diff not available in test / private repos
+    }
 
     const body = renderCard({
       title: pull_request.title,

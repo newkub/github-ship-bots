@@ -11,6 +11,31 @@ export function getBotEnv(): BotEnv {
   return currentEnv;
 }
 
+export async function uploadEvidence(
+  body: {
+    cardId?: string;
+    kind: string;
+    data: string;
+    ciRunUrl?: string;
+  }
+) {
+  const env = getBotEnv();
+  const url = env.API_URL ?? "https://github-ship-bots.newkubise.workers.dev";
+  const res = await fetch(`${url}/api/evidence/webhook`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-bot-token": env.API_TOKEN ?? "",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to upload evidence: ${res.status} ${text}`);
+  }
+  return (await res.json()) as { id: string; key: string; hash: string };
+}
+
 export async function createCardFromWebhook(
   body: {
     kind: "idea" | "work" | "merge" | "release";
