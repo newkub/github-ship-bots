@@ -89,4 +89,18 @@ describe("issues handler", () => {
 
     expect(ctx.calls.length).toBe(0);
   });
+
+  test("ignores /ship on issues", async () => {
+    const ctx = createMockContext({
+      repository: { owner: { login: "newkub" }, name: "devin-skills" },
+      issue: { number: 1 },
+      comment: { body: "/ship", user: { login: "newkub" } },
+    });
+
+    for (const fn of handlers["issue_comment.created"] || []) {
+      await fn(ctx);
+    }
+
+    expect(ctx.calls.length).toBe(0);
+  });
 });
