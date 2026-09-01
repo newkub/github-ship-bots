@@ -14,6 +14,7 @@ import {
 } from "lucide-solid";
 import type { ShipCard, CardStatus, Impact, Risk, Effect, Phase } from "@ship-feed/shared";
 import { fetchCards, updateCardStatus } from "../api";
+import CardDetail from "./CardDetail";
 
 const kindMeta: Record<
   ShipCard["kind"],
@@ -95,6 +96,7 @@ export default function Cards() {
   const query = useQuery(() => ({ queryKey: ["cards"], queryFn: fetchCards }));
   const [filter, setFilter] = createSignal<"all" | CardStatus>("all");
   const [pendingId, setPendingId] = createSignal<string | null>(null);
+  const [detailId, setDetailId] = createSignal<string | null>(null);
 
   const cards = createMemo(() => {
     const data = query.data ?? [];
@@ -183,7 +185,12 @@ export default function Cards() {
                         </div>
                       </div>
 
-                      <h3 class="text-lg font-bold text-gray-900 leading-tight mb-2">{card.title}</h3>
+                      <h3
+                        class="text-lg font-bold text-gray-900 leading-tight mb-2 cursor-pointer hover:text-indigo-600"
+                        onClick={() => setDetailId(card.id)}
+                      >
+                        {card.title}
+                      </h3>
                       <p class={`text-sm text-gray-600 mb-4 ${card.description.length > 120 ? "line-clamp-2" : ""}`}>
                         {card.description}
                       </p>
@@ -255,6 +262,10 @@ export default function Cards() {
             <p>Failed to load cards. Is the API running?</p>
           </div>
         </Show>
+      </Show>
+
+      <Show when={detailId()}>
+        <CardDetail cardId={detailId()!} onClose={() => setDetailId(null)} />
       </Show>
 
       <Show when={!query.isLoading && cards().length === 0}>

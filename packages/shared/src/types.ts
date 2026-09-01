@@ -125,4 +125,9 @@ export interface Env {
   VAPID_PUBLIC_KEY?: string;
   VAPID_PRIVATE_KEY?: string;
   VAPID_SUBJECT?: string;
+  AUTO_APPROVE_THRESHOLD?: string;
+  AUTO_APPROVE_RISK?: string;
+  SLACK_WEBHOOK_URL?: string;
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_CHAT_ID?: string;
 }

@@ -8,6 +8,24 @@ export async function fetchCards(): Promise<ShipCard[]> {
   return res.json();
 }
 
+export async function fetchCard(id: string): Promise<ShipCard> {
+  const res = await fetch(`${API_URL}/api/cards/${id}`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch card");
+  return res.json();
+}
+
+export async function fetchEvidence(cardId: string): Promise<Record<string, unknown>[]> {
+  const res = await fetch(`${API_URL}/api/cards/${cardId}/evidence`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch evidence");
+  return res.json();
+}
+
+export async function fetchEvidenceContent(evidenceId: string): Promise<string> {
+  const res = await fetch(`${API_URL}/api/evidence/${evidenceId}`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch evidence content");
+  return res.text();
+}
+
 export async function fetchSession(): Promise<{ user?: User }> {
   const res = await fetch(`${API_URL}/auth/session`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch session");

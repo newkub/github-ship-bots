@@ -3,6 +3,7 @@ import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { updateLearningWeights } from "../lib/learning";
 import { autoScore } from "../lib/score";
+import { notifyCardStatus } from "../lib/notify";
 import type { Env, ShipCard, SwipeEvent } from "@ship-feed/shared";
 
 const cards = new Hono<{ Bindings: Env }>();
@@ -63,6 +64,27 @@ async function ensureDemoCard(db: Env["DB"]) {
     .run();
 }
 
+cards.get("/:id", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const id = c.req.param("id");
+  const card = await fetchCardById(c.env.DB, id);
+  if (!card) return c.json({ error: "card not found" }, 404);
+  return c.json(card);
+});
+
+cards.get("/:id/evidence", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const id = c.req.param("id");
+  const card = await fetchCardById(c.env.DB, id);
+  if (!card) return c.json({ error: "card not found" }, 404);
+  const { results } = await c.env.DB.prepare("SELECT * FROM evidence WHERE card_id = ? ORDER BY created_at DESC")
+    .bind(id)
+    .all<Record<string, unknown>>();
+  return c.json(results ?? []);
+});
+
 cards.get("/", async (c) => {
   const session = await getSession(c);
   if (!session) return c.json({ error: "unauthorized" }, 401);
@@ -94,6 +116,8 @@ cards.post("/:id/swipe", async (c) => {
     .bind(swipeId, id, session.id, body.direction, now())
     .run();
 
+  await notifyCardStatus(c.env, { ...card, status }, body.direction === "approve" ? "approved" : "rejected");
+
   return c.json({ ok: true, status });
 });
 
@@ -114,15 +138,42 @@ cards.post("/:id/status", async (c) => {
   await c.env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
     .bind(body.status, now(), id)
     .run();
+
+  const updated = await fetchCardById(c.env.DB, id);
+  if (updated) {
+    await notifyCardStatus(c.env, updated, body.status as "created" | "approved" | "rejected" | "shipped");
+  }
+
   return c.json({ ok: true });
 });
 
+function parseAutoApproveThreshold(env: Env): number {
+  const raw = env.AUTO_APPROVE_THRESHOLD;
+  if (!raw) return 8.5;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : 8.5;
+}
+
+function parseAutoApproveRisk(env: Env): Set<string> {
+  const raw = env.AUTO_APPROVE_RISK;
+  const defaults = new Set(["low"]);
+  if (!raw) return defaults;
+  const values = raw.split(",").map((r) => r.trim());
+  return new Set(values.length > 0 ? values : ["low"]);
+}
+
+function shouldAutoApprove(env: Env, card: ShipCard): boolean {
+  const threshold = parseAutoApproveThreshold(env);
+  const allowedRisks = parseAutoApproveRisk(env);
+  return card.score >= threshold && allowedRisks.has(card.risk);
+}
+
 async function insertCard(
-  db: Env["DB"],
+  env: Env,
   card: Omit<ShipCard, "id" | "score" | "createdAt" | "updatedAt" | "evidenceIds">
 ): Promise<ShipCard> {
   const id = generateId();
-  const score = await autoScore(db, card.repoFullName, {
+  const score = await autoScore(env.DB, card.repoFullName, {
     kind: card.kind,
     impact: card.impact,
     risk: card.risk,
@@ -130,7 +181,16 @@ async function insertCard(
     phase: card.phase,
   });
   const evidenceIds: string[] = [];
-  await db
+  const inserted: ShipCard = { ...card, id, score, evidenceIds, createdAt: now(), updatedAt: now() };
+
+  if (shouldAutoApprove(env, inserted)) {
+    inserted.status = "approved";
+    await updateLearningWeights(env.DB, inserted, "approve");
+  }
+
+  await notifyCardStatus(env, inserted, inserted.status === "approved" ? "approved" : "created");
+
+  await env.DB
     .prepare(
       `INSERT INTO cards (id, kind, title, description, status, repo_full_name, issue_number, pull_number, impact, risk, effect, phase, score, evidence_ids, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -140,7 +200,7 @@ async function insertCard(
       card.kind,
       card.title,
       card.description,
-      card.status,
+      inserted.status,
       card.repoFullName,
       card.issueNumber ?? null,
       card.pullNumber ?? null,
@@ -154,7 +214,7 @@ async function insertCard(
       now()
     )
     .run();
-  return { ...card, id, score, evidenceIds, createdAt: now(), updatedAt: now() };
+  return inserted;
 }
 
 cards.post("/webhook", async (c) => {
@@ -175,7 +235,7 @@ cards.post("/webhook", async (c) => {
     phase?: ShipCard["phase"];
   }>();
 
-  const card = await insertCard(c.env.DB, {
+  const card = await insertCard(c.env, {
     kind: body.kind,
     title: body.title,
     description: body.description,
@@ -207,7 +267,7 @@ cards.post("/", async (c) => {
     effect?: ShipCard["effect"];
     phase?: ShipCard["phase"];
   }>();
-  const card = await insertCard(c.env.DB, {
+  const card = await insertCard(c.env, {
     kind: body.kind,
     title: body.title,
     description: body.description,
