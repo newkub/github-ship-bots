@@ -32,52 +32,93 @@ const kindGradients: Record<string, string> = {
   release: "from-purple-500 to-pink-600",
 };
 
+const SWIPE_THRESHOLD = 100;
+
 export default function Card(props: CardProps) {
+  const [startX, setStartX] = createSignal<number | null>(null);
   const [startY, setStartY] = createSignal<number | null>(null);
+  const [deltaX, setDeltaX] = createSignal(0);
   const [deltaY, setDeltaY] = createSignal(0);
   const [dragging, setDragging] = createSignal(false);
+  const [hasDragged, setHasDragged] = createSignal(false);
 
   const icon = () => kindIcons[props.card.kind];
   const label = () => kindLabels[props.card.kind];
   const gradient = () => kindGradients[props.card.kind] ?? kindGradients.idea;
 
+  const getClient = (e: TouchEvent | MouseEvent) => {
+    if ("touches" in e && e.touches.length > 0) {
+      return { x: e.touches[0]!.clientX, y: e.touches[0]!.clientY };
+    }
+    if ("changedTouches" in e && (e as TouchEvent).changedTouches.length > 0) {
+      return { x: (e as TouchEvent).changedTouches[0]!.clientX, y: (e as TouchEvent).changedTouches[0]!.clientY };
+    }
+    return { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
+  };
+
   const onTouchStart = (e: TouchEvent | MouseEvent) => {
-    const clientY = "touches" in e ? e.touches[0]!.clientY : e.clientY;
-    setStartY(clientY);
+    const p = getClient(e);
+    setStartX(p.x);
+    setStartY(p.y);
     setDragging(true);
+    setHasDragged(false);
+    setDeltaX(0);
+    setDeltaY(0);
   };
 
   const onTouchMove = (e: TouchEvent | MouseEvent) => {
-    if (startY() === null) return;
-    const clientY = "touches" in e ? e.touches[0]!.clientY : e.clientY;
-    setDeltaY(clientY - startY()!);
+    if (startX() === null || startY() === null) return;
+    const p = getClient(e);
+    const dx = p.x - startX()!;
+    const dy = p.y - startY()!;
+    setDeltaX(dx);
+    setDeltaY(dy);
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) setHasDragged(true);
   };
 
   const onTouchEnd = () => {
     setDragging(false);
-    if (deltaY() < -100) {
+    const dx = deltaX();
+    const dy = deltaY();
+    if (dx > SWIPE_THRESHOLD) {
+      haptic();
       props.onSwipe("approve");
-    } else if (deltaY() > 100) {
+    } else if (dx < -SWIPE_THRESHOLD) {
+      haptic();
       props.onSwipe("reject");
+    } else if (Math.abs(dy) < 30 && Math.abs(dx) < 30 && !hasDragged()) {
+      props.onToggleExpand();
     }
+    setStartX(null);
     setStartY(null);
+    setDeltaX(0);
     setDeltaY(0);
+    setHasDragged(false);
+  };
+
+  const haptic = () => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(12);
+    }
   };
 
   const transform = () => {
-    if (!props.active) return "translateY(0)";
+    if (!props.active) return "translateX(0)";
+    const x = deltaX();
     const y = deltaY();
-    const rotate = y / 20;
-    const opacity = Math.max(0.5, 1 - Math.abs(y) / 400);
-    return `translateY(${y}px) rotate(${rotate}deg)`;
+    const rotate = x / 20;
+    return `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
   };
+
+  const likeOpacity = () => Math.max(0, Math.min(1, deltaX() / SWIPE_THRESHOLD));
+  const nopeOpacity = () => Math.max(0, Math.min(1, -deltaX() / SWIPE_THRESHOLD));
 
   return (
     <div
-      class={`absolute inset-0 w-full h-full transition-transform duration-300 ${
+      class={`absolute inset-0 w-full h-full select-none ${
         props.active ? "z-10" : props.hidden ? "-z-10 opacity-0" : "z-0 opacity-0"
       }`}
-      style={{ transform: transform(), opacity: props.active ? Math.max(0.5, 1 - Math.abs(deltaY()) / 400) : 1 }}
+      style={{ transform: transform(), "will-change": "transform" }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -85,11 +126,28 @@ export default function Card(props: CardProps) {
       onMouseMove={onTouchMove}
       onMouseUp={onTouchEnd}
       onMouseLeave={onTouchEnd}
-      onClick={() => props.onToggleExpand()}
     >
       <div class="h-full w-full relative overflow-hidden rounded-3xl shadow-2xl">
         <div class={`absolute inset-0 bg-gradient-to-br ${gradient()} opacity-90`} />
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-white/20 to-transparent" />
+
+        <Show when={likeOpacity() > 0}>
+          <div
+            class="absolute top-20 right-8 z-30 rounded-full bg-emerald-500/90 text-white px-4 py-2 font-bold shadow-xl border-2 border-white/20 animate-pulse"
+            style={{ opacity: likeOpacity() }}
+          >
+            APPROVE
+          </div>
+        </Show>
+
+        <Show when={nopeOpacity() > 0}>
+          <div
+            class="absolute top-20 left-8 z-30 rounded-full bg-red-500/90 text-white px-4 py-2 font-bold shadow-xl border-2 border-white/20 animate-pulse"
+            style={{ opacity: nopeOpacity() }}
+          >
+            REJECT
+          </div>
+        </Show>
 
         <div class="absolute inset-0 flex items-center justify-center opacity-20">
           {(() => {
@@ -155,18 +213,6 @@ export default function Card(props: CardProps) {
             </button>
           </div>
         </div>
-
-        <Show when={deltaY() < -80 && dragging()}>
-          <div class="absolute top-20 right-8 z-30 rounded-full bg-emerald-500/90 text-white px-4 py-2 font-bold shadow-xl border-2 border-white/20 animate-pulse">
-            APPROVE
-          </div>
-        </Show>
-
-        <Show when={deltaY() > 80 && dragging()}>
-          <div class="absolute top-20 left-8 z-30 rounded-full bg-red-500/90 text-white px-4 py-2 font-bold shadow-xl border-2 border-white/20 animate-pulse">
-            REJECT
-          </div>
-        </Show>
       </div>
     </div>
   );
