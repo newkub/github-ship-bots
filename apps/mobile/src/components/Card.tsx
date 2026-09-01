@@ -33,13 +33,13 @@ export default function Card(props: CardProps) {
   const label = () => kindLabels[props.card.kind];
 
   const onTouchStart = (e: TouchEvent | MouseEvent) => {
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    const clientY = "touches" in e ? e.touches[0]!.clientY : e.clientY;
     setStartY(clientY);
   };
 
   const onTouchMove = (e: TouchEvent | MouseEvent) => {
     if (startY() === null) return;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    const clientY = "touches" in e ? e.touches[0]!.clientY : e.clientY;
     setDeltaY(clientY - startY()!);
   };
 

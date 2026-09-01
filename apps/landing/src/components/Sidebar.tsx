@@ -1,5 +1,5 @@
 import { For, createSignal, onMount, onCleanup } from "solid-js";
-import { sections } from "../data";
+import { sections, appName } from "../data";
 
 interface SidebarProps {
   mainRef: HTMLElement | undefined;
@@ -63,12 +63,12 @@ export default function Sidebar(props: SidebarProps) {
       >
         <img
           src="assets/bot-logo.png"
-          alt="github-ship-bots logo"
+          alt={`${appName} logo`}
           class="h-10 w-10 rounded-lg"
           width="40"
           height="40"
         />
-        <span class="text-lg font-bold text-white">github-ship-bots</span>
+        <span class="text-lg font-bold text-white">{appName}</span>
       </a>
 
       <ul class="space-y-2 flex-1 overflow-y-auto">
@@ -86,7 +86,7 @@ export default function Sidebar(props: SidebarProps) {
                   }}
                   class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition"
                   classList={{
-                    "bg-orange-500/10 text-orange-400": isActive(),
+                    "bg-indigo-500/10 text-indigo-400": isActive(),
                     "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200": !isActive(),
                   }}
                   aria-current={isActive() ? "page" : undefined}
@@ -105,7 +105,7 @@ export default function Sidebar(props: SidebarProps) {
           href="https://github.com/apps/wrikka-ship-bot"
           target="_blank"
           rel="noopener noreferrer"
-          class="block w-full rounded-xl bg-orange-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-orange-600 transition"
+          class="block w-full rounded-xl bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-600 transition"
         >
           Install
         </a>

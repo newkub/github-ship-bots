@@ -26,10 +26,7 @@ jobs:
         with:
           bun-version: latest
       - run: bun install
-        working-directory: landing
-      - run: bun run build
-        working-directory: landing
-      - run: cp -r landing/dist docs
+      - run: bun --filter @ship-feed/landing build
       - uses: actions/upload-artifact@v4
         with:
           name: docs
@@ -45,13 +42,10 @@ jobs:
         with:
           bun-version: latest
       - run: bun install
-        working-directory: landing
-      - run: bun run build
-        working-directory: landing
-      - run: cp -r landing/dist docs
+      - run: bun --filter @ship-feed/landing build
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: .
+          workingDirectory: packages/bot
           command: deploy

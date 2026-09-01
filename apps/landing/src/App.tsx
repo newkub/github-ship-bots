@@ -10,27 +10,25 @@ import Layout from "./components/Layout";
 export default function App() {
   return (
     <Layout>
-      <section id="home">
+      <section id="home" class="w-full">
         <Hero />
       </section>
-      <div class="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
-        <section id="about">
-          <About />
-        </section>
-        <section id="features">
-          <FeatureGrid />
-        </section>
-        <section id="how-it-works">
-          <HowItWorks />
-        </section>
-        <section id="commands">
-          <CommandCards />
-        </section>
-        <section id="install">
-          <CTA />
-        </section>
-        <Footer />
-      </div>
+      <section id="about" class="w-full">
+        <About />
+      </section>
+      <section id="features" class="w-full">
+        <FeatureGrid />
+      </section>
+      <section id="how-it-works" class="w-full">
+        <HowItWorks />
+      </section>
+      <section id="commands" class="w-full">
+        <CommandCards />
+      </section>
+      <section id="install" class="w-full">
+        <CTA />
+      </section>
+      <Footer />
     </Layout>
   );
 }

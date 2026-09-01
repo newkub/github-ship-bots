@@ -16,7 +16,7 @@
     "wrangler": "^4.0.0"
   },
   "peerDependencies": {
-    "typescript": "^7.0.2"
+    "typescript": "^5.7.2"
   },
   "dependencies": {
     "@octokit/app": "^16.1.4",

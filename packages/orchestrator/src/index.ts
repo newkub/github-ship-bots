@@ -19,7 +19,7 @@ export function createContext(env: Env): OrchestratorContext {
 export async function fetchPendingCards(ctx: OrchestratorContext): Promise<ShipCard[]> {
   const res = await fetch(`${ctx.apiUrl}/api/cards`);
   if (!res.ok) throw new Error("Failed to fetch cards");
-  return res.json();
+  return (await res.json()) as ShipCard[];
 }
 
 export async function onApprove(ctx: OrchestratorContext, card: ShipCard) {

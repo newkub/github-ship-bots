@@ -5,7 +5,7 @@
     "module": "Preserve",
     "moduleDetection": "force",
     "allowJs": true,
-    "types": ["bun"],
+    "types": ["bun", "@cloudflare/workers-types"],
 
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

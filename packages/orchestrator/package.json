@@ -4,13 +4,14 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "lint": "tsc --noEmit"
+    "lint": "bun --bun tsc --noEmit"
   },
   "dependencies": {
     "@ship-feed/shared": "workspace:*"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0",
     "@types/bun": "^1.4.0",
-    "typescript": "^7.0.2"
+    "typescript": "^5.7.2"
   }
 }

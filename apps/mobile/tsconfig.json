@@ -7,7 +7,7 @@
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "allowJs": true,
-    "types": ["bun", "vite-plugin-pwa/client"],
+    "types": ["bun", "vite-plugin-pwa/client", "@cloudflare/workers-types"],
 
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
