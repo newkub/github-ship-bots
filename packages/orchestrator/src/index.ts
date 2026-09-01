@@ -1,4 +1,5 @@
 import type { ShipCard, Env } from "@ship-feed/shared";
+import { shipToGitHub } from "./lib/github";
 
 export interface OrchestratorContext {
   db: D1Database;
@@ -64,16 +65,42 @@ async function updateCardStatus(ctx: OrchestratorContext, card: ShipCard, status
 
 export async function onApprove(ctx: OrchestratorContext, card: ShipCard) {
   await updateCardStatus(ctx, card, "shipped");
-  console.log(`[ship-feed] shipped ${card.id}`);
-  // TODO: trigger Devin `continue` / `ship` workflow to implement, test, gather evidence, and deploy
-  return { ok: true, card: { ...card, status: "shipped" as const } };
+  const gh = await shipToGitHub({
+    appId: ctx.githubAppId,
+    privateKey: ctx.githubAppPrivateKey,
+    repoFullName: card.repoFullName,
+    issueNumber: card.issueNumber,
+    pullNumber: card.pullNumber,
+    action: "approve",
+  });
+  if (gh.skipped) {
+    console.log(`[ship-feed] shipped ${card.id} (GitHub: ${gh.message})`);
+  } else if (!gh.ok) {
+    console.error(`[ship-feed] shipped ${card.id} (GitHub action failed: ${gh.message})`);
+  } else {
+    console.log(`[ship-feed] shipped ${card.id}`);
+  }
+  return { ok: true, card: { ...card, status: "shipped" as const }, github: gh };
 }
 
 export async function onReject(ctx: OrchestratorContext, card: ShipCard) {
   await updateCardStatus(ctx, card, "rejected");
-  console.log(`[ship-feed] rejected ${card.id}`);
-  // TODO: close issue/PR and update learning weights
-  return { ok: true, card: { ...card, status: "rejected" as const } };
+  const gh = await shipToGitHub({
+    appId: ctx.githubAppId,
+    privateKey: ctx.githubAppPrivateKey,
+    repoFullName: card.repoFullName,
+    issueNumber: card.issueNumber,
+    pullNumber: card.pullNumber,
+    action: "reject",
+  });
+  if (gh.skipped) {
+    console.log(`[ship-feed] rejected ${card.id} (GitHub: ${gh.message})`);
+  } else if (!gh.ok) {
+    console.error(`[ship-feed] rejected ${card.id} (GitHub action failed: ${gh.message})`);
+  } else {
+    console.log(`[ship-feed] rejected ${card.id}`);
+  }
+  return { ok: true, card: { ...card, status: "rejected" as const }, github: gh };
 }
 
 export async function runShipLoop(ctx: OrchestratorContext) {
