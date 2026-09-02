@@ -127,3 +127,13 @@ export async function fetchExplain(id: string): Promise<{
   if (!res.ok) throw new Error("Failed to fetch explanation");
   return res.json();
 }
+
+export async function fetchVotes(id: string): Promise<{
+  minApprovers: number;
+  minRejectors: number;
+  votes: { direction: string; user: string }[];
+}> {
+  const res = await fetch(`${API_URL}/api/cards/${id}/votes`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch votes");
+  return res.json();
+}

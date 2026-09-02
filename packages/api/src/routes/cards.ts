@@ -3,6 +3,7 @@ import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { updateLearningWeights } from "../lib/learning";
 import { autoScore, explainScore } from "../lib/score";
+import { resolveApprovalStatus } from "../lib/approval";
 import { notifyCardStatus } from "../lib/notify";
 import { createContext, onApprove, onReject } from "@ship-feed/orchestrator";
 import type { Env, ShipCard, SwipeEvent } from "@ship-feed/shared";
@@ -63,6 +64,30 @@ cards.get("/:id/explain", async (c) => {
   return c.json(explanation);
 });
 
+cards.get("/:id/votes", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const id = c.req.param("id");
+  const card = await fetchCardById(c.env.DB, id);
+  if (!card) return c.json({ error: "card not found" }, 404);
+
+  const rule = await c.env.DB
+    .prepare("SELECT min_approvers, min_rejectors FROM approval_rules WHERE repo_full_name = ?")
+    .bind(card.repoFullName)
+    .first<{ min_approvers: number; min_rejectors: number }>();
+
+  const { results } = await c.env.DB
+    .prepare("SELECT s.direction, u.github_login as user FROM swipes s LEFT JOIN users u ON s.user_id = u.id WHERE s.card_id = ? ORDER BY s.created_at DESC")
+    .bind(id)
+    .all<{ direction: string; user: string }>();
+
+  return c.json({
+    minApprovers: rule?.min_approvers ?? 1,
+    minRejectors: rule?.min_rejectors ?? 1,
+    votes: results ?? [],
+  });
+});
+
 cards.get("/:id/evidence", async (c) => {
   const session = await getSession(c);
   if (!session) return c.json({ error: "unauthorized" }, 401);
@@ -111,17 +136,19 @@ cards.post("/:id/swipe", async (c) => {
   const card = await fetchCardById(c.env.DB, id);
   if (!card) return c.json({ error: "card not found" }, 404);
 
-  const status = body.direction === "approve" ? "approved" : "rejected";
-  await c.env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
-    .bind(status, now(), id)
-    .run();
-
   await updateLearningWeights(c.env.DB, card, body.direction);
 
   const swipeId = generateId();
   await c.env.DB.prepare("INSERT INTO swipes (id, card_id, user_id, direction, created_at) VALUES (?, ?, ?, ?, ?)")
     .bind(swipeId, id, session.id, body.direction, now())
     .run();
+
+  const status = await resolveApprovalStatus(c.env.DB, card);
+  if (status !== card.status) {
+    await c.env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
+      .bind(status, now(), id)
+      .run();
+  }
 
   await notifyCardStatus(c.env, { ...card, status }, body.direction === "approve" ? "approved" : "rejected");
 

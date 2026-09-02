@@ -1,5 +1,5 @@
 import { Show, For, createSignal, createResource } from "solid-js";
-import { fetchCard, fetchEvidence, fetchEvidenceContent, fetchExplain } from "../api";
+import { fetchCard, fetchEvidence, fetchEvidenceContent, fetchExplain, fetchVotes } from "../api";
 import type { ShipCard } from "@ship-feed/shared";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://github-ship-bots.newkubise.workers.dev";
@@ -8,6 +8,7 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
   const [card] = createResource(() => props.cardId, fetchCard);
   const [evidence] = createResource(() => props.cardId, fetchEvidence);
   const [explain] = createResource(() => props.cardId, fetchExplain);
+  const [votes] = createResource(() => props.cardId, fetchVotes);
   const [activeEvidence, setActiveEvidence] = createSignal<string | null>(null);
   const [activeKind, setActiveKind] = createSignal<string>("");
   const [content] = createResource(activeEvidence, fetchEvidenceContent);
@@ -56,6 +57,26 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                             <span class="capitalize">{f.feature}: <span class="text-gray-600">{f.value}</span></span>
                             <span class={f.adjustment >= 0 ? "text-emerald-600" : "text-rose-600"}>
                               {f.adjustment >= 0 ? "+" : ""}{f.adjustment}
+                            </span>
+                          </li>
+                        )}
+                      </For>
+                    </ul>
+                  </div>
+                </Show>
+
+                <Show when={votes()}>
+                  <div class="rounded-xl bg-zinc-50 border border-zinc-200 p-4">
+                    <h3 class="font-semibold text-zinc-900 mb-2">
+                      Approval chain {votes()!.votes.filter((v) => v.direction === "approve").length}/{votes()!.minApprovers}
+                    </h3>
+                    <ul class="space-y-1 text-sm text-zinc-700">
+                      <For each={votes()!.votes}>
+                        {(v) => (
+                          <li class="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-zinc-100">
+                            <span class="text-zinc-500">{v.user ?? "Unknown"}</span>
+                            <span class={v.direction === "approve" ? "text-emerald-600 font-medium" : "text-rose-600 font-medium"}>
+                              {v.direction}
                             </span>
                           </li>
                         )}
