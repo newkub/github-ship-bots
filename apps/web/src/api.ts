@@ -61,6 +61,24 @@ export async function updateCardStatus(cardId: string, status: ShipCard["status"
   return res.json();
 }
 
+export async function shipCard(cardId: string) {
+  const res = await fetch(`${API_URL}/api/cards/${cardId}/ship`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to ship card");
+  return res.json();
+}
+
+export async function rejectCardAction(cardId: string) {
+  const res = await fetch(`${API_URL}/api/cards/${cardId}/reject`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to reject card");
+  return res.json();
+}
+
 export function loginUrl() {
   return `${API_URL}/auth/login`;
 }

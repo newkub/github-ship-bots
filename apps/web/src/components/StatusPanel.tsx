@@ -1,18 +1,28 @@
 import { For, Show, createResource } from "solid-js";
-import { Activity, AlertTriangle, CheckCircle, Loader, RefreshCw, ScrollText, Server, Sparkles } from "lucide-solid";
+import { Activity, AlertTriangle, CheckCircle, Loader, ScrollText, Server, Sparkles, Rocket, X, Eye } from "lucide-solid";
 import type { ShipCard } from "@ship-feed/shared";
-import { fetchQueue } from "../api";
+import { fetchQueue, shipCard, rejectCardAction } from "../api";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://github-ship-bots.newkubise.workers.dev";
 
 export default function StatusPanel() {
-  const [queue] = createResource(fetchQueue);
+  const [queue, { refetch }] = createResource(fetchQueue);
   const [health] = createResource(async () => {
     const res = await fetch(`${API_URL}/health`, { credentials: "include" });
     return res.ok;
   });
 
   const pending = () => queue()?.filter((c) => c.status === "pending").length ?? 0;
+
+  const runShip = async (id: string) => {
+    await shipCard(id).catch(() => {});
+    await refetch();
+  };
+
+  const runReject = async (id: string) => {
+    await rejectCardAction(id).catch(() => {});
+    await refetch();
+  };
 
   return (
     <div class="mb-8 grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -38,12 +48,37 @@ export default function StatusPanel() {
           </Show>
           <For each={queue() ?? []}>
             {(job) => (
-              <div class="flex items-center justify-between rounded-xl bg-gray-50 p-3 text-sm">
-                <div class="min-w-0">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl bg-gray-50 p-3 text-sm">
+                <div class="min-w-0 flex-1">
                   <div class="font-medium text-gray-900 truncate">{job.title}</div>
                   <div class="text-xs text-gray-500">{job.repoFullName}</div>
                 </div>
-                <StatusBadge status={job.status} />
+                <div class="flex items-center gap-2">
+                  <StatusBadge status={job.status} />
+                  <Show when={job.status === "pending" || job.status === "approved"}>
+                    <button
+                      onClick={() => runShip(job.id)}
+                      class="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                      title="Ship now"
+                    >
+                      <Rocket size={14} />
+                    </button>
+                    <button
+                      onClick={() => runReject(job.id)}
+                      class="p-1.5 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200"
+                      title="Reject now"
+                    >
+                      <X size={14} />
+                    </button>
+                  </Show>
+                  <a
+                    href={`/dashboard/cards?detail=${job.id}`}
+                    class="p-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-100"
+                    title="View card"
+                  >
+                    <Eye size={14} />
+                  </a>
+                </div>
               </div>
             )}
           </For>
@@ -70,7 +105,7 @@ export default function StatusPanel() {
         </div>
         <div class="flex gap-2">
           <a href="/dashboard/settings" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50">View logs</a>
-          <button class="px-3 py-1.5 rounded-lg bg-rose-600 text-xs font-medium text-white hover:bg-rose-700" onClick={() => alert("Rollback requires worker integration")}>Rollback now</button>
+          <a href="/dashboard/settings" class="px-3 py-1.5 rounded-lg bg-rose-600 text-xs font-medium text-white hover:bg-rose-700">Rollback</a>
         </div>
 
         <div class="mt-4 pt-4 border-t border-gray-100">
@@ -95,11 +130,11 @@ export default function StatusPanel() {
             <CheckCircle size={14} />
             Tests ready
           </div>
-          <div class="text-xs text-emerald-600 mt-1">Run the test suite from the settings page</div>
+          <div class="text-xs text-emerald-600 mt-1">Run the oracle from the inspector page</div>
         </div>
         <div class="flex gap-2 mb-3">
-          <a href="/dashboard/settings" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50">View report</a>
-          <button class="px-3 py-1.5 rounded-lg bg-indigo-600 text-xs font-medium text-white hover:bg-indigo-700" onClick={() => alert("Test runner requires setup")}>Run now</button>
+          <a href="/dashboard/inspector" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50">View report</a>
+          <a href="/dashboard/inspector" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-xs font-medium text-white hover:bg-indigo-700">Run now</a>
         </div>
       </div>
     </div>

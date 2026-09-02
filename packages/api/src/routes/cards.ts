@@ -4,6 +4,7 @@ import { generateId, now } from "../lib/db";
 import { updateLearningWeights } from "../lib/learning";
 import { autoScore } from "../lib/score";
 import { notifyCardStatus } from "../lib/notify";
+import { createContext, onApprove, onReject } from "@ship-feed/orchestrator";
 import type { Env, ShipCard, SwipeEvent } from "@ship-feed/shared";
 
 const cards = new Hono<{ Bindings: Env }>();
@@ -107,6 +108,34 @@ cards.post("/:id/swipe", async (c) => {
   await notifyCardStatus(c.env, { ...card, status }, body.direction === "approve" ? "approved" : "rejected");
 
   return c.json({ ok: true, status });
+});
+
+cards.post("/:id/ship", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const id = c.req.param("id");
+  const card = await fetchCardById(c.env.DB, id);
+  if (!card) return c.json({ error: "card not found" }, 404);
+
+  const ctx = createContext(c.env);
+  const result = await onApprove(ctx, card);
+  await updateLearningWeights(c.env.DB, card, "approve");
+  await notifyCardStatus(c.env, { ...card, status: "shipped" }, "shipped");
+  return c.json(result);
+});
+
+cards.post("/:id/reject", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const id = c.req.param("id");
+  const card = await fetchCardById(c.env.DB, id);
+  if (!card) return c.json({ error: "card not found" }, 404);
+
+  const ctx = createContext(c.env);
+  const result = await onReject(ctx, card);
+  await updateLearningWeights(c.env.DB, card, "reject");
+  await notifyCardStatus(c.env, { ...card, status: "rejected" }, "rejected");
+  return c.json(result);
 });
 
 cards.post("/:id/status", async (c) => {

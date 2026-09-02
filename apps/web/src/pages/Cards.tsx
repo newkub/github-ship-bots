@@ -1,5 +1,6 @@
-import { For, Show, createMemo, createSignal } from "solid-js";
+import { For, Show, createMemo, createSignal, onMount } from "solid-js";
 import { useQuery, useQueryClient } from "@tanstack/solid-query";
+import { useSearchParams } from "@solidjs/router";
 import { Check, Clock, Grid3X3, List, Package, Rocket, X, GitBranch } from "lucide-solid";
 import type { ShipCard, CardStatus } from "@ship-feed/shared";
 import { fetchCards, fetchRepos, updateCardStatus } from "../api";
@@ -12,11 +13,17 @@ export default function Cards() {
   const queryClient = useQueryClient();
   const query = useQuery(() => ({ queryKey: ["cards"], queryFn: fetchCards }));
   const reposQuery = useQuery(() => ({ queryKey: ["repos"], queryFn: fetchRepos }));
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = createSignal<CardStatus | "all">("all");
   const [repoFilter, setRepoFilter] = createSignal<string>("all");
   const [view, setView] = createSignal<"list" | "board">("board");
   const [pendingId, setPendingId] = createSignal<string | null>(null);
   const [detailId, setDetailId] = createSignal<string | null>(null);
+
+  onMount(() => {
+    const id = searchParams.detail;
+    if (id && typeof id === "string") setDetailId(id);
+  });
 
   const onStatus = async (id: string, status: CardStatus) => {
     setPendingId(id);
@@ -179,7 +186,13 @@ export default function Cards() {
       </Show>
 
       <Show when={detailId()}>
-        <CardDetail cardId={detailId()!} onClose={() => setDetailId(null)} />
+        <CardDetail
+          cardId={detailId()!}
+          onClose={() => {
+            setDetailId(null);
+            setSearchParams({ detail: undefined });
+          }}
+        />
       </Show>
     </div>
   );
