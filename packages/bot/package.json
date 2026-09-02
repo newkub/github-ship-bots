@@ -4,6 +4,10 @@
   "module": "src/index.ts",
   "type": "module",
   "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./worker": "./src/worker.ts"
+  },
   "scripts": {
     "dev": "probot run ./src/index.ts",
     "start": "probot run ./src/index.ts",

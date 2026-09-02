@@ -3,9 +3,11 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "module": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
     "lint": "tsc --noEmit",
     "test": "bun test",
     "db:migrate:local": "wrangler d1 migrations apply ship-feed-db --local",

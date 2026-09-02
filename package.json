@@ -8,8 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:bot": "bun --filter @ship-feed/bot dev",
-    "dev:api": "bun --filter @ship-feed/api dev",
+    "dev:worker": "bun --filter @ship-feed/worker dev",
     "dev:mobile": "bun --filter @ship-feed/mobile dev",
     "dev:web": "bun --filter @ship-feed/web dev",
     "dev:landing": "bun --filter @ship-feed/landing dev",
@@ -20,8 +19,7 @@
     "lint": "bun --filter '*' lint",
     "test": "bun --filter '*' test",
     "verify": "bun run lint && bun run test && bun run build",
-    "deploy:bot": "bun --filter @ship-feed/bot deploy",
-    "deploy:api": "bun --filter @ship-feed/api deploy"
+    "deploy": "bun --filter @ship-feed/worker deploy"
   },
   "devDependencies": {
     "@types/bun": "^1.4.0",
