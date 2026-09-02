@@ -29,7 +29,14 @@ export default function Feed() {
     onCleanup(() => window.removeEventListener("online", onOnline));
   });
 
+  const vibrate = (pattern: number | number[] = 40) => {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(pattern);
+    }
+  };
+
   const doSwipe = async (direction: "approve" | "reject", prompt?: string) => {
+    vibrate(direction === "approve" ? [20, 30, 20] : [40]);
     const list = cards();
     const i = current();
     const card = list[i];

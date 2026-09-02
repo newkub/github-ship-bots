@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { setCookie, getCookie, deleteCookie } from "hono/cookie";
 import auth from "./routes/auth";
 import cards from "./routes/cards";
+import repos from "./routes/repos";
 import evidence from "./routes/evidence";
 import oracle from "./routes/oracle";
 import inspector from "./routes/inspector";
@@ -30,6 +31,7 @@ app.get("/health", (c) => c.json({ ok: true, service: "ship-feed-api" }));
 
 app.route("/auth", auth);
 app.route("/api/cards", cards);
+app.route("/api/repos", repos);
 app.route("/api/evidence", evidence);
 app.route("/api/oracle", oracle);
 app.route("/api/inspector", inspector);

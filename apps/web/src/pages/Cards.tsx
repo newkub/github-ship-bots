@@ -1,8 +1,8 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
 import { useQuery, useQueryClient } from "@tanstack/solid-query";
-import { Check, Clock, Grid3X3, List, Package, Rocket, X } from "lucide-solid";
+import { Check, Clock, Grid3X3, List, Package, Rocket, X, GitBranch } from "lucide-solid";
 import type { ShipCard, CardStatus } from "@ship-feed/shared";
-import { fetchCards, updateCardStatus } from "../api";
+import { fetchCards, fetchRepos, updateCardStatus } from "../api";
 import CardDetail from "./CardDetail";
 import CardTile from "../components/CardTile";
 import Kanban from "../components/Kanban";
@@ -11,7 +11,9 @@ import StatusPanel from "../components/StatusPanel";
 export default function Cards() {
   const queryClient = useQueryClient();
   const query = useQuery(() => ({ queryKey: ["cards"], queryFn: fetchCards }));
+  const reposQuery = useQuery(() => ({ queryKey: ["repos"], queryFn: fetchRepos }));
   const [filter, setFilter] = createSignal<CardStatus | "all">("all");
+  const [repoFilter, setRepoFilter] = createSignal<string>("all");
   const [view, setView] = createSignal<"list" | "board">("board");
   const [pendingId, setPendingId] = createSignal<string | null>(null);
   const [detailId, setDetailId] = createSignal<string | null>(null);
@@ -28,18 +30,25 @@ export default function Cards() {
 
   const cards = createMemo(() => {
     const data = query.data ?? [];
-    if (filter() === "all") return data;
-    return data.filter((c) => c.status === filter());
+    const status = filter();
+    const repo = repoFilter();
+    return data.filter((c) => {
+      if (status !== "all" && c.status !== status) return false;
+      if (repo !== "all" && c.repoFullName !== repo) return false;
+      return true;
+    });
   });
 
   const counts = createMemo(() => {
     const data = query.data ?? [];
+    const repo = repoFilter();
+    const filtered = repo === "all" ? data : data.filter((c) => c.repoFullName === repo);
     return {
-      total: data.length,
-      pending: data.filter((c) => c.status === "pending").length,
-      approved: data.filter((c) => c.status === "approved").length,
-      rejected: data.filter((c) => c.status === "rejected").length,
-      shipped: data.filter((c) => c.status === "shipped").length,
+      total: filtered.length,
+      pending: filtered.filter((c) => c.status === "pending").length,
+      approved: filtered.filter((c) => c.status === "approved").length,
+      rejected: filtered.filter((c) => c.status === "rejected").length,
+      shipped: filtered.filter((c) => c.status === "shipped").length,
     };
   });
 
@@ -103,6 +112,25 @@ export default function Cards() {
               </button>
             )}
           </For>
+
+          <Show when={!reposQuery.isLoading && reposQuery.data && reposQuery.data.length > 0}>
+            <div class="h-5 w-px bg-gray-200 mx-1" />
+            <GitBranch size={14} class="text-gray-400" />
+            <For each={["all", ...reposQuery.data!]}>
+              {(repo) => (
+                <button
+                  onClick={() => setRepoFilter(repo)}
+                  class={`px-3 py-1.5 rounded-full text-xs font-medium transition truncate max-w-[12rem] ${
+                    repoFilter() === repo
+                      ? "bg-indigo-600 text-white shadow-sm"
+                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  {repo === "all" ? "All repos" : repo}
+                </button>
+              )}
+            </For>
+          </Show>
         </div>
       </div>
 

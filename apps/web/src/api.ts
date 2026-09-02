@@ -20,6 +20,12 @@ export async function fetchNudges(): Promise<ShipCard[]> {
   return res.json();
 }
 
+export async function fetchRepos(): Promise<string[]> {
+  const res = await fetch(`${API_URL}/api/repos`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch repos");
+  return res.json();
+}
+
 export async function fetchCard(id: string): Promise<ShipCard> {
   const res = await fetch(`${API_URL}/api/cards/${id}`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch card");
