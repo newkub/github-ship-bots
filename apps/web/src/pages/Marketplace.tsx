@@ -1,65 +1,26 @@
-import { createSignal, For } from "solid-js";
-import { Check, Download, Puzzle, Shield, Sparkles, TestTube, Wand2 } from "lucide-solid";
+import { For, Show, createResource } from "solid-js";
+import { Check, Download, Loader, Puzzle, Sparkles, TestTube, Wand2 } from "lucide-solid";
+import { fetchPlugins, installPlugin, uninstallPlugin } from "../api";
 
-type Skill = {
-  id: string;
-  name: string;
-  description: string;
-  installs: number;
-  installed: boolean;
-  icon: typeof Puzzle;
+const iconMap: Record<string, typeof Puzzle> = {
+  Sparkles,
+  TestTube,
+  Check,
+  Shield: Puzzle,
+  Wand2,
+  Puzzle,
 };
 
-const skills: Skill[] = [
-  {
-    id: "ship-svelte",
-    name: "ship-svelte",
-    description: "Auto-implement and ship Svelte components.",
-    installs: 1200,
-    installed: false,
-    icon: Sparkles,
-  },
-  {
-    id: "test-coverage",
-    name: "test-coverage",
-    description: "Generate tests from traffic and coverage gaps.",
-    installs: 890,
-    installed: false,
-    icon: TestTube,
-  },
-  {
-    id: "issue-resolver",
-    name: "issue-resolver",
-    description: "Parse issues, plan, and open PRs automatically.",
-    installs: 2100,
-    installed: true,
-    icon: Check,
-  },
-  {
-    id: "code-review",
-    name: "code-review",
-    description: "Suggest smart comments and review PRs.",
-    installs: 1500,
-    installed: false,
-    icon: Shield,
-  },
-  {
-    id: "auto-deploy",
-    name: "auto-deploy",
-    description: "Deploy, monitor health, and rollback on failure.",
-    installs: 760,
-    installed: false,
-    icon: Wand2,
-  },
-];
-
 export default function Marketplace() {
-  const [items, setItems] = createSignal<Skill[]>(skills);
+  const [plugins, { refetch }] = createResource(fetchPlugins);
 
-  const toggle = (id: string) => {
-    setItems((list) =>
-      list.map((s) => (s.id === id ? { ...s, installed: !s.installed } : s))
-    );
+  const toggle = async (id: string, installed: boolean) => {
+    if (installed) {
+      await uninstallPlugin(id).catch(() => {});
+    } else {
+      await installPlugin(id).catch(() => {});
+    }
+    await refetch();
   };
 
   return (
@@ -69,10 +30,23 @@ export default function Marketplace() {
         <p class="text-sm text-gray-500 mt-1">Browse and install ship skills for your repositories.</p>
       </div>
 
+      <Show when={plugins.loading}>
+        <div class="flex items-center justify-center py-12 text-gray-500">
+          <Loader size={24} class="animate-spin mr-2" />
+          Loading marketplace...
+        </div>
+      </Show>
+
+      <Show when={plugins.error}>
+        <div class="rounded-2xl bg-rose-50 border border-rose-100 p-6 text-rose-700">
+          Failed to load marketplace.
+        </div>
+      </Show>
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <For each={items()}>
+        <For each={plugins() ?? []}>
           {(skill) => {
-            const Icon = skill.icon;
+            const Icon = iconMap[skill.icon] ?? Puzzle;
             return (
               <div class="rounded-2xl bg-white border border-gray-200 p-5 hover:shadow-md transition">
                 <div class="flex items-start justify-between mb-3">
@@ -84,7 +58,7 @@ export default function Marketplace() {
                 <h3 class="font-semibold text-gray-900 mb-1">{skill.name}</h3>
                 <p class="text-sm text-gray-500 mb-4">{skill.description}</p>
                 <button
-                  onClick={() => toggle(skill.id)}
+                  onClick={() => toggle(skill.id, skill.installed)}
                   class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                     skill.installed
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-200"

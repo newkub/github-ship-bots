@@ -83,6 +83,24 @@ export function loginUrl() {
   return `${API_URL}/auth/login`;
 }
 
+export async function fetchPlugins(): Promise<{ id: string; name: string; description: string; installs: number; icon: string; installed: boolean }[]> {
+  const res = await fetch(`${API_URL}/api/plugins`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch plugins");
+  return res.json();
+}
+
+export async function installPlugin(id: string) {
+  const res = await fetch(`${API_URL}/api/plugins/${id}/install`, { method: "POST", credentials: "include" });
+  if (!res.ok) throw new Error("Failed to install plugin");
+  return res.json();
+}
+
+export async function uninstallPlugin(id: string) {
+  const res = await fetch(`${API_URL}/api/plugins/${id}/uninstall`, { method: "POST", credentials: "include" });
+  if (!res.ok) throw new Error("Failed to uninstall plugin");
+  return res.json();
+}
+
 export function checkoutUrl() {
   return `${API_URL}/api/stripe/checkout`;
 }

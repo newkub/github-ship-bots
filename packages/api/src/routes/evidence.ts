@@ -58,15 +58,25 @@ evidence.post("/webhook", async (c) => {
   return c.json(result);
 });
 
+function contentTypeFor(kind: string) {
+  if (kind === "image") return "image/png";
+  if (kind === "video") return "video/mp4";
+  if (kind === "diff") return "text/plain";
+  if (kind === "log") return "text/plain";
+  return "application/octet-stream";
+}
+
 evidence.get("/:id", async (c) => {
   const session = await getSession(c);
   if (!session) return c.json({ error: "unauthorized" }, 401);
   const id = c.req.param("id");
-  const row = await c.env.DB.prepare("SELECT r2_key FROM evidence WHERE id = ?").bind(id).first<{ r2_key: string }>();
+  const row = await c.env.DB.prepare("SELECT r2_key, kind FROM evidence WHERE id = ?").bind(id).first<{ r2_key: string; kind: string }>();
   if (!row) return c.text("Not found", 404);
   const object = await c.env.EVIDENCE_BUCKET.get(row.r2_key);
   if (!object) return c.text("Not found", 404);
-  return new Response(object.body);
+  const headers = new Headers();
+  headers.set("content-type", contentTypeFor(row.kind));
+  return new Response(object.body, { headers });
 });
 
 export default evidence;

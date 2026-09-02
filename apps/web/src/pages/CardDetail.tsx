@@ -2,11 +2,19 @@ import { Show, For, createSignal, createResource } from "solid-js";
 import { fetchCard, fetchEvidence, fetchEvidenceContent } from "../api";
 import type { ShipCard } from "@ship-feed/shared";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://github-ship-bots.newkubise.workers.dev";
+
 export default function CardDetail(props: { cardId: string; onClose: () => void }) {
   const [card] = createResource(() => props.cardId, fetchCard);
   const [evidence] = createResource(() => props.cardId, fetchEvidence);
   const [activeEvidence, setActiveEvidence] = createSignal<string | null>(null);
+  const [activeKind, setActiveKind] = createSignal<string>("");
   const [content] = createResource(activeEvidence, fetchEvidenceContent);
+
+  const selectEvidence = (id: string, kind: string) => {
+    setActiveEvidence(id);
+    setActiveKind(kind);
+  };
 
   return (
     <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4">
@@ -41,10 +49,13 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                         {(item) => (
                           <li>
                             <button
-                              onClick={() => setActiveEvidence(item.id as string)}
-                              class="w-full text-left px-3 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-sm"
+                              onClick={() => selectEvidence(item.id as string, item.kind as string)}
+                              class={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
+                                activeEvidence() === item.id ? "bg-indigo-50 border border-indigo-200" : "bg-gray-50 hover:bg-gray-100"
+                              }`}
                             >
-                              {item.kind as string} <span class="text-gray-400 ml-2">{item.sha256 as string}</span>
+                              <span class="capitalize font-medium">{item.kind as string}</span>
+                              <span class="text-gray-400 ml-2 font-mono text-xs">{((item.sha256 as string) ?? "").slice(0, 12)}</span>
                             </button>
                           </li>
                         )}
@@ -52,9 +63,25 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                     </ul>
                   </Show>
 
-                  <Show when={activeEvidence() && content()}>
+                  <Show when={activeEvidence()}>
                     <div class="mt-4 rounded-lg bg-gray-900 text-gray-100 p-4 overflow-x-auto">
-                      <pre class="text-xs whitespace-pre-wrap">{content()}</pre>
+                      <Show when={activeKind() === "image"}>
+                        <img
+                          src={`${API_URL}/api/evidence/${activeEvidence()}`}
+                          alt="evidence"
+                          class="max-w-full rounded"
+                        />
+                      </Show>
+                      <Show when={activeKind() === "video"}>
+                        <video
+                          src={`${API_URL}/api/evidence/${activeEvidence()}`}
+                          controls
+                          class="max-w-full rounded"
+                        />
+                      </Show>
+                      <Show when={activeKind() !== "image" && activeKind() !== "video"}>
+                        <pre class="text-xs whitespace-pre-wrap">{content() || "Loading..."}</pre>
+                      </Show>
                     </div>
                   </Show>
                 </div>
