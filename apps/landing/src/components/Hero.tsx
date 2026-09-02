@@ -11,7 +11,7 @@ import {
   Zap,
 } from "lucide-solid";
 import { features } from "../data";
-import ExternalLink from "./ExternalLink";
+
 
 export default function Hero() {
   return (
@@ -65,13 +65,13 @@ export default function Hero() {
             </div>
 
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <ExternalLink
-                href="https://github.com/apps/wrikka-ship-bot"
+              <a
+                href="/dashboard/"
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition"
               >
                 <Zap size={18} />
-                Get Started for free
-              </ExternalLink>
+                Open Dashboard
+              </a>
               <a
                 href="#demo"
                 onClick={(e) => {

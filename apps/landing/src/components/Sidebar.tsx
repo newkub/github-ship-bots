@@ -100,14 +100,20 @@ export default function Sidebar(props: SidebarProps) {
         </For>
       </ul>
 
-      <div class="mt-auto pt-6 border-t border-zinc-800">
+      <div class="mt-auto pt-6 border-t border-zinc-800 space-y-3">
+        <a
+          href="/dashboard/"
+          class="block w-full rounded-xl bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-600 transition"
+        >
+          Open Dashboard
+        </a>
         <a
           href="https://github.com/apps/wrikka-ship-bot"
           target="_blank"
           rel="noopener noreferrer"
-          class="block w-full rounded-xl bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-600 transition"
+          class="block w-full rounded-xl bg-zinc-800 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-zinc-700 transition"
         >
-          Install
+          Install GitHub App
         </a>
       </div>
     </nav>

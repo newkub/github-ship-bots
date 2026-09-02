@@ -29,6 +29,10 @@ export default {
       return botWorker.fetch(request, botEnv);
     }
 
+    if (url.pathname === "/dashboard") {
+      return new Response(null, { status: 301, headers: { Location: "/dashboard/" } });
+    }
+
     if (url.pathname === "/orchestrate" || url.pathname === "/ship") {
       const cronSecret = env.CRON_SECRET ?? "";
       const provided = request.headers.get("x-cron-secret") ?? "";
@@ -47,6 +51,10 @@ export default {
 
     const apiRes = await apiApp.fetch(request, env, ctx);
     if (apiRes.status === 404 && env.ASSETS) {
+      if (url.pathname.startsWith("/dashboard/") && !url.pathname.includes(".")) {
+        const indexUrl = new URL("/dashboard/index.html", url);
+        return env.ASSETS.fetch(new Request(indexUrl.toString(), request));
+      }
       return env.ASSETS.fetch(request);
     }
     return apiRes;

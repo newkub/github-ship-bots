@@ -1,27 +1,23 @@
-import { A, useLocation } from "@solidjs/router";
+import { A } from "@solidjs/router";
 import { useQuery } from "@tanstack/solid-query";
-import { Home, GitBranch, CreditCard, MousePointer, Settings, LogIn, LogOut, Puzzle } from "lucide-solid";
+import { Home, GitBranch, CreditCard, MousePointer, Puzzle, Settings, LogIn, LayoutDashboard } from "lucide-solid";
 import { fetchSession, loginUrl } from "../api";
 import { Show } from "solid-js";
 
 export default function Layout(props: { children?: any }) {
-  const loc = useLocation();
   const session = useQuery(() => ({ queryKey: ["session"], queryFn: fetchSession }));
   const user = () => session.data?.user;
 
   const nav = (href: string, icon: typeof Home, label: string) => {
-    const active = loc.pathname === href;
+    const Icon = icon;
     return (
       <A
         href={href}
-        class={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium ${
-          active ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-50"
-        }`}
+        activeClass="bg-indigo-50 text-indigo-700"
+        inactiveClass="text-gray-600 hover:bg-gray-50"
+        class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium"
       >
-        {(() => {
-          const Icon = icon;
-          return <Icon size={18} />;
-        })()}
+        <Icon size={18} />
         {label}
       </A>
     );
@@ -30,16 +26,16 @@ export default function Layout(props: { children?: any }) {
   return (
     <div class="flex h-screen bg-gray-50">
       <aside class="w-64 bg-white border-r border-gray-200 p-4 flex flex-col">
-        <div class="flex items-center gap-2 px-4 mb-8">
-          <img src="/icon-192x192.png" alt="ship-feed" class="w-8 h-8" />
+        <A href="/" class="flex items-center gap-2 px-4 mb-8">
+          <img src="/dashboard/icon-192x192.png" alt="ship-feed" class="w-8 h-8" />
           <span class="font-bold text-lg">ship-feed</span>
-        </div>
+        </A>
 
         <nav class="space-y-1 flex-1">
-          {nav("/", Home, "Cards")}
+          {nav("/", LayoutDashboard, "Dashboard")}
           {nav("/repos", GitBranch, "Repositories")}
           {nav("/billing", CreditCard, "Billing")}
-          {nav("/inspector", MousePointer, "Web Inspector")}
+          {nav("/inspector", MousePointer, "Inspector")}
           {nav("/marketplace", Puzzle, "Marketplace")}
           {nav("/settings", Settings, "Settings")}
         </nav>

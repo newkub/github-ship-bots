@@ -13,7 +13,7 @@ const queryClient = new QueryClient();
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
+      <Router base="/dashboard">
         <Route path="/" component={Layout}>
           <Route path="/" component={Cards} />
           <Route path="/repos" component={Repos} />
