@@ -22,6 +22,7 @@ id = "00000000000000000000000000000000"
 [vars]
 PUBLIC_APP_URL = "https://github-ship-bots.newkubise.workers.dev"
 WORKOS_CLIENT_ID = "client_01M19F99TQW7CRED4Q65YAE0DH"
+WORKOS_REDIRECT_URI = "https://github-ship-bots.newkubise.workers.dev/auth/callback"
 VAPID_SUBJECT = "mailto:admin@newkubise.workers.dev"
 AUTO_APPROVE_THRESHOLD = "8.5"
 AUTO_APPROVE_RISK = "low"

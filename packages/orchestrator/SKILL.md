@@ -6,7 +6,8 @@ related:
   - follow-tool-vite
   - follow-test
   - run-deploy
-  - ship-verify-cicd
+  - watch-cicd-and-resolve
+  - ship
 ---
 
 # ship-feed orchestrator
