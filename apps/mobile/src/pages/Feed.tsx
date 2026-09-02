@@ -5,8 +5,10 @@ import BottomNav from "../components/BottomNav";
 import Card from "../components/Card";
 import PromptInput from "../components/PromptInput";
 import UndoToast from "../components/UndoToast";
+import EmptyState from "../components/EmptyState";
 import { useQuery } from "@tanstack/solid-query";
 import { isOnline } from "../lib/offline";
+import { Inbox, Check } from "lucide-solid";
 
 export default function Feed() {
   const query = useQuery(() => ({ queryKey: ["cards"], queryFn: fetchCards }));
@@ -32,10 +34,12 @@ export default function Feed() {
     const i = current();
     const card = list[i];
     if (!card) return;
+
     const result = await swipeCard({ cardId: card.id, direction, comment: prompt });
     if ("queued" in result && result.queued) {
       setQueued((q) => q + 1);
     }
+
     setLastSwipe({ direction, previous: i });
     setPendingPrompt(undefined);
     setExpanded(false);
@@ -59,6 +63,7 @@ export default function Feed() {
   const onUndo = () => {
     const last = lastSwipe();
     if (!last) return;
+
     setCurrent(last.previous);
     setLastSwipe(null);
     const opposite = last.direction === "approve" ? "reject" : "approve";
@@ -68,8 +73,11 @@ export default function Feed() {
     }
   };
 
+  const isEmpty = () => !query.isLoading && cards().length === 0;
+  const isDone = () => !query.isLoading && cards().length > 0 && current() >= cards().length;
+
   return (
-    <div class="h-screen w-screen flex flex-col bg-gray-950 text-white">
+    <div class="h-screen w-screen flex flex-col bg-app text-primary pt-safe">
       <div class="flex-1 relative overflow-hidden">
         <For each={cards()}>
           {(card, idx) => (
@@ -77,6 +85,7 @@ export default function Feed() {
               card={card}
               active={idx() === current()}
               hidden={idx() < current()}
+              stackIndex={idx() - current()}
               expanded={expanded()}
               prompt={pendingPrompt()}
               onToggleExpand={() => setExpanded((e) => !e)}
@@ -86,26 +95,44 @@ export default function Feed() {
           )}
         </For>
 
-        {current() >= cards().length && (
-          <div class="absolute inset-0 flex items-center justify-center p-8 text-center">
-            <div>
-              <h2 class="text-2xl font-bold mb-2">All caught up</h2>
-              <p class="text-gray-400">No more cards to review right now.</p>
-            </div>
+        <Show when={query.isLoading}>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="h-10 w-10 rounded-full border-4 border-accent/20 border-t-accent animate-spin" />
           </div>
-        )}
+        </Show>
 
-        {!isOnline() && (
-          <div class="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full bg-amber-500/90 text-xs font-bold text-white">
-            offline
-          </div>
-        )}
+        <Show when={isEmpty()}>
+          <EmptyState
+            class="absolute inset-0"
+            icon={Inbox}
+            title="Welcome to ship-feed"
+            subtitle="Your issue and PR cards will appear here. Swipe right to approve, left to reject, or tap a card to see more."
+            action={{ label: "Refresh", onClick: () => query.refetch() }}
+          />
+        </Show>
 
-        {queued() > 0 && isOnline() && (
-          <div class="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full bg-indigo-500/90 text-xs font-bold text-white">
-            {queued()} queued
-          </div>
-        )}
+        <Show when={isDone()}>
+          <EmptyState
+            class="absolute inset-0"
+            icon={Check}
+            title="All caught up"
+            subtitle="No more cards to review right now. Pull down or refresh when new cards arrive."
+            action={{ label: "Refresh", onClick: () => query.refetch() }}
+          />
+        </Show>
+
+        <div class="absolute top-4 left-4 right-4 z-20 flex flex-col items-start gap-2 pointer-events-none">
+          <Show when={!isOnline()}>
+            <span class="px-3 py-1.5 rounded-full bg-warning text-xs font-bold text-white shadow-lg pointer-events-auto">
+              offline
+            </span>
+          </Show>
+          <Show when={queued() > 0 && isOnline()}>
+            <span class="px-3 py-1.5 rounded-full bg-accent text-xs font-bold text-white shadow-lg pointer-events-auto">
+              {queued()} queued
+            </span>
+          </Show>
+        </div>
 
         <Show when={lastSwipe()}>
           {(swipe) => <UndoToast direction={swipe().direction} onUndo={onUndo} />}

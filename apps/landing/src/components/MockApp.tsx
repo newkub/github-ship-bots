@@ -1,15 +1,19 @@
-import { Send, ThumbsDown, ThumbsUp } from "lucide-solid";
+import { Send, Sparkles, ThumbsDown, ThumbsUp } from "lucide-solid";
 
 export default function MockApp() {
   return (
-    <div class="flex justify-center">
+    <div class="flex justify-center group">
       <div class="relative w-56 sm:w-64 shrink-0">
-        <div class="rounded-[2.5rem] bg-zinc-950 border-4 border-zinc-800 p-2 shadow-2xl">
+        <div class="absolute -inset-1 bg-gradient-to-b from-indigo-500/30 to-purple-500/30 rounded-[2.5rem] blur opacity-30 group-hover:opacity-50 transition duration-500" />
+        <div class="relative rounded-[2.5rem] bg-zinc-950 border-4 border-zinc-800 p-2 shadow-2xl group-hover:border-zinc-700 transition duration-300">
           <div class="rounded-[2rem] bg-zinc-900 overflow-hidden h-[28rem] sm:h-[30rem] p-4 flex flex-col">
             <div class="h-1.5 w-16 mx-auto rounded-full bg-zinc-800 mb-4" />
 
             <div class="flex items-center justify-between mb-4">
-              <span class="text-sm font-bold text-white">ship-feed</span>
+              <span class="text-sm font-bold text-white flex items-center gap-1.5">
+                <Sparkles size={14} class="text-indigo-400" />
+                ship-feed
+              </span>
               <div class="flex items-center gap-1.5">
                 <div class="h-1 w-3 rounded-full bg-zinc-700" />
                 <div class="h-2.5 w-1 rounded-sm bg-zinc-700" />
@@ -26,26 +30,27 @@ export default function MockApp() {
                     type="text"
                     value="Add a dark mode toggle"
                     readOnly
-                    class="flex-1 bg-zinc-900 rounded-lg px-3 py-2 text-xs text-zinc-200 border border-zinc-800 focus:outline-none"
+                    class="flex-1 bg-zinc-900 rounded-lg px-3 py-2 text-xs text-zinc-200 border border-zinc-800 focus:outline-none focus:border-indigo-500/50 transition"
                   />
-                  <button class="h-8 w-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center shrink-0">
+                  <button class="h-8 w-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center shrink-0 hover:bg-indigo-600 active:scale-95 transition">
                     <Send size={14} />
                   </button>
                 </div>
               </div>
 
-              <div class="flex-1 rounded-2xl bg-gradient-to-br from-indigo-500/15 to-purple-500/15 border border-indigo-500/20 p-4 flex flex-col shadow-lg">
-                <div class="text-xs font-bold uppercase tracking-wide text-indigo-300">
+              <div class="flex-1 rounded-2xl bg-gradient-to-br from-indigo-500/15 to-purple-500/15 border border-indigo-500/20 p-4 flex flex-col shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                <div class="relative z-10 text-xs font-bold uppercase tracking-wide text-indigo-300">
                   idea
                 </div>
-                <div class="mt-1 text-white font-semibold text-sm">
+                <div class="relative z-10 mt-1 text-white font-semibold text-sm">
                   Add a dark mode toggle
                 </div>
-                <div class="mt-1 text-xs text-zinc-300">
+                <div class="relative z-10 mt-1 text-xs text-zinc-300">
                   impact high · risk low
                 </div>
 
-                <div class="mt-3 flex flex-wrap gap-2">
+                <div class="relative z-10 mt-3 flex flex-wrap gap-2">
                   <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-medium">
                     score 8.4
                   </span>
@@ -56,12 +61,12 @@ export default function MockApp() {
 
                 <div class="flex-1" />
 
-                <div class="grid grid-cols-2 gap-3 mt-4">
-                  <button class="flex items-center justify-center gap-1.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-2 text-xs font-semibold hover:bg-rose-500/20 transition">
+                <div class="relative z-10 grid grid-cols-2 gap-3 mt-4">
+                  <button class="flex items-center justify-center gap-1.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-2 text-xs font-semibold hover:bg-rose-500/20 active:scale-95 transition">
                     <ThumbsDown size={14} />
                     Reject
                   </button>
-                  <button class="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-2 text-xs font-semibold hover:bg-emerald-500/20 transition">
+                  <button class="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-2 text-xs font-semibold hover:bg-emerald-500/20 active:scale-95 transition">
                     <ThumbsUp size={14} />
                     Approve
                   </button>
@@ -71,7 +76,7 @@ export default function MockApp() {
           </div>
         </div>
 
-        <div class="absolute -right-3 top-1/2 -translate-y-1/2 z-10 flex items-center gap-1 rounded-full bg-zinc-900/90 border border-zinc-800 px-2.5 py-1 text-xs text-zinc-300 shadow">
+        <div class="absolute -right-3 top-1/2 -translate-y-1/2 z-10 flex items-center gap-1 rounded-full bg-zinc-900/90 border border-zinc-800 px-2.5 py-1 text-xs text-zinc-300 shadow group-hover:border-indigo-500/30 transition">
           <ThumbsUp size={12} class="text-emerald-400" />
           <span>swipe</span>
         </div>

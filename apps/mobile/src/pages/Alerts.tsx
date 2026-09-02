@@ -1,12 +1,16 @@
-import { createSignal, For } from "solid-js";
-import { ThumbsUp, ThumbsDown, SkipForward } from "lucide-solid";
+import { createSignal, For, Show } from "solid-js";
+import { ThumbsUp, ThumbsDown, SkipForward, Inbox, Bell } from "lucide-solid";
 import BottomNav from "../components/BottomNav";
+import EmptyState from "../components/EmptyState";
+import type { Component } from "solid-js";
+
+type NudgeAction = "approve" | "reject" | "skip";
 
 type Nudge = {
   id: string;
   title: string;
   repo: string;
-  action: "approve" | "reject" | "skip";
+  action: NudgeAction;
 };
 
 const mockNudges: Nudge[] = [
@@ -17,57 +21,202 @@ const mockNudges: Nudge[] = [
 export default function Alerts() {
   const [nudges, setNudges] = createSignal<Nudge[]>(mockNudges);
 
-  const handleAction = (id: string, action: "approve" | "reject" | "skip") => {
+  const handleAction = (id: string, action: NudgeAction) => {
     console.log("nudge action", id, action);
     setNudges((list) => list.filter((n) => n.id !== id));
   };
 
   return (
-    <div class="h-screen w-screen flex flex-col bg-gray-950 text-white">
-      <div class="p-4 border-b border-gray-800">
-        <h1 class="text-xl font-bold">Notifications</h1>
-        <p class="text-sm text-gray-400">Quick actions for pending cards</p>
-      </div>
+    <div class="h-screen w-screen flex flex-col bg-app text-primary">
+      <header class="pt-safe px-6 py-4 bg-surface border-b border-divider flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-bold flex items-center gap-2">
+            <Bell size={20} class="text-accent" />
+            Notifications
+          </h1>
+          <p class="text-sm text-muted">Quick actions for pending cards</p>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-elevated text-xs font-semibold text-muted border border-divider">
+          {nudges().length} pending
+        </span>
+      </header>
 
-      <div class="flex-1 overflow-auto p-4">
+      <div class="flex-1 overflow-auto p-4 no-scrollbar">
         <For each={nudges()}>
-          {(nudge) => (
-            <div class="mb-4 rounded-2xl bg-gray-900 border border-gray-800 p-4">
-              <div class="text-xs text-gray-400 mb-1">{nudge.repo}</div>
-              <h2 class="font-semibold mb-3">{nudge.title}</h2>
-              <div class="flex gap-2">
-                <button
-                  onClick={() => handleAction(nudge.id, "approve")}
-                  class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/20 text-emerald-400 py-2 text-sm font-semibold"
-                >
-                  <ThumbsUp size={16} />
-                  Approve
-                </button>
-                <button
-                  onClick={() => handleAction(nudge.id, "reject")}
-                  class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-rose-500/20 text-rose-400 py-2 text-sm font-semibold"
-                >
-                  <ThumbsDown size={16} />
-                  Reject
-                </button>
-                <button
-                  onClick={() => handleAction(nudge.id, "skip")}
-                  class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-gray-800 text-gray-300 py-2 text-sm font-semibold"
-                >
-                  <SkipForward size={16} />
-                  Skip
-                </button>
-              </div>
-            </div>
-          )}
+          {(nudge) => <NudgeCard nudge={nudge} onAction={(action) => handleAction(nudge.id, action)} />}
         </For>
 
-        {nudges().length === 0 && (
-          <div class="text-center text-gray-500 mt-20">No pending nudges</div>
-        )}
+        <Show when={nudges().length === 0}>
+          <EmptyState
+            class="h-full"
+            icon={Inbox}
+            title="No pending nudges"
+            subtitle="You're all caught up. New notifications will appear here when cards need your attention."
+          />
+        </Show>
       </div>
 
       <BottomNav active="alerts" nudgeCount={nudges().length} />
+    </div>
+  );
+}
+
+interface NudgeCardProps {
+  nudge: Nudge;
+  onAction: (action: NudgeAction) => void;
+}
+
+const SWIPE_THRESHOLD = 80;
+
+function NudgeCard(props: NudgeCardProps) {
+  const [startX, setStartX] = createSignal<number | null>(null);
+  const [startY, setStartY] = createSignal<number | null>(null);
+  const [deltaX, setDeltaX] = createSignal(0);
+  const [dragging, setDragging] = createSignal(false);
+  const [exiting, setExiting] = createSignal<NudgeAction | null>(null);
+
+  const opacity = () => Math.min(1, Math.abs(deltaX()) / SWIPE_THRESHOLD);
+
+  const isInteractiveTarget = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) return false;
+    return !!target.closest("button, a, [data-no-swipe]");
+  };
+
+  const onTouchStart = (e: TouchEvent | MouseEvent) => {
+    if (exiting() || isInteractiveTarget(e.target)) return;
+    const p = getClient(e);
+    setStartX(p.x);
+    setStartY(p.y);
+    setDragging(true);
+  };
+
+  const onTouchMove = (e: TouchEvent | MouseEvent) => {
+    if (exiting() || startX() === null || startY() === null) return;
+    const p = getClient(e);
+    const dx = p.x - startX()!;
+    const dy = p.y - startY()!;
+
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 12) {
+      e.preventDefault();
+      setDeltaX(dx);
+    }
+  };
+
+  const onTouchEnd = () => {
+    if (exiting() || startX() === null) return;
+    setDragging(false);
+    const dx = deltaX();
+
+    if (dx > SWIPE_THRESHOLD) {
+      dismiss("approve");
+    } else if (dx < -SWIPE_THRESHOLD) {
+      dismiss("reject");
+    } else {
+      setDeltaX(0);
+    }
+
+    setStartX(null);
+    setStartY(null);
+  };
+
+  const dismiss = (action: NudgeAction) => {
+    setExiting(action);
+    window.setTimeout(() => {
+      setExiting(null);
+      props.onAction(action);
+    }, 220);
+  };
+
+  const getClient = (e: TouchEvent | MouseEvent) => {
+    if ("touches" in e && e.touches.length > 0) {
+      return { x: e.touches[0]!.clientX, y: e.touches[0]!.clientY };
+    }
+    if ("changedTouches" in e && (e as TouchEvent).changedTouches.length > 0) {
+      const t = (e as TouchEvent).changedTouches[0]!;
+      return { x: t.clientX, y: t.clientY };
+    }
+    return { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
+  };
+
+  const transform = () => {
+    if (exiting() === "approve") return "translate3d(120%, 0, 0) rotateZ(4deg)";
+    if (exiting() === "reject") return "translate3d(-120%, 0, 0) rotateZ(-4deg)";
+    return `translate3d(${deltaX()}px, 0, 0)`;
+  };
+
+  const transitionClass = () => (dragging() || exiting() ? "transition-transform duration-200 ease-out" : "transition-transform duration-200 ease-out");
+
+  return (
+    <div class="relative mb-4 rounded-2xl overflow-hidden" style={{ "touch-action": "pan-y" }}>
+      <div class="absolute inset-0 flex">
+        <div
+          class="flex-1 bg-emerald-500/90 flex items-center pl-5 text-white font-bold tracking-wider"
+          style={{ opacity: deltaX() > 0 ? opacity() : 0 }}
+        >
+          <ThumbsUp size={20} class="mr-2" />
+          APPROVE
+        </div>
+        <div
+          class="flex-1 bg-rose-500/90 flex items-center justify-end pr-5 text-white font-bold tracking-wider"
+          style={{ opacity: deltaX() < 0 ? opacity() : 0 }}
+        >
+          REJECT
+          <ThumbsDown size={20} class="ml-2" />
+        </div>
+      </div>
+
+      <div
+        class={`relative z-10 bg-elevated border border-divider rounded-2xl p-4 ${transitionClass()}`}
+        style={{ transform: transform() }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onTouchStart}
+        onMouseMove={onTouchMove}
+        onMouseUp={onTouchEnd}
+        onMouseLeave={onTouchEnd}
+      >
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="text-xs text-muted mb-1 truncate">{props.nudge.repo}</div>
+            <h2 class="font-semibold text-primary leading-snug">{props.nudge.title}</h2>
+            {props.nudge.action !== "skip" && (
+              <span
+                class={`inline-flex items-center gap-1 mt-2 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                  props.nudge.action === "approve" ? "bg-success/15 text-success" : "bg-danger/15 text-danger"
+                }`}
+              >
+                {props.nudge.action === "approve" ? <ThumbsUp size={10} /> : <ThumbsDown size={10} />}
+                Suggested {props.nudge.action}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => props.onAction("skip")}
+            class="h-8 w-8 rounded-full bg-surface flex items-center justify-center text-muted hover:text-primary active:scale-95 transition"
+            aria-label="Skip"
+          >
+            <SkipForward size={16} />
+          </button>
+        </div>
+
+        <div class="flex gap-2 mt-4">
+          <button
+            onClick={() => props.onAction("approve")}
+            class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-success/15 text-success py-2.5 text-sm font-semibold active:scale-95 transition"
+          >
+            <ThumbsUp size={16} />
+            Approve
+          </button>
+          <button
+            onClick={() => props.onAction("reject")}
+            class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-danger/15 text-danger py-2.5 text-sm font-semibold active:scale-95 transition"
+          >
+            <ThumbsDown size={16} />
+            Reject
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

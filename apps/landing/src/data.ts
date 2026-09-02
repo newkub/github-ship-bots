@@ -3,15 +3,13 @@ import {
   Bot,
   Brain,
   CheckCircle2,
-  Download,
+  Eye,
   GitPullRequest,
   HelpCircle,
   Layers,
   ListOrdered,
   MessageSquare,
-  MousePointerClick,
   Rocket,
-  Settings,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
@@ -49,8 +47,13 @@ export const appName = "ship-feed";
 
 export const appSlug = "github-ship-bots";
 
+export const dashboardUrl = "/dashboard/";
+
+export const installUrl = "https://github.com/apps/wrikka-ship-bot";
+
 export const sections: Section[] = [
   { id: "home", label: "Home", icon: Sparkles },
+  { id: "preview", label: "Preview", icon: Eye },
   { id: "about", label: "What is it?", icon: HelpCircle },
   { id: "pipeline", label: "Pipeline", icon: GitPullRequest },
   { id: "features", label: "What it does", icon: Zap },

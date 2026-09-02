@@ -1,6 +1,7 @@
 import About from "./components/About";
 import CTA from "./components/CTA";
 import CommandCards from "./components/CommandCards";
+import DashboardPreview from "./components/DashboardPreview";
 import Ecosystem from "./components/Ecosystem";
 import FeatureGrid from "./components/FeatureGrid";
 import Footer from "./components/Footer";
@@ -15,6 +16,9 @@ export default function App() {
     <Layout>
       <section id="home" class="w-full">
         <Hero />
+      </section>
+      <section id="preview" class="w-full">
+        <DashboardPreview />
       </section>
       <section id="about" class="w-full">
         <About />

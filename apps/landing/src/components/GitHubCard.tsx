@@ -1,5 +1,4 @@
 import {
-  CheckCircle2,
   CircleDot,
   GitMerge,
   GitPullRequest,
@@ -40,7 +39,7 @@ export default function GitHubCard(props: GitHubCardProps) {
   const StateIcon = stateConfig[state].icon;
 
   return (
-    <div class="rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-lg w-full">
+    <div class="rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-lg w-full hover:border-indigo-500/30 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/5 transition duration-300 group">
       <div class="flex items-start gap-3">
         <TypeIcon
           size={22}
@@ -53,7 +52,7 @@ export default function GitHubCard(props: GitHubCardProps) {
           }
         />
         <div class="flex-1 min-w-0">
-          <h4 class="text-sm font-semibold text-white truncate">
+          <h4 class="text-sm font-semibold text-white truncate group-hover:text-indigo-300 transition">
             {props.title}
           </h4>
           <p class="text-xs text-zinc-500 mt-0.5">
@@ -79,14 +78,14 @@ export default function GitHubCard(props: GitHubCardProps) {
       </div>
 
       {props.comment && (
-        <div class="mt-4 rounded-xl bg-zinc-900 p-3 border border-zinc-800">
+        <div class="mt-4 rounded-xl bg-zinc-900 p-3 border border-zinc-800 group-hover:border-zinc-700 transition">
           <p class="text-xs text-zinc-500 mb-1">user commented</p>
           <p class="text-sm text-zinc-200 font-mono">{props.comment}</p>
         </div>
       )}
 
       {props.botReply && (
-        <div class="mt-3 rounded-xl bg-orange-500/10 p-3 border border-orange-500/20">
+        <div class="mt-3 rounded-xl bg-orange-500/10 p-3 border border-orange-500/20 group-hover:bg-orange-500/15 transition">
           <p class="text-xs text-orange-400 mb-1 flex items-center gap-1">
             <span class="h-2 w-2 rounded-full bg-orange-500" />
             github-ship-bots
