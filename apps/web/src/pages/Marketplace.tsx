@@ -43,6 +43,12 @@ export default function Marketplace() {
         </div>
       </Show>
 
+      <Show when={!plugins.loading && !plugins.error && (plugins() ?? []).length === 0}>
+        <div class="rounded-2xl bg-gray-50 border border-gray-200 p-8 text-center text-gray-500">
+          No skills available in the marketplace yet.
+        </div>
+      </Show>
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <For each={plugins() ?? []}>
           {(skill) => {

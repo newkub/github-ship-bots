@@ -1,54 +1,59 @@
-import { Hono } from "hono";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { insertCard } from "./cards";
-import type { Env } from "@ship-feed/shared";
+import { withEnv } from "../lib/env";
 
-const inspector = new Hono<{ Bindings: Env }>();
+const inspector = withEnv(new Elysia({ prefix: "/api/inspector" }));
 
-inspector.post("/", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const body = await c.req.json<{
-    url: string;
-    selector: string;
-    prompt: string;
-    repoFullName: string;
-    impact?: "high" | "medium" | "low";
-    risk?: "high" | "medium" | "low";
-    effect?: "high" | "medium" | "low";
-    phase?: "mvp" | "v2" | "done";
-  }>();
+const inspectorSchema = z.object({
+  url: z.string(),
+  selector: z.string(),
+  prompt: z.string(),
+  repoFullName: z.string(),
+  impact: z.enum(["high", "medium", "low"]).default("medium"),
+  risk: z.enum(["high", "medium", "low"]).default("medium"),
+  effect: z.enum(["high", "medium", "low"]).default("medium"),
+  phase: z.enum(["mvp", "v2", "done"]).default("mvp"),
+});
+
+inspector.post("/", async ({ request, set, env, body }) => {
+  const session = await getSession({ request, set, env });
+  if (!session) {
+    set.status = 401;
+    return { error: "unauthorized" };
+  }
 
   const id = generateId();
-  await c.env.DB.prepare(
+  await env.DB.prepare(
     "INSERT INTO inspector_annotations (id, url, selector, prompt, created_at) VALUES (?, ?, ?, ?, ?)"
   )
     .bind(id, body.url, body.selector, body.prompt, now())
     .run();
 
-  const card = await insertCard(c.env, {
+  const card = await insertCard(env, {
     kind: "work",
     title: body.prompt,
     description: `Inspector: ${body.url}\nSelector: ${body.selector}`,
     status: "pending",
     repoFullName: body.repoFullName,
-    impact: body.impact ?? "medium",
-    risk: body.risk ?? "medium",
-    effect: body.effect ?? "medium",
-    phase: body.phase ?? "mvp",
+    impact: body.impact,
+    risk: body.risk,
+    effect: body.effect,
+    phase: body.phase,
   });
 
-  await c.env.DB.prepare("UPDATE inspector_annotations SET card_id = ? WHERE id = ?")
+  await env.DB.prepare("UPDATE inspector_annotations SET card_id = ? WHERE id = ?")
     .bind(card.id, id)
     .run();
 
-  return c.json({
+  return {
     ok: true,
     id,
     card,
     message: "Inspector annotation queued and ship-feed card created.",
-  });
-});
+  };
+}, { body: inspectorSchema });
 
 export default inspector;
