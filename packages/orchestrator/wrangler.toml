@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "ship-feed-db"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "7da4a45d-039f-48a1-ab99-316d636568a3"
 
 [[r2_buckets]]
 binding = "EVIDENCE_BUCKET"
@@ -18,7 +18,7 @@ bucket_name = "ship-feed-baselines"
 
 [[kv_namespaces]]
 binding = "SESSION_KV"
-id = "00000000000000000000000000000000"
+id = "cdbd999cc26c4ca2a48f9d2dec865104"
 
 [vars]
 PUBLIC_APP_URL = "https://github-ship-bots.newkubise.workers.dev"
