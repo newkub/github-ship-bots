@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { updateLearningWeights } from "../lib/learning";
-import { autoScore } from "../lib/score";
+import { autoScore, explainScore } from "../lib/score";
 import { notifyCardStatus } from "../lib/notify";
 import { createContext, onApprove, onReject } from "@ship-feed/orchestrator";
 import type { Env, ShipCard, SwipeEvent } from "@ship-feed/shared";
@@ -43,6 +43,24 @@ cards.get("/:id", async (c) => {
   const card = await fetchCardById(c.env.DB, id);
   if (!card) return c.json({ error: "card not found" }, 404);
   return c.json(card);
+});
+
+cards.get("/:id/explain", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const id = c.req.param("id");
+  const card = await fetchCardById(c.env.DB, id);
+  if (!card) return c.json({ error: "card not found" }, 404);
+
+  const explanation = await explainScore(c.env.DB, card.repoFullName, {
+    kind: card.kind,
+    impact: card.impact,
+    risk: card.risk,
+    effect: card.effect,
+    phase: card.phase,
+  });
+
+  return c.json(explanation);
 });
 
 cards.get("/:id/evidence", async (c) => {

@@ -1,5 +1,5 @@
 import { Show, For, createSignal, createResource } from "solid-js";
-import { fetchCard, fetchEvidence, fetchEvidenceContent } from "../api";
+import { fetchCard, fetchEvidence, fetchEvidenceContent, fetchExplain } from "../api";
 import type { ShipCard } from "@ship-feed/shared";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://github-ship-bots.newkubise.workers.dev";
@@ -7,6 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || "https://github-ship-bots.newkub
 export default function CardDetail(props: { cardId: string; onClose: () => void }) {
   const [card] = createResource(() => props.cardId, fetchCard);
   const [evidence] = createResource(() => props.cardId, fetchEvidence);
+  const [explain] = createResource(() => props.cardId, fetchExplain);
   const [activeEvidence, setActiveEvidence] = createSignal<string | null>(null);
   const [activeKind, setActiveKind] = createSignal<string>("");
   const [content] = createResource(activeEvidence, fetchEvidenceContent);
@@ -35,11 +36,33 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
               <div class="p-6 space-y-6">
                 <p class="text-gray-700 text-sm leading-relaxed">{c.description}</p>
 
-                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                  <Metric label="score" value={c.score.toFixed(2)} />
                   <Metric label="impact" value={c.impact} />
                   <Metric label="risk" value={c.risk} />
                   <Metric label="effect" value={c.effect} />
                 </div>
+
+                <Show when={explain()}>
+                  <div class="rounded-xl bg-indigo-50 border border-indigo-100 p-4">
+                    <h3 class="font-semibold text-indigo-900 mb-2">Why this score?</h3>
+                    <p class="text-sm text-indigo-800 mb-3">
+                      Base <strong>{explain()!.base}</strong> + adjustment <strong>{explain()!.adjustment}</strong> = <strong>{explain()!.final}</strong>
+                    </p>
+                    <ul class="space-y-1 text-sm text-indigo-900">
+                      <For each={explain()!.features}>
+                        {(f) => (
+                          <li class="flex items-center justify-between bg-white/60 rounded-lg px-3 py-2">
+                            <span class="capitalize">{f.feature}: <span class="text-gray-600">{f.value}</span></span>
+                            <span class={f.adjustment >= 0 ? "text-emerald-600" : "text-rose-600"}>
+                              {f.adjustment >= 0 ? "+" : ""}{f.adjustment}
+                            </span>
+                          </li>
+                        )}
+                      </For>
+                    </ul>
+                  </div>
+                </Show>
 
                 <div>
                   <h3 class="font-semibold text-gray-900 mb-3">Evidence</h3>

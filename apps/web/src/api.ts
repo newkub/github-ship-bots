@@ -115,3 +115,15 @@ export async function submitInspector(data: { url: string; selector: string; pro
   if (!res.ok) throw new Error("Failed to submit inspector");
   return res.json();
 }
+
+export async function fetchExplain(id: string): Promise<{
+  base: number;
+  averageWeight: number;
+  adjustment: number;
+  final: number;
+  features: { feature: string; value: string; weight: number; defaultWeight: number; adjustment: number }[];
+}> {
+  const res = await fetch(`${API_URL}/api/cards/${id}/explain`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch explanation");
+  return res.json();
+}
