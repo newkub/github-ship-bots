@@ -30,6 +30,11 @@ export default {
     }
 
     if (url.pathname === "/orchestrate" || url.pathname === "/ship") {
+      const cronSecret = env.CRON_SECRET ?? "";
+      const provided = request.headers.get("x-cron-secret") ?? "";
+      if (!cronSecret || provided !== cronSecret) {
+        return new Response("unauthorized", { status: 401 });
+      }
       return orchestratorWorker.fetch(request, env);
     }
 
@@ -45,9 +50,5 @@ export default {
       return env.ASSETS.fetch(request);
     }
     return apiRes;
-  },
-
-  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    await orchestratorWorker.scheduled(controller, env, ctx);
   },
 };

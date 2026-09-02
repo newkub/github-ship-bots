@@ -6,6 +6,5 @@ describe("worker", () => {
     const mod = await import("../src/index");
     expect(mod.default).toBeDefined();
     expect(typeof mod.default.fetch).toBe("function");
-    expect(typeof mod.default.scheduled).toBe("function");
   });
 });
