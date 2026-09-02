@@ -106,6 +106,121 @@ export interface InspectorAnnotation {
   createdAt: string;
 }
 
+export interface ApprovalRule {
+  repoFullName: string;
+  minApprovers: number;
+  minRejectors: number;
+  updatedAt: string;
+}
+
+export interface CommentTemplate {
+  id: string;
+  userId: string;
+  repoFullName?: string;
+  name: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface CardComment {
+  id: string;
+  cardId: string;
+  userId: string;
+  templateId?: string;
+  body: string;
+  postedToGitHub: boolean;
+  createdAt: string;
+}
+
+export interface SecurityFinding {
+  id: string;
+  cardId?: string;
+  repoFullName: string;
+  type: string;
+  severity: "critical" | "high" | "medium" | "low" | "info";
+  description: string;
+  resolvedAt?: string;
+  createdAt: string;
+}
+
+export interface RollbackEvent {
+  id: string;
+  cardId: string;
+  deploymentId?: string;
+  reason: string;
+  success: boolean;
+  rolledBackAt: string;
+  createdAt: string;
+}
+
+export interface RefactorArtifact {
+  id: string;
+  cardId: string;
+  diffKey: string;
+  status: "pending" | "applied" | "rejected";
+  createdAt: string;
+}
+
+export interface IssueTrace {
+  id: string;
+  issueId: string;
+  cardId?: string;
+  event: string;
+  detail: string;
+  createdAt: string;
+}
+
+export interface CiDiagnostic {
+  id: string;
+  cardId?: string;
+  runId: string;
+  logKey: string;
+  diagnosis: string;
+  createdAt: string;
+}
+
+export interface UsageEvent {
+  id: string;
+  userId?: string;
+  event: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface AgentSdk {
+  id: string;
+  userId: string;
+  name: string;
+  token: string;
+  config: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface NotificationChannel {
+  id: string;
+  userId: string;
+  provider: "slack" | "discord" | "telegram";
+  channel: string;
+  webhook: string;
+  createdAt: string;
+}
+
+export interface HealthCheck {
+  id: string;
+  status: "healthy" | "degraded" | "unhealthy";
+  metrics: Record<string, number>;
+  runAt: string;
+}
+
+export interface VoiceCommand {
+  id: string;
+  userId: string;
+  audioKey?: string;
+  transcript: string;
+  action: string;
+  createdAt: string;
+}
+
 export interface Env {
   DB: D1Database;
   EVIDENCE_BUCKET: R2Bucket;
