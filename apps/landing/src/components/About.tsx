@@ -10,6 +10,7 @@ import {
 } from "lucide-solid";
 import { appName, dashboardUrl, installUrl } from "../data";
 import SectionHeader from "./SectionHeader";
+import VisualBlock from "./VisualBlock";
 
 const steps = [
   { icon: Layers, text: "Ideas become cards" },
@@ -48,6 +49,10 @@ export default function About() {
             title={`What is ${appName}?`}
             subtitle={`${appName} is a card-driven approval layer for software development. Every idea, pull request, merge, and release is a card. Humans choose and vote. The system handles implementation, verification, evidence, shipping, and learning.`}
           />
+
+          <div class="max-w-2xl mx-auto mb-12">
+            <VisualBlock variant="about" />
+          </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 items-center">
             <For each={steps}>

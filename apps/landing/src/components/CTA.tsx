@@ -1,6 +1,7 @@
 import { ExternalLink, Rocket, Sparkles } from "lucide-solid";
 import { dashboardUrl, installUrl } from "../data";
 import SectionHeader from "./SectionHeader";
+import VisualBlock from "./VisualBlock";
 
 export default function CTA() {
   return (
@@ -20,6 +21,10 @@ export default function CTA() {
             title="Start shipping now"
             subtitle="Install ship-feed on your repositories and turn every idea into an autonomous shipping pipeline."
           />
+
+          <div class="max-w-xl mx-auto mb-10">
+            <VisualBlock variant="install" />
+          </div>
 
           <div class="mt-2 flex flex-col sm:flex-row gap-4 justify-center">
             <a

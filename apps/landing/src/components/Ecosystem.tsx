@@ -11,6 +11,7 @@ import {
   Zap,
 } from "lucide-solid";
 import SectionHeader from "./SectionHeader";
+import VisualBlock from "./VisualBlock";
 
 const parts = [
   { title: "GitHub bot", desc: "Comments voting cards on every issue and PR.", icon: MessageSquare, color: "indigo" },
@@ -41,6 +42,10 @@ export default function Ecosystem() {
           title="Ecosystem"
           subtitle="ship-feed is more than a bot. It is a full-stack loop that connects GitHub, Cloudflare, web, mobile, and agents."
         />
+
+        <div class="max-w-2xl mx-auto mb-12">
+          <VisualBlock variant="ecosystem" />
+        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <For each={parts}>

@@ -2,6 +2,7 @@ import { For } from "solid-js";
 import { CheckCircle2, Rocket, Terminal, XCircle } from "lucide-solid";
 import { commands } from "../data";
 import SectionHeader from "./SectionHeader";
+import VisualBlock from "./VisualBlock";
 
 const iconMap: Record<string, typeof CheckCircle2> = {
   "/approve": CheckCircle2,
@@ -38,6 +39,10 @@ export default function CommandCards() {
           title="Commands"
           subtitle="Vote with a comment. The bot reads the command and advances the card through the pipeline."
         />
+
+        <div class="max-w-xl mx-auto mb-12">
+          <VisualBlock variant="commands" />
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <For each={commands}>

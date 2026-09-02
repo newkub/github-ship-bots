@@ -1,6 +1,7 @@
 import { For } from "solid-js";
 import { features } from "../data";
 import SectionHeader from "./SectionHeader";
+import VisualBlock from "./VisualBlock";
 
 export default function FeatureGrid() {
   const colorClass = (i: number) => {
@@ -23,6 +24,10 @@ export default function FeatureGrid() {
           title="Why ship-feed?"
           subtitle="The fastest way from idea to shipped code. The bot does the work, you make the call."
         />
+
+        <div class="max-w-xl mx-auto mb-12">
+          <VisualBlock variant="features" />
+        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <For each={features}>

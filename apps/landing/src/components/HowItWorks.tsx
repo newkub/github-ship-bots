@@ -2,6 +2,7 @@ import { For } from "solid-js";
 import { ArrowRight } from "lucide-solid";
 import { steps } from "../data";
 import SectionHeader from "./SectionHeader";
+import VisualBlock from "./VisualBlock";
 
 export default function HowItWorks() {
   return (
@@ -14,6 +15,10 @@ export default function HowItWorks() {
           title="How it works"
           subtitle="Four steps from repo connection to shipped code. The bot handles the busywork; you just decide."
         />
+
+        <div class="max-w-xl mx-auto mb-12">
+          <VisualBlock variant="how-it-works" />
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-4 items-stretch">
           <For each={steps}>
