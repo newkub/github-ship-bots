@@ -47,6 +47,62 @@ export const evidence = sqliteTable("evidence", {
   createdAt: text("created_at").notNull(),
 });
 
+export const subscriptions = sqliteTable("subscriptions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  stripeSubscriptionId: text("stripe_subscription_id").notNull(),
+  plan: text("plan").notNull(),
+  status: text("status").notNull(),
+  currentPeriodEnd: text("current_period_end").notNull(),
+});
+
+export const learningWeights = sqliteTable("learning_weights", {
+  repoFullName: text("repo_full_name").notNull(),
+  feature: text("feature").notNull(),
+  weight: real("weight").notNull(),
+  updatedAt: text("updated_at").notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.repoFullName, t.feature] }),
+}));
+
+export const inspectorAnnotations = sqliteTable("inspector_annotations", {
+  id: text("id").primaryKey(),
+  url: text("url").notNull(),
+  selector: text("selector").notNull(),
+  prompt: text("prompt").notNull(),
+  screenshotR2Key: text("screenshot_r2_key"),
+  cardId: text("card_id"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const pushSubscriptions = sqliteTable("push_subscriptions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id"),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const testOracleBaselines = sqliteTable("test_oracle_baselines", {
+  id: text("id").primaryKey(),
+  repoFullName: text("repo_full_name").notNull(),
+  name: text("name").notNull(),
+  r2Key: text("r2_key").notNull(),
+  sha256: text("sha256").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const testOracleResults = sqliteTable("test_oracle_results", {
+  id: text("id").primaryKey(),
+  baselineId: text("baseline_id").notNull(),
+  cardId: text("card_id").notNull(),
+  diffScore: real("diff_score").notNull(),
+  passed: integer("passed", { mode: "boolean" }).notNull(),
+  r2DiffKey: text("r2_diff_key"),
+  createdAt: text("created_at").notNull(),
+});
+
 export const plugins = sqliteTable("plugins", {
   id: text("id").primaryKey(),
   name: text("name").notNull().unique(),
@@ -62,3 +118,118 @@ export const userPlugins = sqliteTable("user_plugins", {
 }, (t) => ({
   pk: primaryKey({ columns: [t.userId, t.pluginId] }),
 }));
+
+export const approvalRules = sqliteTable("approval_rules", {
+  repoFullName: text("repo_full_name").primaryKey(),
+  minApprovers: integer("min_approvers").notNull().default(1),
+  minRejectors: integer("min_rejectors").notNull().default(1),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const commentTemplates = sqliteTable("comment_templates", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  repoFullName: text("repo_full_name"),
+  name: text("name").notNull(),
+  body: text("body").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const cardComments = sqliteTable("card_comments", {
+  id: text("id").primaryKey(),
+  cardId: text("card_id").notNull(),
+  userId: text("user_id").notNull(),
+  templateId: text("template_id"),
+  body: text("body").notNull(),
+  postedToGitHub: integer("posted_to_github", { mode: "boolean" }).notNull().default(false),
+  createdAt: text("created_at").notNull(),
+});
+
+export const securityFindings = sqliteTable("security_findings", {
+  id: text("id").primaryKey(),
+  cardId: text("card_id"),
+  repoFullName: text("repo_full_name").notNull(),
+  type: text("type").notNull(),
+  severity: text("severity").notNull(),
+  description: text("description").notNull(),
+  resolvedAt: text("resolved_at"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const rollbackEvents = sqliteTable("rollback_events", {
+  id: text("id").primaryKey(),
+  cardId: text("card_id").notNull(),
+  deploymentId: text("deployment_id"),
+  reason: text("reason").notNull(),
+  success: integer("success", { mode: "boolean" }).notNull().default(false),
+  rolledBackAt: text("rolled_back_at").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const refactorArtifacts = sqliteTable("refactor_artifacts", {
+  id: text("id").primaryKey(),
+  cardId: text("card_id").notNull(),
+  diffKey: text("diff_key").notNull(),
+  status: text("status").notNull().default("pending"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const issueTraces = sqliteTable("issue_traces", {
+  id: text("id").primaryKey(),
+  issueId: text("issue_id").notNull(),
+  cardId: text("card_id"),
+  event: text("event").notNull(),
+  detail: text("detail").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const ciDiagnostics = sqliteTable("ci_diagnostics", {
+  id: text("id").primaryKey(),
+  cardId: text("card_id"),
+  runId: text("run_id").notNull(),
+  logKey: text("log_key").notNull(),
+  diagnosis: text("diagnosis").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const usageEvents = sqliteTable("usage_events", {
+  id: text("id").primaryKey(),
+  userId: text("user_id"),
+  event: text("event").notNull(),
+  metadata: text("metadata").notNull().default("{}"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const agentSdks = sqliteTable("agent_sdks", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  name: text("name").notNull().unique(),
+  token: text("token").notNull(),
+  config: text("config").notNull().default("{}"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const notificationChannels = sqliteTable("notification_channels", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  provider: text("provider").notNull(),
+  channel: text("channel").notNull(),
+  webhook: text("webhook").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const healthChecks = sqliteTable("health_checks", {
+  id: text("id").primaryKey(),
+  status: text("status").notNull(),
+  metrics: text("metrics").notNull().default("{}"),
+  runAt: text("run_at").notNull(),
+});
+
+export const voiceCommands = sqliteTable("voice_commands", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  audioKey: text("audio_key"),
+  transcript: text("transcript").notNull(),
+  action: text("action").notNull(),
+  createdAt: text("created_at").notNull(),
+});
