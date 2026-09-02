@@ -88,6 +88,24 @@ cards.get("/:id/votes", async (c) => {
   });
 });
 
+cards.get("/:id/comments", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const id = c.req.param("id");
+  const { results } = await c.env.DB
+    .prepare("SELECT c.*, u.github_login as user FROM card_comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.card_id = ? ORDER BY c.created_at DESC")
+    .bind(id)
+    .all<Record<string, unknown>>();
+  return c.json((results ?? []).map((row) => ({
+    id: row.id,
+    cardId: row.card_id,
+    user: row.user,
+    body: row.body,
+    postedToGitHub: Boolean(row.posted_to_github),
+    createdAt: row.created_at,
+  })));
+});
+
 cards.get("/:id/evidence", async (c) => {
   const session = await getSession(c);
   if (!session) return c.json({ error: "unauthorized" }, 401);

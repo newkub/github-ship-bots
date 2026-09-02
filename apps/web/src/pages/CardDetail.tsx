@@ -1,5 +1,5 @@
 import { Show, For, createSignal, createResource } from "solid-js";
-import { fetchCard, fetchEvidence, fetchEvidenceContent, fetchExplain, fetchVotes } from "../api";
+import { fetchCard, fetchComments, fetchEvidence, fetchEvidenceContent, fetchExplain, fetchTemplates, fetchVotes, applyTemplate } from "../api";
 import type { ShipCard } from "@ship-feed/shared";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://github-ship-bots.newkubise.workers.dev";
@@ -9,6 +9,8 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
   const [evidence] = createResource(() => props.cardId, fetchEvidence);
   const [explain] = createResource(() => props.cardId, fetchExplain);
   const [votes] = createResource(() => props.cardId, fetchVotes);
+  const [comments, { refetch: refetchComments }] = createResource(() => props.cardId, fetchComments);
+  const [templates] = createResource(() => card()?.repoFullName, fetchTemplates);
   const [activeEvidence, setActiveEvidence] = createSignal<string | null>(null);
   const [activeKind, setActiveKind] = createSignal<string>("");
   const [content] = createResource(activeEvidence, fetchEvidenceContent);
@@ -78,6 +80,46 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                             <span class={v.direction === "approve" ? "text-emerald-600 font-medium" : "text-rose-600 font-medium"}>
                               {v.direction}
                             </span>
+                          </li>
+                        )}
+                      </For>
+                    </ul>
+                  </div>
+                </Show>
+
+                <Show when={templates() && templates()!.length > 0}>
+                  <div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Quick comment</h3>
+                    <div class="flex flex-wrap gap-2">
+                      <For each={templates()}>
+                        {(t) => (
+                          <button
+                            onClick={async () => {
+                              await applyTemplate(t.id, props.cardId);
+                              await refetchComments();
+                            }}
+                            class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-medium hover:bg-indigo-100 transition"
+                          >
+                            {t.name}
+                          </button>
+                        )}
+                      </For>
+                    </div>
+                  </div>
+                </Show>
+
+                <Show when={comments() && comments()!.length > 0}>
+                  <div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Comments</h3>
+                    <ul class="space-y-2">
+                      <For each={comments() ?? []}>
+                        {(comment) => (
+                          <li class="rounded-lg bg-gray-50 border border-gray-100 p-3 text-sm">
+                            <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+                              <span>{comment.user ?? "You"}</span>
+                              {comment.postedToGitHub && <span class="text-emerald-600">GitHub</span>}
+                            </div>
+                            <p class="text-gray-700 whitespace-pre-line">{comment.body}</p>
                           </li>
                         )}
                       </For>

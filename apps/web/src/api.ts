@@ -137,3 +137,38 @@ export async function fetchVotes(id: string): Promise<{
   if (!res.ok) throw new Error("Failed to fetch votes");
   return res.json();
 }
+
+export async function fetchTemplates(repo?: string): Promise<{ id: string; name: string; body: string; repoFullName?: string }[]> {
+  const url = repo ? `${API_URL}/api/templates?repo=${encodeURIComponent(repo)}` : `${API_URL}/api/templates`;
+  const res = await fetch(url, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch templates");
+  return res.json();
+}
+
+export async function createTemplate(data: { name: string; body: string; repoFullName?: string }) {
+  const res = await fetch(`${API_URL}/api/templates`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to create template");
+  return res.json();
+}
+
+export async function applyTemplate(templateId: string, cardId: string) {
+  const res = await fetch(`${API_URL}/api/templates/${templateId}/comment`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ cardId }),
+  });
+  if (!res.ok) throw new Error("Failed to apply template");
+  return res.json();
+}
+
+export async function fetchComments(cardId: string): Promise<{ id: string; user: string; body: string; postedToGitHub: boolean; createdAt: string }[]> {
+  const res = await fetch(`${API_URL}/api/cards/${cardId}/comments`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch comments");
+  return res.json();
+}
