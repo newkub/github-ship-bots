@@ -24,6 +24,7 @@ export default {
         WEBHOOK_SECRET: env.GITHUB_WEBHOOK_SECRET,
         API_TOKEN: env.BOT_TOKEN ?? "",
         API_URL: env.PUBLIC_APP_URL,
+        OPENAI_API_KEY: env.OPENAI_API_KEY,
         ASSETS: env.ASSETS ?? { fetch: async () => new Response("not found", { status: 404 }) },
       };
       return botWorker.fetch(request, botEnv);

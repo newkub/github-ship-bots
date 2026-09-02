@@ -5,6 +5,7 @@ import {
 } from "../types.ts";
 import { parseCommand, renderCard } from "../domain/actions.ts";
 import { createCardFromWebhook, uploadEvidence } from "../lib/api.ts";
+import { generateReviewComment } from "../lib/review.ts";
 
 function isApprove(command: "approve" | "reject" | "ship"): boolean {
   return command === "approve";
@@ -56,6 +57,27 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
       issue_number: pull_request.number,
       body,
     });
+
+    try {
+      const { data: diff } = await octokit.rest.pulls.get({
+        owner: payload.repository.owner.login,
+        repo: payload.repository.name,
+        pull_number: pull_request.number,
+        mediaType: { format: "diff" },
+      });
+      if (typeof diff === "string") {
+        const reviewBody = await generateReviewComment(diff);
+        await octokit.rest.pulls.createReview({
+          owner: payload.repository.owner.login,
+          repo: payload.repository.name,
+          pull_number: pull_request.number,
+          event: "COMMENT",
+          body: reviewBody,
+        });
+      }
+    } catch {
+      // review not available in test / private repos
+    }
   });
 
   webhooks.on<IssueCommentPayload>("issue_comment.created", async ({ octokit, payload }) => {

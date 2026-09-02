@@ -8,6 +8,7 @@ export interface BotEnv {
   API_URL?: string;
   API_TOKEN?: string;
   DB?: D1Database;
+  OPENAI_API_KEY?: string;
 }
 
 export function createBotEnv(overrides?: Partial<BotEnv>): BotEnv {
