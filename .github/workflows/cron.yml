@@ -1,0 +1,17 @@
+name: Cron Ship Loop
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+
+jobs:
+  ship-loop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger ship loop
+        run: |
+          curl -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -s \
+            https://github-ship-bots.newkubise.workers.dev/orchestrate

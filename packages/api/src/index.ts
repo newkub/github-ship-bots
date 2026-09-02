@@ -25,7 +25,8 @@ app.use(
   })
 );
 
-app.get("/", (c) => c.json({ ok: true, service: "ship-feed-api" }));
+app.get("/", (c) => c.text(""));
+app.get("/health", (c) => c.json({ ok: true, service: "ship-feed-api" }));
 
 app.route("/auth", auth);
 app.route("/api/cards", cards);

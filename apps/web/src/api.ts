@@ -51,7 +51,7 @@ export function checkoutUrl() {
   return `${API_URL}/api/stripe/checkout`;
 }
 
-export async function submitInspector(data: { url: string; selector: string; prompt: string }) {
+export async function submitInspector(data: { url: string; selector: string; prompt: string; repoFullName: string }) {
   const res = await fetch(`${API_URL}/api/inspector`, {
     method: "POST",
     headers: { "content-type": "application/json" },

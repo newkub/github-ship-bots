@@ -111,6 +111,7 @@ export interface Env {
   EVIDENCE_BUCKET: R2Bucket;
   BASELINE_BUCKET: R2Bucket;
   SESSION_KV: KVNamespace;
+  ASSETS?: { fetch: (request: Request) => Promise<Response> };
   WORKOS_API_KEY: string;
   WORKOS_CLIENT_ID: string;
   WORKOS_COOKIE_PASSWORD: string;
@@ -125,6 +126,7 @@ export interface Env {
   VAPID_PUBLIC_KEY?: string;
   VAPID_PRIVATE_KEY?: string;
   VAPID_SUBJECT?: string;
+  CRON_SECRET?: string;
   AUTO_APPROVE_THRESHOLD?: string;
   AUTO_APPROVE_RISK?: string;
   SLACK_WEBHOOK_URL?: string;

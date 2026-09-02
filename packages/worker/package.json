@@ -1,0 +1,28 @@
+{
+  "name": "@ship-feed/worker",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "module": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "lint": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@ship-feed/api": "workspace:*",
+    "@ship-feed/bot": "workspace:*",
+    "@ship-feed/orchestrator": "workspace:*",
+    "@ship-feed/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "@types/bun": "^1.4.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.0.0"
+  }
+}
