@@ -5,10 +5,16 @@ export default function Inspector() {
   const [url, setUrl] = createSignal("");
   const [selector, setSelector] = createSignal("");
   const [prompt, setPrompt] = createSignal("");
+  const [repoFullName, setRepoFullName] = createSignal("");
   const [result, setResult] = createSignal<string | null>(null);
 
   const onSubmit = async () => {
-    const res = await submitInspector({ url: url(), selector: selector(), prompt: prompt() });
+    const res = await submitInspector({
+      url: url(),
+      selector: selector(),
+      prompt: prompt(),
+      repoFullName: repoFullName(),
+    });
     setResult(`Inspector queued: ${JSON.stringify(res)}`);
   };
 
@@ -45,6 +51,16 @@ export default function Inspector() {
               rows={4}
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
               placeholder="Make the headline more compelling and run CI."
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Repository</label>
+            <input
+              type="text"
+              value={repoFullName()}
+              onInput={(e) => setRepoFullName(e.currentTarget.value)}
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              placeholder="owner/repo"
             />
           </div>
           <button

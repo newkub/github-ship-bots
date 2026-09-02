@@ -168,7 +168,7 @@ function shouldAutoApprove(env: Env, card: ShipCard): boolean {
   return card.score >= threshold && allowedRisks.has(card.risk);
 }
 
-async function insertCard(
+export async function insertCard(
   env: Env,
   card: Omit<ShipCard, "id" | "score" | "createdAt" | "updatedAt" | "evidenceIds">
 ): Promise<ShipCard> {
