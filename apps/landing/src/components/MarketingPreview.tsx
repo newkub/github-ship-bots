@@ -1,8 +1,8 @@
 import { Send, Sparkles, ThumbsDown, ThumbsUp } from "lucide-solid";
 
-export default function MockApp() {
+export default function MarketingPreview() {
   return (
-    <div class="flex justify-center group">
+    <div class="flex flex-col items-center justify-center group">
       <div class="relative w-56 sm:w-64 shrink-0">
         <div class="absolute -inset-1 bg-gradient-to-b from-indigo-500/30 to-purple-500/30 rounded-[2.5rem] blur opacity-30 group-hover:opacity-50 transition duration-500" />
         <div class="relative rounded-[2.5rem] bg-zinc-950 border-4 border-zinc-800 p-2 shadow-2xl group-hover:border-zinc-700 transition duration-300">
@@ -30,9 +30,13 @@ export default function MockApp() {
                     type="text"
                     value="Add a dark mode toggle"
                     readOnly
-                    class="flex-1 bg-zinc-900 rounded-lg px-3 py-2 text-xs text-zinc-200 border border-zinc-800 focus:outline-none focus:border-indigo-500/50 transition"
+                    class="flex-1 bg-zinc-900 rounded-lg px-3 py-2 text-xs text-zinc-200 border border-zinc-800 focus:outline-none transition"
                   />
-                  <button class="h-8 w-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center shrink-0 hover:bg-indigo-600 active:scale-95 transition">
+                  <button
+                    disabled
+                    aria-disabled="true"
+                    class="h-8 w-8 rounded-lg bg-indigo-500/50 text-white flex items-center justify-center shrink-0 cursor-not-allowed"
+                  >
                     <Send size={14} />
                   </button>
                 </div>
@@ -62,11 +66,19 @@ export default function MockApp() {
                 <div class="flex-1" />
 
                 <div class="relative z-10 grid grid-cols-2 gap-3 mt-4">
-                  <button class="flex items-center justify-center gap-1.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-2 text-xs font-semibold hover:bg-rose-500/20 active:scale-95 transition">
+                  <button
+                    disabled
+                    aria-disabled="true"
+                    class="flex items-center justify-center gap-1.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 px-3 py-2 text-xs font-semibold cursor-not-allowed"
+                  >
                     <ThumbsDown size={14} />
                     Reject
                   </button>
-                  <button class="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-2 text-xs font-semibold hover:bg-emerald-500/20 active:scale-95 transition">
+                  <button
+                    disabled
+                    aria-disabled="true"
+                    class="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-2 text-xs font-semibold cursor-not-allowed"
+                  >
                     <ThumbsUp size={14} />
                     Approve
                   </button>
@@ -81,6 +93,7 @@ export default function MockApp() {
           <span>swipe</span>
         </div>
       </div>
+      <p class="mt-4 text-xs text-zinc-500">Marketing preview — not a live session</p>
     </div>
   );
 }

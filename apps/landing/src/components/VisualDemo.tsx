@@ -1,6 +1,6 @@
 import { ExternalLink, Rocket } from "lucide-solid";
 import GitHubCard from "./GitHubCard";
-import MockApp from "./MockApp";
+import MarketingPreview from "./MarketingPreview";
 import SectionHeader from "./SectionHeader";
 import { dashboardUrl, installUrl } from "../data";
 
@@ -81,7 +81,7 @@ export default function VisualDemo() {
               />
             </div>
             <div class="order-1 sm:order-2 flex justify-center">
-              <MockApp />
+              <MarketingPreview />
             </div>
           </div>
         </div>
