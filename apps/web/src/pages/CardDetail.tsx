@@ -23,7 +23,16 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
   return (
     <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4">
       <div class="w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
-        <Show when={card()} fallback={<div class="p-6 text-gray-500">Loading...</div>} keyed>
+        <Show when={card.loading}>
+          <div class="p-6 text-gray-500 flex items-center gap-2"><span class="animate-pulse">Loading...</span></div>
+        </Show>
+        <Show when={card.error}>
+          <div class="p-6 rounded-xl bg-rose-50 text-rose-700">
+            <div class="font-semibold">Failed to load card</div>
+            <div class="text-sm mt-1">{(card.error as Error).message}</div>
+          </div>
+        </Show>
+        <Show when={card()} fallback={<></>} keyed>
           {(c: ShipCard) => (
             <div>
               <div class="p-6 border-b border-gray-100 flex items-start justify-between">

@@ -1,30 +1,36 @@
-import { Hono } from "hono";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { getSession } from "../lib/session";
 import { now } from "../lib/db";
-import type { Env } from "@ship-feed/shared";
+import { withEnv } from "../lib/env";
 
-const learning = new Hono<{ Bindings: Env }>();
+const learning = withEnv(new Elysia({ prefix: "/api/learning" }));
 
-learning.get("/weights", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const repo = c.req.query("repo");
+learning.get("/weights", async ({ request, set, env, query }) => {
+  const session = await getSession({ request, set, env });
+  if (!session) {
+    set.status = 401;
+    return { error: "unauthorized" };
+  }
+  const repo = query.repo;
   const { results } = repo
-    ? await c.env.DB.prepare("SELECT * FROM learning_weights WHERE repo_full_name = ?").bind(repo).all()
-    : await c.env.DB.prepare("SELECT * FROM learning_weights").all();
-  return c.json(results);
+    ? await env.DB.prepare("SELECT * FROM learning_weights WHERE repo_full_name = ?").bind(repo).all()
+    : await env.DB.prepare("SELECT * FROM learning_weights").all();
+  return results;
 });
 
-learning.post("/weights", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const body = await c.req.json<{ repoFullName: string; feature: string; weight: number }>();
-  await c.env.DB.prepare(
+learning.post("/weights", async ({ request, set, env, body }) => {
+  const session = await getSession({ request, set, env });
+  if (!session) {
+    set.status = 401;
+    return { error: "unauthorized" };
+  }
+  await env.DB.prepare(
     "INSERT OR REPLACE INTO learning_weights (repo_full_name, feature, weight, updated_at) VALUES (?, ?, ?, ?)"
   )
     .bind(body.repoFullName, body.feature, body.weight, now())
     .run();
-  return c.json({ ok: true });
-});
+  return { ok: true };
+}, { body: z.object({ repoFullName: z.string(), feature: z.string(), weight: z.number() }) });
 
 export default learning;

@@ -1,6 +1,8 @@
-import { Hono } from "hono";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
+import { withEnv } from "../lib/env";
 import { updateLearningWeights } from "../lib/learning";
 import { autoScore, explainScore } from "../lib/score";
 import { resolveApprovalStatus } from "../lib/approval";
@@ -8,7 +10,29 @@ import { notifyCardStatus } from "../lib/notify";
 import { createContext, onApprove, onReject } from "@ship-feed/orchestrator";
 import type { Env, ShipCard, SwipeEvent } from "@ship-feed/shared";
 
-const cards = new Hono<{ Bindings: Env }>();
+const cards = withEnv(new Elysia({ prefix: "/api/cards" }));
+
+const impactSchema = z.enum(["high", "medium", "low"]);
+const riskSchema = z.enum(["high", "medium", "low"]);
+const effectSchema = z.enum(["high", "medium", "low"]);
+const phaseSchema = z.enum(["mvp", "v2", "done"]);
+const kindSchema = z.enum(["idea", "work", "merge", "release"]);
+const statusSchema = z.enum(["pending", "approved", "rejected", "shipped"]);
+
+const directionSchema = z.enum(["approve", "reject"]);
+
+const cardInputSchema = z.object({
+  kind: kindSchema,
+  title: z.string(),
+  description: z.string(),
+  repoFullName: z.string(),
+  issueNumber: z.number().optional(),
+  pullNumber: z.number().optional(),
+  impact: impactSchema.default("medium"),
+  risk: riskSchema.default("medium"),
+  effect: effectSchema.default("medium"),
+  phase: phaseSchema.default("mvp"),
+});
 
 function rowToCard(row: Record<string, unknown>): ShipCard {
   return {
@@ -37,23 +61,48 @@ async function fetchCardById(db: Env["DB"], id: string): Promise<ShipCard | unde
   return rowToCard(row);
 }
 
-cards.get("/:id", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const id = c.req.param("id");
-  const card = await fetchCardById(c.env.DB, id);
-  if (!card) return c.json({ error: "card not found" }, 404);
-  return c.json(card);
-});
+function unauthorized() {
+  return { error: "unauthorized" };
+}
 
-cards.get("/:id/explain", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const id = c.req.param("id");
-  const card = await fetchCardById(c.env.DB, id);
-  if (!card) return c.json({ error: "card not found" }, 404);
+function notFound() {
+  return { error: "card not found" };
+}
 
-  const explanation = await explainScore(c.env.DB, card.repoFullName, {
+function ensureAuth(
+  set: { status?: number | string },
+  user: Awaited<ReturnType<typeof getSession>>
+): user is NonNullable<typeof user> {
+  if (!user) {
+    set.status = 401;
+    return false;
+  }
+  return true;
+}
+
+cards.get("/:id", async ({ request, set, env, params }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const id = params.id;
+  const card = await fetchCardById(env.DB, id);
+  if (!card) {
+    set.status = 404;
+    return notFound();
+  }
+  return card;
+}, { params: z.object({ id: z.string() }) });
+
+cards.get("/:id/explain", async ({ request, set, env, params }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const id = params.id;
+  const card = await fetchCardById(env.DB, id);
+  if (!card) {
+    set.status = 404;
+    return notFound();
+  }
+
+  const explanation = await explainScore(env.DB, card.repoFullName, {
     kind: card.kind,
     impact: card.impact,
     risk: card.risk,
@@ -61,171 +110,184 @@ cards.get("/:id/explain", async (c) => {
     phase: card.phase,
   });
 
-  return c.json(explanation);
-});
+  return explanation;
+}, { params: z.object({ id: z.string() }) });
 
-cards.get("/:id/votes", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const id = c.req.param("id");
-  const card = await fetchCardById(c.env.DB, id);
-  if (!card) return c.json({ error: "card not found" }, 404);
+cards.get("/:id/votes", async ({ request, set, env, params }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const id = params.id;
+  const card = await fetchCardById(env.DB, id);
+  if (!card) {
+    set.status = 404;
+    return notFound();
+  }
 
-  const rule = await c.env.DB
+  const rule = await env.DB
     .prepare("SELECT min_approvers, min_rejectors FROM approval_rules WHERE repo_full_name = ?")
     .bind(card.repoFullName)
     .first<{ min_approvers: number; min_rejectors: number }>();
 
-  const { results } = await c.env.DB
+  const { results } = await env.DB
     .prepare("SELECT s.direction, u.github_login as user FROM swipes s LEFT JOIN users u ON s.user_id = u.id WHERE s.card_id = ? ORDER BY s.created_at DESC")
     .bind(id)
     .all<{ direction: string; user: string }>();
 
-  return c.json({
+  return {
     minApprovers: rule?.min_approvers ?? 1,
     minRejectors: rule?.min_rejectors ?? 1,
     votes: results ?? [],
-  });
-});
+  };
+}, { params: z.object({ id: z.string() }) });
 
-cards.get("/:id/comments", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const id = c.req.param("id");
-  const { results } = await c.env.DB
+cards.get("/:id/comments", async ({ request, set, env, params }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const id = params.id;
+  const { results } = await env.DB
     .prepare("SELECT c.*, u.github_login as user FROM card_comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.card_id = ? ORDER BY c.created_at DESC")
     .bind(id)
     .all<Record<string, unknown>>();
-  return c.json((results ?? []).map((row) => ({
+  return (results ?? []).map((row) => ({
     id: row.id,
     cardId: row.card_id,
     user: row.user,
     body: row.body,
     postedToGitHub: Boolean(row.posted_to_github),
     createdAt: row.created_at,
-  })));
-});
+  }));
+}, { params: z.object({ id: z.string() }) });
 
-cards.get("/:id/evidence", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const id = c.req.param("id");
-  const card = await fetchCardById(c.env.DB, id);
-  if (!card) return c.json({ error: "card not found" }, 404);
-  const { results } = await c.env.DB.prepare("SELECT * FROM evidence WHERE card_id = ? ORDER BY created_at DESC")
+cards.get("/:id/evidence", async ({ request, set, env, params }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const id = params.id;
+  const card = await fetchCardById(env.DB, id);
+  if (!card) {
+    set.status = 404;
+    return notFound();
+  }
+  const { results } = await env.DB.prepare("SELECT * FROM evidence WHERE card_id = ? ORDER BY created_at DESC")
     .bind(id)
     .all<Record<string, unknown>>();
-  return c.json(results ?? []);
-});
+  return results ?? [];
+}, { params: z.object({ id: z.string() }) });
 
-cards.get("/", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const { results } = await c.env.DB.prepare(
+cards.get("/", async ({ request, set, env }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const { results } = await env.DB.prepare(
     "SELECT * FROM cards WHERE status = 'pending' ORDER BY score DESC LIMIT 100"
   ).all<Record<string, unknown>>();
-  return c.json(results.map(rowToCard));
+  return (results ?? []).map(rowToCard);
 });
 
-cards.get("/queue", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const { results } = await c.env.DB.prepare(
+cards.get("/queue", async ({ request, set, env }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const { results } = await env.DB.prepare(
     "SELECT * FROM cards WHERE status IN ('pending', 'approved', 'rejected') ORDER BY updated_at DESC LIMIT 20"
   ).all<Record<string, unknown>>();
-  return c.json(results.map(rowToCard));
+  return (results ?? []).map(rowToCard);
 });
 
-cards.get("/nudges", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const { results } = await c.env.DB.prepare(
+cards.get("/nudges", async ({ request, set, env }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const { results } = await env.DB.prepare(
     "SELECT * FROM cards WHERE status = 'pending' ORDER BY score DESC LIMIT 20"
   ).all<Record<string, unknown>>();
-  return c.json(results.map(rowToCard));
+  return (results ?? []).map(rowToCard);
 });
 
-cards.post("/:id/swipe", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const body = await c.req.json<{ direction: SwipeEvent["direction"] }>();
-  const id = c.req.param("id");
+cards.post("/:id/swipe", async ({ request, set, env, params, body }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const id = params.id;
 
-  const card = await fetchCardById(c.env.DB, id);
-  if (!card) return c.json({ error: "card not found" }, 404);
+  const card = await fetchCardById(env.DB, id);
+  if (!card) {
+    set.status = 404;
+    return notFound();
+  }
 
-  await updateLearningWeights(c.env.DB, card, body.direction);
+  await updateLearningWeights(env.DB, card, body.direction);
 
   const swipeId = generateId();
-  await c.env.DB.prepare("INSERT INTO swipes (id, card_id, user_id, direction, created_at) VALUES (?, ?, ?, ?, ?)")
+  await env.DB.prepare("INSERT INTO swipes (id, card_id, user_id, direction, created_at) VALUES (?, ?, ?, ?, ?)")
     .bind(swipeId, id, session.id, body.direction, now())
     .run();
 
-  const status = await resolveApprovalStatus(c.env.DB, card);
+  const status = await resolveApprovalStatus(env.DB, card);
   if (status !== card.status) {
-    await c.env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
+    await env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
       .bind(status, now(), id)
       .run();
   }
 
-  await notifyCardStatus(c.env, { ...card, status }, body.direction === "approve" ? "approved" : "rejected");
+  await notifyCardStatus(env, { ...card, status }, body.direction === "approve" ? "approved" : "rejected");
 
-  return c.json({ ok: true, status });
-});
+  return { ok: true, status };
+}, { params: z.object({ id: z.string() }), body: z.object({ direction: directionSchema }) });
 
-cards.post("/:id/ship", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const id = c.req.param("id");
-  const card = await fetchCardById(c.env.DB, id);
-  if (!card) return c.json({ error: "card not found" }, 404);
+cards.post("/:id/ship", async ({ request, set, env, params }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const id = params.id;
+  const card = await fetchCardById(env.DB, id);
+  if (!card) {
+    set.status = 404;
+    return notFound();
+  }
 
-  const ctx = createContext(c.env);
+  const ctx = createContext(env);
   const result = await onApprove(ctx, card);
-  await updateLearningWeights(c.env.DB, card, "approve");
-  await notifyCardStatus(c.env, { ...card, status: "shipped" }, "shipped");
-  return c.json(result);
-});
+  await updateLearningWeights(env.DB, card, "approve");
+  await notifyCardStatus(env, { ...card, status: "shipped" }, "shipped");
+  return result;
+}, { params: z.object({ id: z.string() }) });
 
-cards.post("/:id/reject", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const id = c.req.param("id");
-  const card = await fetchCardById(c.env.DB, id);
-  if (!card) return c.json({ error: "card not found" }, 404);
+cards.post("/:id/reject", async ({ request, set, env, params }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const id = params.id;
+  const card = await fetchCardById(env.DB, id);
+  if (!card) {
+    set.status = 404;
+    return notFound();
+  }
 
-  const ctx = createContext(c.env);
+  const ctx = createContext(env);
   const result = await onReject(ctx, card);
-  await updateLearningWeights(c.env.DB, card, "reject");
-  await notifyCardStatus(c.env, { ...card, status: "rejected" }, "rejected");
-  return c.json(result);
-});
+  await updateLearningWeights(env.DB, card, "reject");
+  await notifyCardStatus(env, { ...card, status: "rejected" }, "rejected");
+  return result;
+}, { params: z.object({ id: z.string() }) });
 
-cards.post("/:id/status", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const body = await c.req.json<{ status: ShipCard["status"] }>();
-  const id = c.req.param("id");
+cards.post("/:id/status", async ({ request, set, env, params, body }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const id = params.id;
 
   if (body.status === "approved" || body.status === "rejected") {
-    const card = await fetchCardById(c.env.DB, id);
+    const card = await fetchCardById(env.DB, id);
     if (card) {
       const direction = body.status === "approved" ? "approve" : "reject";
-      await updateLearningWeights(c.env.DB, card, direction);
+      await updateLearningWeights(env.DB, card, direction);
     }
   }
 
-  await c.env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
+  await env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
     .bind(body.status, now(), id)
     .run();
 
-  const updated = await fetchCardById(c.env.DB, id);
+  const updated = await fetchCardById(env.DB, id);
   if (updated) {
-    await notifyCardStatus(c.env, updated, body.status as "created" | "approved" | "rejected" | "shipped");
+    await notifyCardStatus(env, updated, body.status as "created" | "approved" | "rejected" | "shipped");
   }
 
-  return c.json({ ok: true });
-});
+  return { ok: true };
+}, { params: z.object({ id: z.string() }), body: z.object({ status: statusSchema }) });
 
 function parseAutoApproveThreshold(env: Env): number {
   const raw = env.AUTO_APPROVE_THRESHOLD;
@@ -297,25 +359,14 @@ export async function insertCard(
   return inserted;
 }
 
-cards.post("/webhook", async (c) => {
-  const token = c.req.header("x-bot-token");
-  if (!c.env.BOT_TOKEN || token !== c.env.BOT_TOKEN) {
-    return c.json({ error: "unauthorized" }, 401);
+cards.post("/webhook", async ({ request, set, env, body }) => {
+  const token = request.headers.get("x-bot-token");
+  if (!env.BOT_TOKEN || token !== env.BOT_TOKEN) {
+    set.status = 401;
+    return { error: "unauthorized" };
   }
-  const body = await c.req.json<{
-    kind: ShipCard["kind"];
-    title: string;
-    description: string;
-    repoFullName: string;
-    issueNumber?: number;
-    pullNumber?: number;
-    impact?: ShipCard["impact"];
-    risk?: ShipCard["risk"];
-    effect?: ShipCard["effect"];
-    phase?: ShipCard["phase"];
-  }>();
 
-  const card = await insertCard(c.env, {
+  const card = await insertCard(env, {
     kind: body.kind,
     title: body.title,
     description: body.description,
@@ -323,31 +374,19 @@ cards.post("/webhook", async (c) => {
     repoFullName: body.repoFullName,
     issueNumber: body.issueNumber,
     pullNumber: body.pullNumber,
-    impact: body.impact ?? "medium",
-    risk: body.risk ?? "medium",
-    effect: body.effect ?? "medium",
-    phase: body.phase ?? "mvp",
+    impact: body.impact,
+    risk: body.risk,
+    effect: body.effect,
+    phase: body.phase,
   });
 
-  return c.json({ ok: true, card });
-});
+  return { ok: true, card };
+}, { body: cardInputSchema });
 
-cards.post("/", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const body = await c.req.json<{
-    kind: ShipCard["kind"];
-    title: string;
-    description: string;
-    repoFullName: string;
-    issueNumber?: number;
-    pullNumber?: number;
-    impact?: ShipCard["impact"];
-    risk?: ShipCard["risk"];
-    effect?: ShipCard["effect"];
-    phase?: ShipCard["phase"];
-  }>();
-  const card = await insertCard(c.env, {
+cards.post("/", async ({ request, set, env, body }) => {
+  const session = await getSession({ request, set, env });
+  if (!ensureAuth(set, session)) return unauthorized();
+  const card = await insertCard(env, {
     kind: body.kind,
     title: body.title,
     description: body.description,
@@ -355,12 +394,12 @@ cards.post("/", async (c) => {
     repoFullName: body.repoFullName,
     issueNumber: body.issueNumber,
     pullNumber: body.pullNumber,
-    impact: body.impact ?? "medium",
-    risk: body.risk ?? "medium",
-    effect: body.effect ?? "medium",
-    phase: body.phase ?? "mvp",
+    impact: body.impact,
+    risk: body.risk,
+    effect: body.effect,
+    phase: body.phase,
   });
-  return c.json({ ok: true, card });
-});
+  return { ok: true, card };
+}, { body: cardInputSchema });
 
 export default cards;

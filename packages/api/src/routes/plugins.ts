@@ -1,15 +1,18 @@
-import { Hono } from "hono";
+import { Elysia } from "elysia";
 import { getSession } from "../lib/session";
 import { now } from "../lib/db";
-import type { Env } from "@ship-feed/shared";
+import { withEnv } from "../lib/env";
 
-const plugins = new Hono<{ Bindings: Env }>();
+const plugins = withEnv(new Elysia({ prefix: "/api/plugins" }));
 
-plugins.get("/", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
+plugins.get("/", async ({ request, set, env }) => {
+  const session = await getSession({ request, set, env });
+  if (!session) {
+    set.status = 401;
+    return { error: "unauthorized" };
+  }
 
-  const { results } = await c.env.DB.prepare("SELECT * FROM plugins ORDER BY installs DESC").all<{
+  const { results } = await env.DB.prepare("SELECT * FROM plugins ORDER BY installs DESC").all<{
     id: string;
     name: string;
     description: string;
@@ -18,44 +21,53 @@ plugins.get("/", async (c) => {
   }>();
 
   const list = results ?? [];
-  if (list.length === 0) return c.json([]);
+  if (list.length === 0) return [];
 
-  const { results: installed } = await c.env.DB.prepare(
+  const { results: installed } = await env.DB.prepare(
     "SELECT plugin_id FROM user_plugins WHERE user_id = ?"
   )
     .bind(session.id)
     .all<{ plugin_id: string }>();
 
   const installedIds = new Set((installed ?? []).map((r) => r.plugin_id));
-  return c.json(list.map((p) => ({ ...p, installed: installedIds.has(p.id) })));
+  return list.map((p) => ({ ...p, installed: installedIds.has(p.id) }));
 });
 
-plugins.post("/:id/install", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const id = c.req.param("id");
+plugins.post("/:id/install", async ({ request, set, env, params }) => {
+  const session = await getSession({ request, set, env });
+  if (!session) {
+    set.status = 401;
+    return { error: "unauthorized" };
+  }
+  const id = params.id;
 
-  const existing = await c.env.DB.prepare("SELECT id FROM plugins WHERE id = ?").bind(id).first();
-  if (!existing) return c.json({ error: "plugin not found" }, 404);
+  const existing = await env.DB.prepare("SELECT id FROM plugins WHERE id = ?").bind(id).first();
+  if (!existing) {
+    set.status = 404;
+    return { error: "plugin not found" };
+  }
 
-  await c.env.DB.prepare("INSERT OR IGNORE INTO user_plugins (user_id, plugin_id, created_at) VALUES (?, ?, ?)")
+  await env.DB.prepare("INSERT OR IGNORE INTO user_plugins (user_id, plugin_id, created_at) VALUES (?, ?, ?)")
     .bind(session.id, id, now())
     .run();
 
-  await c.env.DB.prepare("UPDATE plugins SET installs = installs + 1 WHERE id = ?").bind(id).run();
+  await env.DB.prepare("UPDATE plugins SET installs = installs + 1 WHERE id = ?").bind(id).run();
 
-  return c.json({ ok: true });
+  return { ok: true };
 });
 
-plugins.post("/:id/uninstall", async (c) => {
-  const session = await getSession(c);
-  if (!session) return c.json({ error: "unauthorized" }, 401);
-  const id = c.req.param("id");
+plugins.post("/:id/uninstall", async ({ request, set, env, params }) => {
+  const session = await getSession({ request, set, env });
+  if (!session) {
+    set.status = 401;
+    return { error: "unauthorized" };
+  }
+  const id = params.id;
 
-  await c.env.DB.prepare("DELETE FROM user_plugins WHERE user_id = ? AND plugin_id = ?").bind(session.id, id).run();
-  await c.env.DB.prepare("UPDATE plugins SET installs = MAX(0, installs - 1) WHERE id = ?").bind(id).run();
+  await env.DB.prepare("DELETE FROM user_plugins WHERE user_id = ? AND plugin_id = ?").bind(session.id, id).run();
+  await env.DB.prepare("UPDATE plugins SET installs = MAX(0, installs - 1) WHERE id = ?").bind(id).run();
 
-  return c.json({ ok: true });
+  return { ok: true };
 });
 
 export default plugins;
