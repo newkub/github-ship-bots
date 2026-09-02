@@ -1,0 +1,13 @@
+## Summary
+- Remove Hono from `packages/api` and migrate all routes to Elysia with Zod validation.
+- Complete `packages/api/src/db/schema.ts` to match all migrations.
+- Update `.env.example` files for `packages/api`, `packages/bot`, and `packages/worker`.
+- Fix dashboard pages (`Billing`, `Settings`, `Inspector`, `Marketplace`, `CardDetail`) to use real data, loading, error, and empty states.
+- Run `bun run lint`, `bun run test`, and `bun run build` — all pass.
+
+## Test plan
+- [x] `bun run lint`
+- [x] `bun run test`
+- [x] `bun run build`
+
+Generated with [Devin](https://devin.ai)
