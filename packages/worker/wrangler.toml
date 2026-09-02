@@ -1,7 +1,7 @@
 name = "github-ship-bots"
 main = "src/index.ts"
 account_id = "384988241a425d49c5980f2b87b842c9"
-compatibility_date = "2024-08-01"
+compatibility_date = "2026-09-02"
 compatibility_flags = ["nodejs_compat"]
 
 [[d1_databases]]
