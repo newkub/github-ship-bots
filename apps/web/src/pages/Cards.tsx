@@ -106,7 +106,7 @@ export default function Cards() {
         </div>
       </div>
 
-      <StatusPanel cards={query.data ?? []} />
+      <StatusPanel />
 
       <Show when={!query.isLoading} fallback={<p class="text-gray-500">Loading cards...</p>}>
         <Show

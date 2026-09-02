@@ -1,29 +1,40 @@
-import { createSignal, For, Show } from "solid-js";
-import { ThumbsUp, ThumbsDown, SkipForward, Inbox, Bell } from "lucide-solid";
+import { createResource, createSignal, For, Show } from "solid-js";
+import { ThumbsUp, ThumbsDown, SkipForward, Inbox, Bell, Loader } from "lucide-solid";
 import BottomNav from "../components/BottomNav";
 import EmptyState from "../components/EmptyState";
 import type { Component } from "solid-js";
+import type { ShipCard } from "@ship-feed/shared";
+import { fetchNudges, swipeCard } from "../api";
 
 type NudgeAction = "approve" | "reject" | "skip";
 
-type Nudge = {
+interface Nudge {
   id: string;
   title: string;
   repo: string;
   action: NudgeAction;
-};
+}
 
-const mockNudges: Nudge[] = [
-  { id: "1", title: "refactor auth flow", repo: "newkub/github-ship-bots", action: "approve" },
-  { id: "2", title: "add dark mode", repo: "newkub/devin-skills", action: "reject" },
-];
+function cardToNudge(card: ShipCard): Nudge {
+  return {
+    id: card.id,
+    title: card.title,
+    repo: card.repoFullName,
+    action: card.score >= 8.5 && card.risk === "low" ? "approve" : "reject",
+  };
+}
 
 export default function Alerts() {
-  const [nudges, setNudges] = createSignal<Nudge[]>(mockNudges);
+  const [nudges, { refetch }] = createResource(async () => {
+    const cards = await fetchNudges();
+    return cards.map(cardToNudge);
+  });
 
-  const handleAction = (id: string, action: NudgeAction) => {
-    console.log("nudge action", id, action);
-    setNudges((list) => list.filter((n) => n.id !== id));
+  const handleAction = async (id: string, action: NudgeAction) => {
+    if (action === "approve" || action === "reject") {
+      await swipeCard({ cardId: id, direction: action }).catch(() => {});
+    }
+    refetch();
   };
 
   return (
@@ -37,16 +48,32 @@ export default function Alerts() {
           <p class="text-sm text-muted">Quick actions for pending cards</p>
         </div>
         <span class="px-2.5 py-1 rounded-full bg-elevated text-xs font-semibold text-muted border border-divider">
-          {nudges().length} pending
+          {nudges()?.length ?? 0} pending
         </span>
       </header>
 
       <div class="flex-1 overflow-auto p-4 no-scrollbar">
-        <For each={nudges()}>
+        <Show when={nudges.loading}>
+          <div class="h-full flex items-center justify-center text-muted">
+            <Loader size={24} class="animate-spin mr-2" />
+            Loading nudges...
+          </div>
+        </Show>
+
+        <Show when={nudges.error}>
+          <EmptyState
+            class="h-full"
+            icon={Inbox}
+            title="Could not load nudges"
+            subtitle="Check your connection and try again."
+          />
+        </Show>
+
+        <For each={nudges() ?? []}>
           {(nudge) => <NudgeCard nudge={nudge} onAction={(action) => handleAction(nudge.id, action)} />}
         </For>
 
-        <Show when={nudges().length === 0}>
+        <Show when={!nudges.loading && !nudges.error && (nudges() ?? []).length === 0}>
           <EmptyState
             class="h-full"
             icon={Inbox}
@@ -56,7 +83,7 @@ export default function Alerts() {
         </Show>
       </div>
 
-      <BottomNav active="alerts" nudgeCount={nudges().length} />
+      <BottomNav active="alerts" nudgeCount={nudges()?.length ?? 0} />
     </div>
   );
 }
@@ -150,14 +177,14 @@ function NudgeCard(props: NudgeCardProps) {
     <div class="relative mb-4 rounded-2xl overflow-hidden" style={{ "touch-action": "pan-y" }}>
       <div class="absolute inset-0 flex">
         <div
-          class="flex-1 bg-emerald-500/90 flex items-center pl-5 text-white font-bold tracking-wider"
+          class="flex-1 bg-success/90 flex items-center pl-5 text-white font-bold tracking-wider"
           style={{ opacity: deltaX() > 0 ? opacity() : 0 }}
         >
           <ThumbsUp size={20} class="mr-2" />
           APPROVE
         </div>
         <div
-          class="flex-1 bg-rose-500/90 flex items-center justify-end pr-5 text-white font-bold tracking-wider"
+          class="flex-1 bg-danger/90 flex items-center justify-end pr-5 text-white font-bold tracking-wider"
           style={{ opacity: deltaX() < 0 ? opacity() : 0 }}
         >
           REJECT

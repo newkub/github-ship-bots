@@ -61,7 +61,7 @@ auth.get("/callback", async (c) => {
   }
 
   await setSession(c, user as User);
-  return c.redirect(`${c.env.PUBLIC_APP_URL}/`);
+  return c.redirect(`${c.env.PUBLIC_APP_URL}/dashboard/`);
 });
 
 auth.get("/session", async (c) => {

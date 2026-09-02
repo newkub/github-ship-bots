@@ -8,6 +8,18 @@ export async function fetchCards(): Promise<ShipCard[]> {
   return res.json();
 }
 
+export async function fetchQueue(): Promise<ShipCard[]> {
+  const res = await fetch(`${API_URL}/api/cards/queue`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch queue");
+  return res.json();
+}
+
+export async function fetchNudges(): Promise<ShipCard[]> {
+  const res = await fetch(`${API_URL}/api/cards/nudges`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch nudges");
+  return res.json();
+}
+
 export async function fetchCard(id: string): Promise<ShipCard> {
   const res = await fetch(`${API_URL}/api/cards/${id}`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch card");

@@ -9,6 +9,12 @@ export async function fetchCards(): Promise<ShipCard[]> {
   return res.json();
 }
 
+export async function fetchNudges(): Promise<ShipCard[]> {
+  const res = await fetch(`${API_URL}/api/cards/nudges`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch nudges");
+  return res.json();
+}
+
 export async function swipeCard({
   cardId,
   direction,

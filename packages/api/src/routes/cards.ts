@@ -35,35 +35,6 @@ async function fetchCardById(db: Env["DB"], id: string): Promise<ShipCard | unde
   return rowToCard(row);
 }
 
-async function ensureDemoCard(db: Env["DB"]) {
-  const existing = await db.prepare("SELECT id FROM cards LIMIT 1").first();
-  if (existing) return;
-  const id = generateId();
-  await db.prepare(
-    `INSERT INTO cards (id, kind, title, description, status, repo_full_name, issue_number, pull_number, impact, risk, effect, phase, score, evidence_ids, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  )
-    .bind(
-      id,
-      "idea",
-      "Add mobile PWA swipe cards",
-      "Build a TikTok-like mobile interface for approving and rejecting ship-feed cards.",
-      "pending",
-      "newkub/github-ship-bots",
-      1,
-      null,
-      "high",
-      "medium",
-      "high",
-      "mvp",
-      10,
-      "[]",
-      now(),
-      now()
-    )
-    .run();
-}
-
 cards.get("/:id", async (c) => {
   const session = await getSession(c);
   if (!session) return c.json({ error: "unauthorized" }, 401);
@@ -88,9 +59,26 @@ cards.get("/:id/evidence", async (c) => {
 cards.get("/", async (c) => {
   const session = await getSession(c);
   if (!session) return c.json({ error: "unauthorized" }, 401);
-  await ensureDemoCard(c.env.DB);
   const { results } = await c.env.DB.prepare(
     "SELECT * FROM cards WHERE status = 'pending' ORDER BY score DESC LIMIT 100"
+  ).all<Record<string, unknown>>();
+  return c.json(results.map(rowToCard));
+});
+
+cards.get("/queue", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const { results } = await c.env.DB.prepare(
+    "SELECT * FROM cards WHERE status IN ('pending', 'approved', 'rejected') ORDER BY updated_at DESC LIMIT 20"
+  ).all<Record<string, unknown>>();
+  return c.json(results.map(rowToCard));
+});
+
+cards.get("/nudges", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const { results } = await c.env.DB.prepare(
+    "SELECT * FROM cards WHERE status = 'pending' ORDER BY score DESC LIMIT 20"
   ).all<Record<string, unknown>>();
   return c.json(results.map(rowToCard));
 });
