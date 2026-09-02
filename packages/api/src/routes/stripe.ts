@@ -10,7 +10,7 @@ stripe.post("/checkout", async (c) => {
   const session = await getSession(c);
   if (!session) return c.json({ error: "unauthorized" }, 401);
 
-  const client = new Stripe(c.env.STRIPE_SECRET_KEY, { apiVersion: "2025-02-24.acacia" });
+  const client = new Stripe(c.env.STRIPE_SECRET_KEY, { apiVersion: "2026-08-26.dahlia" });
   const url = await client.checkout.sessions.create({
     customer_email: session.email,
     line_items: [{ price: c.env.STRIPE_PRICE_PRO, quantity: 1 }],
@@ -26,7 +26,7 @@ stripe.post("/webhook", async (c) => {
   const sig = c.req.header("stripe-signature");
   if (!sig) return c.text("Missing signature", 400);
 
-  const client = new Stripe(c.env.STRIPE_SECRET_KEY, { apiVersion: "2025-02-24.acacia" });
+  const client = new Stripe(c.env.STRIPE_SECRET_KEY, { apiVersion: "2026-08-26.dahlia" });
   const body = await c.req.text();
   let event;
   try {
@@ -44,11 +44,12 @@ stripe.post("/webhook", async (c) => {
     const user = await c.env.DB.prepare("SELECT * FROM users WHERE email = ?").bind(session.customer_email).first<{ id: string }>();
     if (!user) return c.text("User not found", 404);
 
+    const currentPeriodEnd = sub.items.data[0]?.current_period_end;
     const id = generateId();
     await c.env.DB.prepare(
       "INSERT INTO subscriptions (id, user_id, stripe_subscription_id, plan, status, current_period_end) VALUES (?, ?, ?, ?, ?, ?)"
     )
-      .bind(id, user.id, subscriptionId, "pro", sub.status, new Date(sub.current_period_end * 1000).toISOString())
+      .bind(id, user.id, subscriptionId, "pro", sub.status, currentPeriodEnd ? new Date(currentPeriodEnd * 1000).toISOString() : null)
       .run();
 
     await c.env.DB.prepare("UPDATE users SET plan = ?, stripe_customer_id = ? WHERE id = ?")

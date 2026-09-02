@@ -1,5 +1,5 @@
 import { onMount } from "solid-js";
-import anime from "animejs";
+import { animate } from "animejs";
 
 const defaults = {
   opacity: [0, 1],
@@ -17,8 +17,7 @@ export function useScrollReveal(selector: string, stagger = 60) {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            anime({
-              targets: [entry.target],
+            animate([entry.target] as unknown as HTMLElement[], {
               ...defaults,
               delay: stagger,
             });

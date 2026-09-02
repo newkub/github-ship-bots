@@ -16,9 +16,9 @@
     "deploy": "wrangler deploy"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240925.0",
+    "@cloudflare/workers-types": "^5.20260902.1",
     "@types/bun": "^1.4.0",
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.128.0"
   },
   "peerDependencies": {
     "typescript": "^5.7.2"
@@ -27,7 +27,7 @@
     "@octokit/app": "^16.1.4",
     "@octokit/rest": "^22.0.1",
     "@octokit/webhooks": "^14.2.0",
-    "probot": "^14.3.2",
-    "@ship-feed/shared": "workspace:*"
+    "@ship-feed/shared": "workspace:*",
+    "probot": "^14.3.2"
   }
 }

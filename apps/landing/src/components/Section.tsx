@@ -1,5 +1,5 @@
 import { onMount, type JSX } from "solid-js";
-import anime from "animejs";
+import { animate } from "animejs";
 
 export default function Section(props: {
   id: string;
@@ -23,13 +23,12 @@ export default function Section(props: {
       (entries) => {
         const [entry] = entries;
         if (entry.isIntersecting) {
-          anime({
-            targets: children,
+          animate(children as unknown as HTMLElement[], {
             opacity: [0, 1],
             translateY: [24, 0],
             easing: "easeOutExpo",
             duration: 900,
-            delay: anime.stagger(80),
+            delay: 80,
           });
           observer.disconnect();
         }
