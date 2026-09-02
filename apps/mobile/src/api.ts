@@ -12,30 +12,34 @@ export async function fetchCards(): Promise<ShipCard[]> {
 export async function swipeCard({
   cardId,
   direction,
+  comment,
 }: {
   cardId: string;
   direction: SwipeEvent["direction"];
+  comment?: string;
 }): Promise<{ ok: true; queued: true } | { ok: true; status: string }> {
   if (!isOnline()) {
-    queueSwipe(cardId, direction);
+    queueSwipe(cardId, direction, comment);
     return { ok: true, queued: true };
   }
 
-  return syncSwipe({ cardId, direction });
+  return syncSwipe({ cardId, direction, comment });
 }
 
 export async function syncSwipe({
   cardId,
   direction,
+  comment,
 }: {
   cardId: string;
   direction: SwipeEvent["direction"];
+  comment?: string;
 }): Promise<{ ok: true; status: string }> {
   const res = await fetch(`${API_URL}/api/cards/${cardId}/swipe`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ direction }),
+    body: JSON.stringify({ direction, comment }),
   });
   if (!res.ok) throw new Error("Failed to swipe card");
   return res.json();

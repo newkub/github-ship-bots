@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import { ThumbsUp, ThumbsDown, ChevronUp, ChevronDown, Rocket, Briefcase, GitMerge, Package } from "lucide-solid";
+import { ThumbsUp, ThumbsDown, ChevronUp, ChevronDown, Rocket, Briefcase, GitMerge, Package, MessageSquarePlus, FileImage } from "lucide-solid";
 import type { ShipCard } from "@ship-feed/shared";
 
 interface CardProps {
@@ -7,8 +7,10 @@ interface CardProps {
   active: boolean;
   hidden: boolean;
   expanded: boolean;
+  prompt?: string;
   onToggleExpand: () => void;
   onSwipe: (direction: "approve" | "reject") => void;
+  onAddPrompt: () => void;
 }
 
 const kindIcons = {
@@ -177,11 +179,28 @@ export default function Card(props: CardProps) {
             {props.card.pullNumber && <span class="bg-white/10 px-2 py-1 rounded">PR #{props.card.pullNumber}</span>}
           </div>
 
-          <div class="grid grid-cols-3 gap-2 text-center text-xs mb-6">
+          <div class="grid grid-cols-3 gap-2 text-center text-xs mb-4">
             <Metric label="impact" value={props.card.impact} />
             <Metric label="risk" value={props.card.risk} />
             <Metric label="effect" value={props.card.effect} />
           </div>
+
+          <Show when={props.card.evidenceIds.length > 0}>
+            <div class="flex items-center gap-2 mb-4">
+              <span class="flex items-center gap-1.5 text-xs text-white/80 bg-white/10 px-2 py-1 rounded">
+                <FileImage size={12} />
+                {props.card.evidenceIds.length} evidence
+              </span>
+              <span class="text-xs text-white/60">tap to expand for preview</span>
+            </div>
+          </Show>
+
+          <Show when={props.prompt}>
+            <div class="mb-4 rounded-xl bg-white/10 border border-white/20 p-3">
+              <div class="text-[10px] uppercase tracking-wider text-white/60 mb-1">Attached prompt</div>
+              <p class="text-sm text-white">{props.prompt}</p>
+            </div>
+          </Show>
 
           <div class="flex justify-between items-center">
             <button
@@ -192,6 +211,15 @@ export default function Card(props: CardProps) {
               class="h-16 w-16 rounded-full bg-red-500/90 backdrop-blur flex items-center justify-center text-white shadow-xl active:scale-95 transition border-2 border-white/20"
             >
               <ThumbsDown size={32} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                props.onAddPrompt();
+              }}
+              class="h-12 w-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white shadow-xl active:scale-95 transition border-2 border-white/20"
+            >
+              <MessageSquarePlus size={22} />
             </button>
             <button
               onClick={(e) => {

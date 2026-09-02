@@ -2,15 +2,15 @@ import type { SwipeEvent } from "@ship-feed/shared";
 
 const QUEUE_KEY = "ship-feed:offline-swipes";
 
-export type QueuedSwipe = { cardId: string; direction: SwipeEvent["direction"]; createdAt: number };
+export type QueuedSwipe = { cardId: string; direction: SwipeEvent["direction"]; comment?: string; createdAt: number };
 
 export function isOnline() {
   return typeof navigator !== "undefined" && navigator.onLine;
 }
 
-export function queueSwipe(cardId: string, direction: SwipeEvent["direction"]) {
+export function queueSwipe(cardId: string, direction: SwipeEvent["direction"], comment?: string) {
   const queue = getQueue();
-  queue.push({ cardId, direction, createdAt: Date.now() });
+  queue.push({ cardId, direction, comment, createdAt: Date.now() });
   localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
 }
 

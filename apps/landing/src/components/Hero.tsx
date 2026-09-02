@@ -1,14 +1,16 @@
+import { For } from "solid-js";
 import {
-  Bot,
   GitPullRequest,
   Layers,
   MessageSquare,
+  Play,
   Rocket,
   Sparkles,
   ThumbsDown,
   ThumbsUp,
   Zap,
 } from "lucide-solid";
+import { features } from "../data";
 import ExternalLink from "./ExternalLink";
 
 export default function Hero() {
@@ -29,14 +31,38 @@ export default function Hero() {
               <span>Card-driven autonomous development</span>
             </div>
 
-            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white">
-              ship-feed
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white">
+              Autonomous shipping for{" "}
+              <span class="text-indigo-400">GitHub projects</span>
             </h1>
 
             <p class="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Turn ideas into cards, approve or reject them, and let agents
-              implement, test, gather evidence, and ship — continuously.
+              Approve, swipe, comment — your AI bot ships the rest.
             </p>
+
+            <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto lg:mx-0">
+              <For each={features}>
+                {(feature, i) => {
+                  const Icon = feature.icon;
+                  const colors = [
+                    "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+                    "text-purple-400 bg-purple-500/10 border-purple-500/20",
+                    "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+                    "text-orange-400 bg-orange-500/10 border-orange-500/20",
+                  ];
+                  return (
+                    <div class={`flex items-center gap-2 rounded-xl bg-zinc-900/50 border border-zinc-800 px-3 py-2.5 ${i() === 0 ? "sm:col-span-1" : ""}`}>
+                      <div class={`flex h-8 w-8 items-center justify-center rounded-lg border ${colors[i() % colors.length]}`}>
+                        <Icon size={18} />
+                      </div>
+                      <span class="text-sm font-medium text-zinc-200">
+                        {feature.title}
+                      </span>
+                    </div>
+                  );
+                }}
+              </For>
+            </div>
 
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <ExternalLink
@@ -44,15 +70,21 @@ export default function Hero() {
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition"
               >
                 <Zap size={18} />
-                Install on GitHub
+                Get Started for free
               </ExternalLink>
-              <ExternalLink
-                href="https://github.com/newkub/github-ship-bots"
+              <a
+                href="#demo"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("demo")?.scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }}
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-800 px-6 py-3.5 text-base font-semibold text-white shadow hover:bg-zinc-700 transition"
               >
-                <Bot size={18} />
-                View source
-              </ExternalLink>
+                <Play size={18} />
+                View 60-sec demo
+              </a>
             </div>
           </div>
 
@@ -185,3 +217,5 @@ function Card(props: {
     </div>
   );
 }
+
+

@@ -1,6 +1,7 @@
 import type { Component } from "solid-js";
 import {
   Bot,
+  Brain,
   CheckCircle2,
   Download,
   GitPullRequest,
@@ -11,8 +12,11 @@ import {
   MousePointerClick,
   Rocket,
   Settings,
+  ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
   Terminal,
+  ThumbsUp,
   XCircle,
   Zap,
 } from "lucide-solid";
@@ -24,7 +28,8 @@ export interface Feature {
 }
 
 export interface Step {
-  text: string;
+  title: string;
+  desc: string;
   icon: Component<{ size?: number; class?: string }>;
 }
 
@@ -58,43 +63,48 @@ export const sections: Section[] = [
 
 export const features: Feature[] = [
   {
-    title: "Card-driven ideas",
-    body: "Every issue and PR becomes a ship card with impact, risk, and effect scores that humans can approve or reject.",
-    icon: Layers,
+    title: "Fast",
+    body: "From idea to open PR in minutes, not days.",
+    icon: Zap,
   },
   {
-    title: "Autonomous implementation",
-    body: "Approved cards are picked up by agent workflows that implement, test, gather evidence, and ship.",
+    title: "Smart",
+    body: "AI scores impact, risk, and evidence before you vote.",
+    icon: Brain,
+  },
+  {
+    title: "Auto",
+    body: "One approval and the bot writes, tests, and ships.",
     icon: Bot,
   },
   {
-    title: "/approve or /reject",
-    body: "Vote with a single comment. The bot updates labels, merges, closes, or blocks based on your decision.",
-    icon: CheckCircle2,
-  },
-  {
-    title: "Evidence vault",
-    body: "Every ship produces traceable evidence, baselines, and oracle results so you can audit and learn.",
-    icon: MessageSquare,
-  },
-  {
-    title: "Web & mobile dashboards",
-    body: "Swipe cards on the PWA, customize plans and repos on the web dashboard, and inspect live pages.",
-    icon: MousePointerClick,
-  },
-  {
-    title: "Continuous learning",
-    body: "The system updates learning weights from every outcome, improving future ideas and risk scoring.",
-    icon: Settings,
+    title: "Safe",
+    body: "Guardrails, audit trails, and rollbacks by default.",
+    icon: ShieldCheck,
   },
 ];
 
 export const steps: Step[] = [
-  { text: "Install the GitHub App and connect your repositories.", icon: Download },
-  { text: "Open an idea, pull request, or release proposal.", icon: GitPullRequest },
-  { text: "ship-feed turns it into a scored card on web and mobile.", icon: Layers },
-  { text: "Comment /approve or /reject to move it forward.", icon: MousePointerClick },
-  { text: "The orchestrator implements, verifies, ships, and learns.", icon: Rocket },
+  {
+    title: "Connect repo",
+    desc: "Install the GitHub App and pick the repositories to ship.",
+    icon: GitPullRequest,
+  },
+  {
+    title: "Set rules",
+    desc: "Define impact thresholds, review policies, and guardrails.",
+    icon: SlidersHorizontal,
+  },
+  {
+    title: "Swipe/approve",
+    desc: "Review scored cards and approve with a swipe or comment.",
+    icon: ThumbsUp,
+  },
+  {
+    title: "Auto ship",
+    desc: "The bot implements, verifies, and ships continuously.",
+    icon: Rocket,
+  },
 ];
 
 export const commands: Command[] = [

@@ -6,6 +6,7 @@ import { fetchCards, updateCardStatus } from "../api";
 import CardDetail from "./CardDetail";
 import CardTile from "../components/CardTile";
 import Kanban from "../components/Kanban";
+import StatusPanel from "../components/StatusPanel";
 
 export default function Cards() {
   const queryClient = useQueryClient();
@@ -104,6 +105,8 @@ export default function Cards() {
           </For>
         </div>
       </div>
+
+      <StatusPanel cards={query.data ?? []} />
 
       <Show when={!query.isLoading} fallback={<p class="text-gray-500">Loading cards...</p>}>
         <Show

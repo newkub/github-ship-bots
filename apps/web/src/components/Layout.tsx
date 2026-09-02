@@ -1,6 +1,6 @@
 import { A, useLocation } from "@solidjs/router";
 import { useQuery } from "@tanstack/solid-query";
-import { Home, GitBranch, CreditCard, MousePointer, Settings, LogIn, LogOut } from "lucide-solid";
+import { Home, GitBranch, CreditCard, MousePointer, Settings, LogIn, LogOut, Puzzle } from "lucide-solid";
 import { fetchSession, loginUrl } from "../api";
 import { Show } from "solid-js";
 
@@ -40,6 +40,7 @@ export default function Layout(props: { children?: any }) {
           {nav("/repos", GitBranch, "Repositories")}
           {nav("/billing", CreditCard, "Billing")}
           {nav("/inspector", MousePointer, "Web Inspector")}
+          {nav("/marketplace", Puzzle, "Marketplace")}
           {nav("/settings", Settings, "Settings")}
         </nav>
 

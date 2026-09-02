@@ -1,6 +1,5 @@
 import { Rocket, Sparkles } from "lucide-solid";
 import ExternalLink from "./ExternalLink";
-import { appName } from "../data";
 
 export default function CTA() {
   return (
@@ -14,11 +13,11 @@ export default function CTA() {
           </div>
 
           <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Ready to ship cards?
+            Start shipping now
           </h2>
           <p class="text-zinc-300 mb-8 max-w-xl mx-auto">
-            Install the {appName} GitHub App, open your first issue, and turn your
-            team&apos;s decisions into an autonomous shipping pipeline.
+            Install ship-feed on your repositories and turn every idea into an
+            autonomous shipping pipeline.
           </p>
 
           <ExternalLink
@@ -26,7 +25,7 @@ export default function CTA() {
             class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition"
           >
             <Sparkles size={20} />
-            Install on GitHub
+            Start shipping now
           </ExternalLink>
         </div>
       </div>
