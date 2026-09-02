@@ -1,8 +1,9 @@
-import { ExternalLink, Rocket } from "lucide-solid";
+import { Rocket } from "lucide-solid";
+import { Link } from "@tanstack/solid-router";
 import GitHubCard from "./GitHubCard";
 import MarketingPreview from "./MarketingPreview";
 import SectionHeader from "./SectionHeader";
-import { dashboardUrl, installUrl } from "../data";
+import { dashboardUrl } from "../data";
 
 const steps = [
   {
@@ -46,15 +47,13 @@ export default function VisualDemo() {
             </ul>
 
             <div class="flex flex-col sm:flex-row gap-4">
-              <a
-                href={installUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/install"
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 hover:-translate-y-0.5 active:scale-95 transition"
               >
-                <ExternalLink size={18} />
+                <Rocket size={18} />
                 Install GitHub App
-              </a>
+              </Link>
               <a
                 href={dashboardUrl}
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-800 px-6 py-3.5 text-base font-semibold text-white hover:bg-zinc-700 hover:-translate-y-0.5 active:scale-95 transition"

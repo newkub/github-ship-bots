@@ -1,11 +1,12 @@
 import { ExternalLink as ExternalLinkIcon, Heart } from "lucide-solid";
-import { appName, dashboardUrl, installUrl } from "../data";
+import { Link } from "@tanstack/solid-router";
+import { appName, dashboardUrl } from "../data";
 import ExternalLink from "./ExternalLink";
 
 const links = [
-  { label: "Open Dashboard", href: dashboardUrl, external: false },
-  { label: "Install GitHub App", href: installUrl, external: true },
-  { label: "GitHub", href: "https://github.com/newkub/github-ship-bots", external: true },
+  { label: "Open Dashboard", href: dashboardUrl, type: "external" as const },
+  { label: "Install GitHub App", href: "/install", type: "internal" as const },
+  { label: "GitHub", href: "https://github.com/newkub/github-ship-bots", type: "external" as const },
 ];
 
 export default function Footer() {
@@ -14,17 +15,13 @@ export default function Footer() {
       <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         <div class="flex flex-col md:flex-row items-center justify-between gap-6">
           <div class="text-center md:text-left">
-            <a
-              href="#home"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById("home")?.scrollIntoView({ behavior: "smooth" });
-              }}
+            <Link
+              to="/"
               class="inline-flex items-center gap-2 text-lg font-bold text-white hover:text-indigo-400 transition"
             >
               <img src="/assets/bot-logo.png" alt={`${appName} logo`} class="h-8 w-8 rounded-lg" />
               {appName}
-            </a>
+            </Link>
             <p class="mt-2 text-sm text-zinc-500 max-w-sm">
               Card-driven autonomous development for GitHub projects.
             </p>
@@ -32,7 +29,7 @@ export default function Footer() {
 
           <div class="flex flex-wrap items-center justify-center gap-4">
             {links.map((link) =>
-              link.external ? (
+              link.type === "external" ? (
                 <ExternalLink
                   href={link.href}
                   class="text-sm font-medium text-zinc-400 hover:text-indigo-400 transition"
@@ -40,12 +37,12 @@ export default function Footer() {
                   {link.label}
                 </ExternalLink>
               ) : (
-                <a
-                  href={link.href}
+                <Link
+                  to={link.href}
                   class="text-sm font-medium text-zinc-400 hover:text-indigo-400 transition"
                 >
                   {link.label}
-                </a>
+                </Link>
               )
             )}
           </div>

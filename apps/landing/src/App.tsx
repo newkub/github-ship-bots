@@ -1,51 +1,91 @@
-import About from "./components/About";
-import CTA from "./components/CTA";
-import CommandCards from "./components/CommandCards";
-import DashboardPreview from "./components/DashboardPreview";
-import Ecosystem from "./components/Ecosystem";
-import FeatureGrid from "./components/FeatureGrid";
+import {
+  Link,
+  Outlet,
+  RouterProvider,
+  createRootRoute,
+  createRoute,
+  createRouter,
+} from "@tanstack/solid-router";
 import Footer from "./components/Footer";
-import Hero from "./components/Hero";
-import HowItWorks from "./components/HowItWorks";
-import Layout from "./components/Layout";
-import Pipeline from "./components/Pipeline";
-import Section from "./components/Section";
-import VisualDemo from "./components/VisualDemo";
+import TopNav from "./components/TopNav";
+import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
+import FeaturesPage from "./pages/FeaturesPage";
+import HowItWorksPage from "./pages/HowItWorksPage";
+import CommandsPage from "./pages/CommandsPage";
+import InstallPage from "./pages/InstallPage";
+
+const rootRoute = createRootRoute({
+  component: () => (
+    <>
+      <TopNav />
+      <main class="min-h-screen bg-zinc-950 text-zinc-50 font-sans antialiased pt-28 md:pt-32 pb-20 md:pb-0">
+        <Outlet />
+        <Footer />
+      </main>
+    </>
+  ),
+});
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: HomePage,
+});
+
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/about',
+  component: AboutPage,
+});
+
+const featuresRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/features',
+  component: FeaturesPage,
+});
+
+const howItWorksRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/how-it-works',
+  component: HowItWorksPage,
+});
+
+const commandsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/commands',
+  component: CommandsPage,
+});
+
+const installRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/install',
+  component: InstallPage,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  aboutRoute,
+  featuresRoute,
+  howItWorksRoute,
+  commandsRoute,
+  installRoute,
+]);
+
+const router = createRouter({
+  routeTree,
+  defaultPreload: 'intent',
+  scrollRestoration: true,
+});
+
+declare module '@tanstack/solid-router' {
+  interface Register {
+    router: typeof router;
+  }
+}
 
 export default function App() {
-  return (
-    <Layout>
-      <section id="home" class="w-full">
-        <Hero />
-      </section>
-      <Section id="preview" class="w-full">
-        <DashboardPreview />
-      </Section>
-      <Section id="about" class="w-full">
-        <About />
-      </Section>
-      <Section id="pipeline" class="w-full">
-        <Pipeline />
-      </Section>
-      <Section id="features" class="w-full">
-        <FeatureGrid />
-      </Section>
-      <Section id="ecosystem" class="w-full">
-        <Ecosystem />
-      </Section>
-      <Section id="how-it-works" class="w-full">
-        <HowItWorks />
-      </Section>
-      <Section id="demo" class="w-full">
-        <VisualDemo />
-      </Section>
-      <Section id="commands" class="w-full">
-        <CommandCards />
-      </Section>
-      <Section id="install" class="w-full">
-        <CTA />
-      </Section>
-      <Footer />
-    </Layout>
-  );
+  return <RouterProvider router={router} />;
 }
+
+export { Link };

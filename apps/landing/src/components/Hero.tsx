@@ -11,7 +11,8 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from "lucide-solid";
-import { dashboardUrl, features, installUrl } from "../data";
+import { Link } from "@tanstack/solid-router";
+import { dashboardUrl, features } from "../data";
 
 export default function Hero() {
   return (
@@ -74,25 +75,17 @@ export default function Hero() {
                 <Rocket size={18} />
                 Open Dashboard
               </a>
-              <a
-                href={installUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/install"
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-800 px-6 py-3.5 text-base font-semibold text-white shadow hover:bg-zinc-700 hover:-translate-y-0.5 active:scale-95 transition"
               >
                 <ExternalLink size={18} />
                 Install GitHub App
-              </a>
+              </Link>
             </div>
 
-            <a
-              href="#demo"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById("demo")?.scrollIntoView({
-                  behavior: "smooth",
-                });
-              }}
+            <Link
+              to="/how-it-works"
               class="mt-6 inline-flex items-center justify-center gap-2 text-sm font-medium text-zinc-400 hover:text-indigo-400 transition group"
             >
               <span class="h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-indigo-500/30 group-hover:bg-zinc-800 transition">
@@ -100,7 +93,7 @@ export default function Hero() {
               </span>
               Watch the 60-sec demo
               <ArrowRight size={14} class="group-hover:translate-x-0.5 transition" />
-            </a>
+            </Link>
           </div>
 
           <div class="relative flex justify-center items-center h-[28rem] lg:h-auto lg:min-h-[28rem] animate-fade-in-up" style="animation-delay: 0.15s">

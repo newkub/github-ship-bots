@@ -56,6 +56,10 @@ export default {
         const indexUrl = new URL("/dashboard/index.html", url);
         return env.ASSETS.fetch(new Request(indexUrl.toString(), request));
       }
+      if (!url.pathname.includes(".") && !url.pathname.startsWith("/api/") && !url.pathname.startsWith("/auth/")) {
+        const indexUrl = new URL("/index.html", url);
+        return env.ASSETS.fetch(new Request(indexUrl.toString(), request));
+      }
       return env.ASSETS.fetch(request);
     }
     return apiRes;
