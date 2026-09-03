@@ -142,13 +142,13 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                         {(item) => (
                           <li>
                             <button
-                              onClick={() => selectEvidence(item.id as string, item.kind as string)}
+                              onClick={() => selectEvidence(item.id, item.kind)}
                               class={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
                                 activeEvidence() === item.id ? "bg-indigo-50 border border-indigo-200" : "bg-gray-50 hover:bg-gray-100"
                               }`}
                             >
-                              <span class="capitalize font-medium">{item.kind as string}</span>
-                              <span class="text-gray-400 ml-2 font-mono text-xs">{((item.sha256 as string) ?? "").slice(0, 12)}</span>
+                              <span class="capitalize font-medium">{item.kind}</span>
+                              <span class="text-gray-400 ml-2 font-mono text-xs">{(item.sha256 ?? "").slice(0, 12)}</span>
                             </button>
                           </li>
                         )}

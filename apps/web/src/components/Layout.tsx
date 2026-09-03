@@ -10,9 +10,9 @@ import {
   LayoutDashboard,
 } from "lucide-solid";
 import { fetchSession, loginUrl, logout } from "../api";
-import { Show, createEffect } from "solid-js";
+import { Show, createEffect, type JSX } from "solid-js";
 
-export default function Layout(props: { children?: any }) {
+export default function Layout(props: { children?: JSX.Element }) {
   const queryClient = useQueryClient();
   const session = useQuery(() => ({ queryKey: ["session"], queryFn: fetchSession }));
   const user = () => session.data?.user;
