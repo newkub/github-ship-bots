@@ -28,4 +28,8 @@ export interface Env {
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_ID?: string;
   OPENAI_API_KEY?: string;
+  OPENAI_API_URL?: string;
+  OPENAI_MODEL?: string;
+  GITHUB_API_URL?: string;
+  GITHUB_WEB_URL?: string;
 }

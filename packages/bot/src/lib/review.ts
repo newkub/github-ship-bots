@@ -34,15 +34,15 @@ function heuristicReview(diff: string): string {
   return lines.join("\n");
 }
 
-async function openaiReview(diff: string, apiKey: string): Promise<string> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+async function openaiReview(diff: string, apiKey: string, baseUrl: string, model: string): Promise<string> {
+  const res = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model,
       messages: [
         { role: "system", content: "You are a concise code reviewer. Summarize the diff in 3-5 bullets. Mention risks and cleanups." },
         { role: "user", content: diff.slice(0, 12000) },
@@ -63,8 +63,10 @@ export async function generateReviewComment(diff: string): Promise<string> {
   if (!env.OPENAI_API_KEY) {
     return heuristicReview(diff);
   }
+  const baseUrl = env.OPENAI_API_URL || "https://api.openai.com/v1";
+  const model = env.OPENAI_MODEL || "gpt-4o-mini";
   try {
-    return await openaiReview(diff, env.OPENAI_API_KEY);
+    return await openaiReview(diff, env.OPENAI_API_KEY, baseUrl, model);
   } catch {
     return heuristicReview(diff);
   }

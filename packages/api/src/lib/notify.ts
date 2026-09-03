@@ -10,12 +10,13 @@ function escapeHtml(text: string): string {
 export async function notifyCardStatus(env: Env, card: ShipCard, event: "created" | "approved" | "rejected" | "shipped") {
   const title = `[ship-feed] ${event}: ${card.title}`;
   const body = `repo: ${card.repoFullName}\nscore: ${card.score.toFixed(1)}\nstatus: ${card.status}`;
+  const githubWeb = env.GITHUB_WEB_URL || "https://github.com";
   if (card.issueNumber) {
-    const url = `https://github.com/${card.repoFullName}/issues/${card.issueNumber}`;
+    const url = `${githubWeb}/${card.repoFullName}/issues/${card.issueNumber}`;
     const tasks = [notifySlack(env, title, body, url), notifyTelegram(env, title, body, url)];
     await Promise.all(tasks.map((p) => p.catch(() => undefined)));
   } else if (card.pullNumber) {
-    const url = `https://github.com/${card.repoFullName}/pull/${card.pullNumber}`;
+    const url = `${githubWeb}/${card.repoFullName}/pull/${card.pullNumber}`;
     const tasks = [notifySlack(env, title, body, url), notifyTelegram(env, title, body, url)];
     await Promise.all(tasks.map((p) => p.catch(() => undefined)));
   } else {

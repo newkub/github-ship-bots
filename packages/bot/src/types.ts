@@ -9,6 +9,10 @@ export interface BotEnv {
   API_TOKEN?: string;
   DB?: D1Database;
   OPENAI_API_KEY?: string;
+  OPENAI_API_URL?: string;
+  OPENAI_MODEL?: string;
+  GITHUB_API_URL?: string;
+  GITHUB_WEB_URL?: string;
 }
 
 export function createBotEnv(overrides?: Partial<BotEnv>): BotEnv {

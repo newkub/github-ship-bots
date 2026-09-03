@@ -9,6 +9,8 @@ export interface GitHubActionResult {
 export interface ShipActionContext {
   appId: string;
   privateKey: string;
+  githubApiUrl: string;
+  githubWebUrl: string;
   repoFullName: string;
   issueNumber?: number;
   pullNumber?: number;
@@ -29,8 +31,8 @@ function createJwt(appId: string, privateKey: string): string {
   return `${signingInput}.${base64url(signature)}`;
 }
 
-async function githubFetch(path: string, token: string, init?: RequestInit): Promise<unknown> {
-  const res = await fetch(`https://api.github.com${path}`, {
+async function githubFetch(baseUrl: string, path: string, token: string, init?: RequestInit): Promise<unknown> {
+  const res = await fetch(`${baseUrl}${path}`, {
     ...init,
     headers: {
       accept: "application/vnd.github+json",
@@ -54,12 +56,13 @@ async function getInstallationToken(ctx: ShipActionContext): Promise<string | un
   const jwt = createJwt(ctx.appId, ctx.privateKey);
 
   const installation = (await githubFetch(
+    ctx.githubApiUrl,
     `/repos/${owner}/${repo}/installation`,
     jwt
   )) as { id: number } | undefined;
   if (!installation?.id) return undefined;
 
-  const tokenResp = (await githubFetch(`/app/installations/${installation.id}/access_tokens`, jwt, {
+  const tokenResp = (await githubFetch(ctx.githubApiUrl, `/app/installations/${installation.id}/access_tokens`, jwt, {
     method: "POST",
   })) as { token: string } | undefined;
   return tokenResp?.token;
@@ -83,7 +86,7 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
   try {
     if (ctx.pullNumber) {
       if (ctx.action === "approve") {
-        await githubFetch(`/repos/${owner}/${repo}/pulls/${ctx.pullNumber}/merge`, token, {
+        await githubFetch(ctx.githubApiUrl, `/repos/${owner}/${repo}/pulls/${ctx.pullNumber}/merge`, token, {
           method: "PUT",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -92,18 +95,18 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
             merge_method: "squash",
           }),
         });
-        await githubFetch(`/repos/${owner}/${repo}/issues/${ctx.pullNumber}/comments`, token, {
+        await githubFetch(ctx.githubApiUrl, `/repos/${owner}/${repo}/issues/${ctx.pullNumber}/comments`, token, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ body: ":rocket: Shipped via ship-feed" }),
         });
       } else {
-        await githubFetch(`/repos/${owner}/${repo}/pulls/${ctx.pullNumber}`, token, {
+        await githubFetch(ctx.githubApiUrl, `/repos/${owner}/${repo}/pulls/${ctx.pullNumber}`, token, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ state: "closed", state_reason: "not_planned" }),
         });
-        await githubFetch(`/repos/${owner}/${repo}/issues/${ctx.pullNumber}/comments`, token, {
+        await githubFetch(ctx.githubApiUrl, `/repos/${owner}/${repo}/issues/${ctx.pullNumber}/comments`, token, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ body: `:x: Rejected via ship-feed${ctx.reason ? `: ${ctx.reason}` : ""}` }),
@@ -111,23 +114,23 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
       }
     } else if (ctx.issueNumber) {
       if (ctx.action === "approve") {
-        await githubFetch(`/repos/${owner}/${repo}/issues/${ctx.issueNumber}`, token, {
+        await githubFetch(ctx.githubApiUrl, `/repos/${owner}/${repo}/issues/${ctx.issueNumber}`, token, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ state: "closed" }),
         });
-        await githubFetch(`/repos/${owner}/${repo}/issues/${ctx.issueNumber}/comments`, token, {
+        await githubFetch(ctx.githubApiUrl, `/repos/${owner}/${repo}/issues/${ctx.issueNumber}/comments`, token, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ body: ":rocket: Shipped via ship-feed" }),
         });
       } else {
-        await githubFetch(`/repos/${owner}/${repo}/issues/${ctx.issueNumber}`, token, {
+        await githubFetch(ctx.githubApiUrl, `/repos/${owner}/${repo}/issues/${ctx.issueNumber}`, token, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ state: "closed" }),
         });
-        await githubFetch(`/repos/${owner}/${repo}/issues/${ctx.issueNumber}/comments`, token, {
+        await githubFetch(ctx.githubApiUrl, `/repos/${owner}/${repo}/issues/${ctx.issueNumber}/comments`, token, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ body: `:x: Rejected via ship-feed${ctx.reason ? `: ${ctx.reason}` : ""}` }),
