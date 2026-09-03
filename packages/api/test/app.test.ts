@@ -4,7 +4,7 @@ import type { Env } from "@ship-feed/shared";
 
 describe("api", () => {
   test("GET /health returns health payload", async () => {
-    const res = await app.request("/health", undefined, {} as Env);
+    const res = await app.fetch(new Request("http://localhost/health"), {} as Env);
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);

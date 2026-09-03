@@ -1,5 +1,5 @@
 import { createSign } from "node:crypto";
-import { fetchExternal, getCorrelationId } from "@ship-feed/shared";
+import { fetchExternal, getCorrelationId, assertRecord, assertString, assertNumber } from "@ship-feed/shared";
 
 const REPO_FULL_NAME_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 
@@ -72,17 +72,17 @@ async function getInstallationToken(ctx: ShipActionContext): Promise<string | un
 
   const jwt = createJwt(ctx.appId, ctx.privateKey);
 
-  const installation = (await githubFetch(
-    ctx,
-    `/repos/${encodeRepoPath(owner, repo)}/installation`,
-    jwt
-  )) as { id: number } | undefined;
-  if (!installation?.id) return undefined;
+  const installationJson = await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/installation`, jwt);
+  if (!installationJson) return undefined;
+  const installation = assertRecord(installationJson, "GitHub installation");
+  const installationId = assertNumber(installation.id, "installation.id");
 
-  const tokenResp = (await githubFetch(ctx, `/app/installations/${installation.id}/access_tokens`, jwt, {
+  const tokenRespJson = await githubFetch(ctx, `/app/installations/${installationId}/access_tokens`, jwt, {
     method: "POST",
-  })) as { token: string } | undefined;
-  return tokenResp?.token;
+  });
+  if (!tokenRespJson) return undefined;
+  const tokenResp = assertRecord(tokenRespJson, "GitHub access token");
+  return assertString(tokenResp.token, "token");
 }
 
 export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubActionResult> {

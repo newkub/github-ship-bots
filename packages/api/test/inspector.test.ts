@@ -4,9 +4,8 @@ import type { Env } from "@ship-feed/shared";
 
 describe("inspector", () => {
   test("POST /api/inspector requires session", async () => {
-    const res = await app.request(
-      "/api/inspector",
-      {
+    const res = await app.fetch(
+      new Request("http://localhost/api/inspector", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -15,7 +14,7 @@ describe("inspector", () => {
           prompt: "Make the headline more compelling and run CI.",
           repoFullName: "newkub/github-ship-bots",
         }),
-      },
+      }),
       {} as Env
     );
     expect(res.status).toBe(401);

@@ -1,5 +1,5 @@
 import { getBotEnv } from "./api";
-import { fetchExternal, getCorrelationId } from "@ship-feed/shared";
+import { fetchExternal, getCorrelationId, assertRecord, assertString, assertOptionalString, assertArray } from "@ship-feed/shared";
 
 function heuristicReview(diff: string): string {
   const added = (diff.match(/^\+[^+]/gm) ?? []).length;
@@ -55,8 +55,20 @@ async function openaiReview(diff: string, apiKey: string, baseUrl: string, model
     const text = await res.text();
     throw new Error(`OpenAI error: ${res.status} ${text}`);
   }
-  const data = (await res.json()) as { choices: { message: { content: string } }[] };
-  return data.choices[0]?.message?.content?.trim() || "AI review unavailable.";
+  const json = await res.json();
+  const data = assertRecord(json, "OpenAI response");
+  const choices = assertArray(data.choices, "choices");
+  const first = choices[0];
+  if (first === null || typeof first !== "object") {
+    return "AI review unavailable.";
+  }
+  const choice = assertRecord(first, "choice");
+  if (choice.message === null || typeof choice.message !== "object") {
+    return "AI review unavailable.";
+  }
+  const message = assertRecord(choice.message, "message");
+  const content = assertOptionalString(message.content, "content");
+  return content?.trim() || "AI review unavailable.";
 }
 
 export async function generateReviewComment(diff: string): Promise<string> {

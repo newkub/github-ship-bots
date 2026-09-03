@@ -52,19 +52,11 @@ const app = new Elysia()
   .use(learning)
   .use(push);
 
-function createRequest(input: string | Request, init?: RequestInit): Request {
-  if (input instanceof Request) return input;
-  if (input.startsWith("http://") || input.startsWith("https://")) {
-    return new Request(input, init);
-  }
-  return new Request(new URL(input, "http://localhost").toString(), init);
-}
-
 export default {
   async fetch(
     request: Request,
     env: Env,
-    _ctx: ExecutionContext
+    _ctx?: ExecutionContext
   ): Promise<Response> {
     if (request.method === "OPTIONS") {
       return new Response(null, {
@@ -76,14 +68,5 @@ export default {
     setRequestEnv(request, env);
     const response = await app.fetch(request);
     return applyCors(response, request, env);
-  },
-
-  async request(
-    input: string | Request,
-    init?: RequestInit,
-    env: Env = {} as Env
-  ): Promise<Response> {
-    const request = createRequest(input, init);
-    return this.fetch(request, env, {} as ExecutionContext);
   },
 };
