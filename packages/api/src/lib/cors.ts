@@ -5,9 +5,6 @@ export function getAllowedOrigins(env: Env): string[] {
   return [
     ...configured,
     env.PUBLIC_APP_URL,
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:5175",
   ].filter((value, index, self) => Boolean(value) && self.indexOf(value) === index);
 }
 

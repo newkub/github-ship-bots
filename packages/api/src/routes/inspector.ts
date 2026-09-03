@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
-import { insertCard } from "./cards";
+import { insertCard } from "../services/card-service";
 import { withEnv } from "../lib/env";
 
 const inspector = withEnv(new Elysia({ prefix: "/api/inspector" }));

@@ -4,7 +4,37 @@ import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { withEnv } from "../lib/env";
 
+const plans = [
+  {
+    id: "free",
+    name: "Free",
+    price: "$0",
+    features: ["3 cards/day", "Public repos", "Email support"],
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: "$19",
+    features: ["Unlimited cards", "Private repos", "Evidence vault", "Priority support"],
+  },
+  {
+    id: "team",
+    name: "Team",
+    price: "$49",
+    features: ["Everything in Pro", "Multiple seats", "Custom CI", "SLA"],
+  },
+];
+
 const stripe = withEnv(new Elysia({ prefix: "/api/stripe" }));
+
+stripe.get("/plans", async ({ request, set, env }) => {
+  const session = await getSession({ request, set, env });
+  if (!session) {
+    set.status = 401;
+    return { error: "unauthorized" };
+  }
+  return { plans };
+});
 
 stripe.post("/checkout", async ({ request, set, env }) => {
   const session = await getSession({ request, set, env });
@@ -13,7 +43,7 @@ stripe.post("/checkout", async ({ request, set, env }) => {
     return { error: "unauthorized" };
   }
 
-  const client = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2026-08-26.dahlia" });
+  const client = new Stripe(env.STRIPE_SECRET_KEY);
   const url = await client.checkout.sessions.create({
     customer_email: session.email,
     line_items: [{ price: env.STRIPE_PRICE_PRO, quantity: 1 }],
@@ -32,7 +62,7 @@ stripe.post("/webhook", async ({ request, set, env }) => {
     return "Missing signature";
   }
 
-  const client = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2026-08-26.dahlia" });
+  const client = new Stripe(env.STRIPE_SECRET_KEY);
   const body = await request.text();
   let event;
   try {

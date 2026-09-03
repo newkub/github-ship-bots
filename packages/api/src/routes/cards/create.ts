@@ -1,4 +1,6 @@
 import { Elysia } from "elysia";
+import type { z } from "zod";
+import type { ShipCard } from "@ship-feed/shared";
 import { timingSafeEquals } from "@ship-feed/shared";
 import { getSession } from "../../lib/session";
 import { unauthorized, notFound, ensureAuth } from "../../lib/card-auth";
@@ -6,7 +8,11 @@ import { insertCard } from "../../services/card-service";
 import { withEnv } from "../../lib/env";
 import { cardInputSchema } from "./schemas";
 
-function cardFromBody(body: any): any {
+type CardInput = z.infer<typeof cardInputSchema>;
+
+type NewCard = Omit<ShipCard, "id" | "score" | "createdAt" | "updatedAt" | "evidenceIds">;
+
+function cardFromBody(body: CardInput): NewCard {
   return {
     kind: body.kind,
     title: body.title,

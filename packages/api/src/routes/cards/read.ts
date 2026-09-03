@@ -99,7 +99,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const { results } = await env.DB.prepare(
-      "SELECT * FROM cards WHERE status = 'pending' ORDER BY score DESC LIMIT 100"
+      "SELECT * FROM cards ORDER BY updated_at DESC LIMIT 100"
     ).all<Record<string, unknown>>();
     return (results ?? []).map(rowToCard);
   })

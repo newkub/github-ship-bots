@@ -108,6 +108,16 @@ export default function Feed() {
           </div>
         </Show>
 
+        <Show when={query.error}>
+          <EmptyState
+            class="absolute inset-0"
+            icon={Inbox}
+            title="Failed to load cards"
+            subtitle={query.error?.message ?? "Check your connection and try again."}
+            action={{ label: "Retry", onClick: () => query.refetch() }}
+          />
+        </Show>
+
         <Show when={isEmpty()}>
           <EmptyState
             class="absolute inset-0"

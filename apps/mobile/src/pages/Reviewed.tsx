@@ -23,6 +23,22 @@ export default function Reviewed() {
       </header>
 
       <div class="flex-1 overflow-y-auto p-4 no-scrollbar">
+        <Show when={query.isLoading}>
+          <div class="h-40 flex items-center justify-center">
+            <div class="h-10 w-10 rounded-full border-4 border-accent/20 border-t-accent animate-spin" />
+          </div>
+        </Show>
+
+        <Show when={query.error}>
+          <EmptyState
+            class="h-full"
+            icon={History}
+            title="Failed to load cards"
+            subtitle={query.error?.message ?? "Check your connection and try again."}
+            action={{ label: "Retry", onClick: () => query.refetch() }}
+          />
+        </Show>
+
         <For each={decided()}>
           {(card) => {
             const Icon = kindIcons[card.kind];

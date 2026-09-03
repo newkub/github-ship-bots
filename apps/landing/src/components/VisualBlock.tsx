@@ -5,11 +5,11 @@ import HowItWorksVisual from "./visuals/HowItWorksVisual";
 import CommandsVisual from "./visuals/CommandsVisual";
 import InstallVisual from "./visuals/InstallVisual";
 
-type Variant = "about" | "features" | "ecosystem" | "how-it-works" | "commands" | "install";
+export type Variant = "about" | "features" | "ecosystem" | "how-it-works" | "commands" | "install";
 
 export function WindowChrome(props: { title: string; children: any }) {
   return (
-    <div class="relative rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden shadow-2xl shadow-black/30">
+    <div class="reveal-visual relative rounded-2xl bg-zinc-900 border border-zinc-800 overflow-hidden shadow-2xl shadow-black/30 hover:border-indigo-500/20 hover:shadow-indigo-500/10 hover:-translate-y-1 hover:scale-[1.01] transition duration-500 group">
       <div class="flex items-center gap-3 px-4 py-3 bg-zinc-950 border-b border-zinc-800">
         <div class="flex items-center gap-1.5">
           <div class="h-2.5 w-2.5 rounded-full bg-rose-500" />

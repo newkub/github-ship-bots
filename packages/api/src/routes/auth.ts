@@ -7,12 +7,9 @@ import type { User } from "@ship-feed/shared";
 
 const auth = withEnv(new Elysia({ prefix: "/auth" }));
 
-auth.get("/login", ({ request, env, redirect }) => {
+auth.get("/login", ({ env, redirect }) => {
   const workos = new WorkOS(env.WORKOS_API_KEY);
-  const origin = request.headers.get("origin") ?? "";
-  const redirectUri = origin.startsWith("http://localhost")
-    ? "http://localhost:5174/auth/callback"
-    : `${env.PUBLIC_APP_URL}/auth/callback`;
+  const redirectUri = env.WORKOS_REDIRECT_URI || `${env.PUBLIC_APP_URL}/auth/callback`;
 
   const url = workos.userManagement.getAuthorizationUrl({
     clientId: env.WORKOS_CLIENT_ID,
@@ -30,10 +27,7 @@ auth.get("/callback", async ({ request, set, env, redirect, query }) => {
   }
 
   const workos = new WorkOS(env.WORKOS_API_KEY);
-  const origin = request.headers.get("origin") ?? "";
-  const redirectUri = origin.startsWith("http://localhost")
-    ? "http://localhost:5174/auth/callback"
-    : `${env.PUBLIC_APP_URL}/auth/callback`;
+  const redirectUri = env.WORKOS_REDIRECT_URI || `${env.PUBLIC_APP_URL}/auth/callback`;
 
   const resp = await workos.userManagement.authenticateWithCode({
     clientId: env.WORKOS_CLIENT_ID,

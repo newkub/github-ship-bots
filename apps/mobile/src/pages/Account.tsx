@@ -25,6 +25,19 @@ export default function Account() {
       </header>
 
       <div class="flex-1 overflow-y-auto p-6 space-y-5 no-scrollbar">
+        <Show when={session.isLoading}>
+          <div class="h-40 flex items-center justify-center">
+            <div class="h-10 w-10 rounded-full border-4 border-accent/20 border-t-accent animate-spin" />
+          </div>
+        </Show>
+
+        <Show when={session.error}>
+          <div class="rounded-2xl bg-surface border border-divider p-4 text-center">
+            <p class="text-danger font-medium">Failed to load session</p>
+            <p class="text-sm text-muted mt-1">{session.error?.message ?? "Check your connection."}</p>
+          </div>
+        </Show>
+
         <Show
           when={user()}
           fallback={
