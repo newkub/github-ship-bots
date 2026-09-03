@@ -24,6 +24,7 @@ PUBLIC_APP_URL = "https://github-ship-bots.newkubise.workers.dev"
 VAPID_SUBJECT = "mailto:admin@newkubise.workers.dev"
 AUTO_APPROVE_THRESHOLD = "8.5"
 AUTO_APPROVE_RISK = "low"
+ELYSIA_AOT = "false"
 
 # Set WORKOS_CLIENT_ID and WORKOS_REDIRECT_URI via wrangler secrets or .dev.vars
 
