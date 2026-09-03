@@ -62,6 +62,12 @@ export function assertBoolean(value: unknown, name: string): boolean {
   return value;
 }
 
+export function assertOptionalBoolean(value: unknown, name: string): boolean | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "boolean") throw new Error(`Expected ${name} to be a boolean`);
+  return value;
+}
+
 export function isArray(value: unknown): value is unknown[] {
   return Array.isArray(value);
 }

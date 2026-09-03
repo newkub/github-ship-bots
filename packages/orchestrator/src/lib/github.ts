@@ -1,5 +1,5 @@
 import { createSign } from "node:crypto";
-import { fetchExternal, getCorrelationId, assertRecord, assertString, assertNumber } from "@ship-feed/shared";
+import { fetchExternal, getCorrelationId, assertRecord, assertString, assertNumber, assertOptionalBoolean, assertOptionalString } from "@ship-feed/shared";
 
 const REPO_FULL_NAME_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 
@@ -65,6 +65,31 @@ async function githubFetch(ctx: ShipActionContext, path: string, token: string, 
   return res.json();
 }
 
+async function checkPullRequestMergeable(ctx: ShipActionContext, token: string): Promise<{ ok: boolean; message?: string }> {
+  const parsed = parseRepo(ctx.repoFullName);
+  if (!parsed) return { ok: false, message: "Invalid repoFullName" };
+  const { owner, repo } = parsed;
+
+  const json = await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/pulls/${ctx.pullNumber}`, token);
+  if (!json) return { ok: false, message: "Pull request not found" };
+
+  const pr = assertRecord(json, "GitHub pull request");
+  const merged = assertOptionalBoolean(pr.merged, "merged");
+  if (merged) return { ok: true, message: "Already merged" };
+
+  const mergeable = assertOptionalBoolean(pr.mergeable, "mergeable");
+  if (mergeable !== true) {
+    return { ok: false, message: "Pull request is not mergeable" };
+  }
+
+  const mergeableState = assertOptionalString(pr.mergeable_state, "mergeable_state");
+  if (mergeableState !== "clean") {
+    return { ok: false, message: `Pull request mergeable_state is ${mergeableState ?? "unknown"}` };
+  }
+
+  return { ok: true };
+}
+
 async function getInstallationToken(ctx: ShipActionContext): Promise<string | undefined> {
   const parsed = parseRepo(ctx.repoFullName);
   if (!parsed) return undefined;
@@ -107,6 +132,14 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
   try {
     if (ctx.pullNumber) {
       if (ctx.action === "approve") {
+        const mergeCheck = await checkPullRequestMergeable(ctx, token);
+        if (!mergeCheck.ok) {
+          return { ok: false, message: mergeCheck.message };
+        }
+        if (mergeCheck.message === "Already merged") {
+          return { ok: true, skipped: true, message: mergeCheck.message };
+        }
+
         await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/pulls/${ctx.pullNumber}/merge`, token, {
           method: "PUT",
           headers: { "content-type": "application/json" },

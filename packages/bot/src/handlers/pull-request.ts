@@ -105,12 +105,33 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
     });
 
     if (command === "approve") {
-      await octokit.rest.pulls.merge({
+      const { data: pr } = await octokit.rest.pulls.get({
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
         pull_number: issue.number,
-        merge_method: "squash",
       });
+      if (pr.merged) {
+        await octokit.rest.issues.createComment({
+          owner: payload.repository.owner.login,
+          repo: payload.repository.name,
+          issue_number: issue.number,
+          body: ":rocket: Already merged.",
+        });
+      } else if (pr.mergeable === true && pr.mergeable_state === "clean") {
+        await octokit.rest.pulls.merge({
+          owner: payload.repository.owner.login,
+          repo: payload.repository.name,
+          pull_number: issue.number,
+          merge_method: "squash",
+        });
+      } else {
+        await octokit.rest.issues.createComment({
+          owner: payload.repository.owner.login,
+          repo: payload.repository.name,
+          issue_number: issue.number,
+          body: `:x: Cannot merge: pull request is not mergeable (${pr.mergeable_state ?? "unknown"}).`,
+        });
+      }
     }
   });
 }
