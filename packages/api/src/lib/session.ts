@@ -1,3 +1,4 @@
+import { assertUser } from "@ship-feed/shared";
 import type { User } from "@ship-feed/shared";
 import type { SessionContext } from "./env";
 import {
@@ -29,7 +30,7 @@ export async function getSession(c: SessionContext): Promise<User | null> {
   if (!sessionId) return null;
   const raw = await c.env.SESSION_KV.get(`session:${sessionId}`);
   if (!raw) return null;
-  return JSON.parse(raw) as User;
+  return assertUser(JSON.parse(raw));
 }
 
 export async function setSession(

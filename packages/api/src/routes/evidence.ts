@@ -32,7 +32,7 @@ async function storeEvidence(
 ): Promise<{ id: string; key: string; hash: string }> {
   const bytes = base64ToBytes(body.data);
   const key = `evidence/${generateId()}.${extensionFor(body.kind)}`;
-  const sha256 = await crypto.subtle.digest("SHA-256", bytes.buffer as ArrayBuffer);
+  const sha256 = await crypto.subtle.digest("SHA-256", bytes.buffer);
   const hash = Array.from(new Uint8Array(sha256))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
