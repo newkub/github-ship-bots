@@ -17,8 +17,8 @@ async function getCryptoKey(secret: string): Promise<CryptoKey> {
 
 async function signValue(value: string, secret: string): Promise<string> {
   const key = await getCryptoKey(secret);
-  const data = new TextEncoder().encode(value).buffer as ArrayBuffer;
-  const signature = await crypto.subtle.sign("HMAC", key, data);
+  const data = new TextEncoder().encode(value);
+  const signature = await crypto.subtle.sign("HMAC", key, data as unknown as ArrayBuffer);
   return btoa(String.fromCharCode(...new Uint8Array(signature)));
 }
 
@@ -40,12 +40,12 @@ async function unsignValue(
     return false;
   }
 
-  const data = new TextEncoder().encode(value).buffer as ArrayBuffer;
+  const data = new TextEncoder().encode(value);
   const valid = await crypto.subtle.verify(
     "HMAC",
     key,
     signatureBytes.buffer as ArrayBuffer,
-    data
+    data.buffer as ArrayBuffer
   );
   return valid ? value : false;
 }

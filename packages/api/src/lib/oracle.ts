@@ -1,19 +1,15 @@
 export function base64ToBytes(b64: string): Uint8Array {
-  try {
-    const clean = b64.replace(/^data:image\/[^;]+;base64,/, "");
-    const bin = atob(clean);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) {
-      bytes[i] = bin.charCodeAt(i);
-    }
-    return bytes;
-  } catch {
-    return new Uint8Array();
+  const clean = b64.replace(/^data:image\/[^;]+;base64,/, "");
+  const bin = atob(clean);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    bytes[i] = bin.charCodeAt(i);
   }
+  return bytes;
 }
 
 export async function sha256Hex(data: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", data.buffer as ArrayBuffer);
+  const digest = await crypto.subtle.digest("SHA-256", data as unknown as ArrayBuffer);
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");

@@ -74,7 +74,8 @@ push.post("/notify", async ({ request, set, env, body }) => {
   }
 
   const { results } = await env.DB
-    .prepare("SELECT endpoint, p256dh, auth FROM push_subscriptions")
+    .prepare("SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = ?")
+    .bind(session.id)
     .all<{ endpoint: string; p256dh: string; auth: string }>();
 
   const subscriptions: PushSubscriptionData[] = (results ?? []).map((row) => ({

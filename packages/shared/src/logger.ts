@@ -10,15 +10,33 @@ export interface ExternalCallLog {
 }
 
 function generateId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
+  const c = typeof crypto !== "undefined" ? (crypto as unknown as Crypto) : undefined;
+  if (c && "randomUUID" in c) {
+    return c.randomUUID();
   }
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const bytes = new Uint8Array(16);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = Math.floor(Math.random() * 256);
+  }
+  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function getHeaderValue(headers: unknown, name: string): string | null | undefined {
+  if (!headers) return undefined;
+  if (headers instanceof Headers) {
+    return headers.get(name) ?? undefined;
+  }
+  if (typeof headers === "object" && headers !== null && !Array.isArray(headers)) {
+    const record = headers as Record<string, string | undefined>;
+    for (const key of Object.keys(record)) {
+      if (key.toLowerCase() === name.toLowerCase()) return record[key];
+    }
+  }
+  return undefined;
 }
 
 export function getCorrelationId(headers?: Headers | Record<string, string> | null): string {
-  const h = headers && "get" in headers ? (headers as Headers).get("x-correlation-id") : (headers as Record<string, string> | null)?.["x-correlation-id"];
-  return h || generateId();
+  return getHeaderValue(headers, "x-correlation-id") || generateId();
 }
 
 export function logExternalCall(ctx: ExternalCallLog): void {
