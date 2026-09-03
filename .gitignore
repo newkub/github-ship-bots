@@ -9,8 +9,9 @@ landing/dist
 docs
 *.tgz
 
-# pnpm lock (project uses bun.lock)
+# lockfiles (project uses bun.lockb)
 pnpm-lock.yaml
+bun.lock
 
 # code coverage
 coverage
