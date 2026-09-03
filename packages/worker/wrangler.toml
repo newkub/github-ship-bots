@@ -1,8 +1,9 @@
 name = "github-ship-bots"
 main = "src/index.ts"
-account_id = "384988241a425d49c5980f2b87b842c9"
 compatibility_date = "2026-09-02"
 compatibility_flags = ["nodejs_compat"]
+
+# Set account_id via `wrangler deploy` or add it to your local wrangler.toml
 
 [[d1_databases]]
 binding = "DB"
@@ -27,10 +28,10 @@ binding = "ASSETS"
 
 [vars]
 PUBLIC_APP_URL = "https://github-ship-bots.newkubise.workers.dev"
-WORKOS_CLIENT_ID = "client_01M19F99TQW7CRED4Q65YAE0DH"
-WORKOS_REDIRECT_URI = "https://github-ship-bots.newkubise.workers.dev/auth/callback"
 VAPID_SUBJECT = "mailto:admin@newkubise.workers.dev"
 AUTO_APPROVE_THRESHOLD = "8.5"
 AUTO_APPROVE_RISK = "low"
+
+# Set WORKOS_CLIENT_ID and WORKOS_REDIRECT_URI via wrangler secrets or .dev.vars
 
 # Secrets: WORKOS_API_KEY, WORKOS_COOKIE_PASSWORD, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_PRO, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, BOT_TOKEN, GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY, GITHUB_WEBHOOK_SECRET, CRON_SECRET
