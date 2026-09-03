@@ -1,5 +1,5 @@
-import { createSign } from "node:crypto";
 import { fetchExternal, getCorrelationId, assertRecord, assertString, assertNumber, assertOptionalBoolean, assertOptionalString } from "@ship-feed/shared";
+import { importRsaPrivateKey, base64url, signJwt } from "./crypto";
 
 const REPO_FULL_NAME_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 
@@ -33,17 +33,12 @@ export interface ShipActionContext {
   reason?: string;
 }
 
-function base64url(input: Buffer | string): string {
-  return Buffer.from(input).toString("base64url");
-}
-
-function createJwt(appId: string, privateKey: string): string {
+async function createJwt(appId: string, privateKey: string): Promise<string> {
   const header = JSON.stringify({ alg: "RS256", typ: "JWT" });
   const now = Math.floor(Date.now() / 1000);
   const payload = JSON.stringify({ iat: now - 60, exp: now + 600, iss: appId });
-  const signingInput = `${base64url(header)}.${base64url(payload)}`;
-  const signature = createSign("RSA-SHA256").update(signingInput).sign(privateKey);
-  return `${signingInput}.${base64url(signature)}`;
+  const key = await importRsaPrivateKey(privateKey);
+  return signJwt(header, payload, key);
 }
 
 async function githubFetch(ctx: ShipActionContext, path: string, token: string, init?: RequestInit): Promise<unknown> {
@@ -95,7 +90,7 @@ async function getInstallationToken(ctx: ShipActionContext): Promise<string | un
   if (!parsed) return undefined;
   const { owner, repo } = parsed;
 
-  const jwt = createJwt(ctx.appId, ctx.privateKey);
+  const jwt = await createJwt(ctx.appId, ctx.privateKey);
 
   const installationJson = await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/installation`, jwt);
   if (!installationJson) return undefined;
