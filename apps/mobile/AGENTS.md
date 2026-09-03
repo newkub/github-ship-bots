@@ -17,11 +17,11 @@ PWA with offline queue, push notifications, and a TikTok-like card stack. Talks 
 
 ### 1. Architecture
 
-- solid-js: /follow-lib-solid
-- @solidjs/router: /follow-lib-solid-router
-- @tanstack/solid-query: /follow-lib-tanstack-query
+- solid-js: /follow-framework-solidjs
+- @solidjs/router: /learn-from-web
+- @tanstack/solid-query: /follow-lib-tanstack-ecosystem
 - unocss: /follow-lib-unocss
-- vite: /learn-from-web
+- vite: /follow-tool-vite
 - vite-plugin-pwa: /learn-from-web
 - @mmmike/web-push: /learn-from-web
 
@@ -38,7 +38,7 @@ Maintainers on mobile devices who want to vote on cards and attach voice or sket
 
 ### 4. Skills
 
-- report-uxui: /report-uxui
+- review-uxui: /review-uxui
 - report-uxui-sketch: /report-uxui-sketch
 
 ### 5. Workspaces

@@ -17,7 +17,7 @@ Probot/Octokit GitHub App. Mounted by `packages/worker`. Uses `packages/shared` 
 
 ### 1. Architecture
 
-- probot: /follow-github-app
+- probot: /follow-create-github-bots
 - @octokit/rest: /learn-from-web
 - @octokit/app: /learn-from-web
 - cloudflare workers types: /learn-from-web
@@ -34,7 +34,7 @@ GitHub repositories that have installed the ship-feed app.
 
 ### 4. Skills
 
-- follow-github-app: /follow-github-app
+- follow-create-github-bots: /follow-create-github-bots
 - implement-github-issue: /implement-github-issue
 
 ### 5. Workspaces

@@ -17,11 +17,11 @@ Elysia-based API mounted by `packages/worker`. Uses D1 for persistence, R2 for e
 
 ### 1. Architecture
 
-- elysia: /follow-framework-elysia
-- zod: /follow-tool-zod
-- drizzle-orm: /follow-tool-drizzle
-- stripe: /learn-from-web
-- @workos-inc/node: /learn-from-web
+- elysia: /follow-lib-elysia
+- zod: /follow-lib-zod
+- drizzle-orm: /follow-lib-drizzle
+- stripe: /follow-service-stripe
+- @workos-inc/node: /follow-service-workos
 - @mmmike/web-push: /learn-from-web
 - cloudflare workers types: /learn-from-web
 
@@ -41,9 +41,9 @@ Frontend clients (web, mobile) and the GitHub bot. Not called directly by end us
 
 ### 4. Skills
 
-- follow-framework-elysia: /follow-framework-elysia
-- follow-tool-zod: /follow-tool-zod
-- follow-tool-drizzle: /follow-tool-drizzle
+- follow-lib-elysia: /follow-lib-elysia
+- follow-lib-zod: /follow-lib-zod
+- follow-lib-drizzle: /follow-lib-drizzle
 
 ### 5. Workspaces
 

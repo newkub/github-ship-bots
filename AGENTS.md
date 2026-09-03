@@ -68,18 +68,21 @@ This is a Bun + TypeScript monorepo. It contains a marketing landing site, a web
 #### Tech Mapping
 
 - bun: /follow-lang-bun
-- typescript: /learn-from-web
-- solid-js: /follow-lib-solid
-- @tanstack/solid-query: /follow-lib-tanstack-query
-- @tanstack/solid-router: /follow-lib-tanstack-router
-- @solidjs/router: /follow-lib-solid-router
-- elysia: /follow-framework-elysia
-- drizzle-orm: /follow-tool-drizzle
-- zod: /follow-tool-zod
-- wrangler: /follow-tool-wrangler
-- probot: /follow-github-app
+- typescript: /follow-lang-typescript
+- vite: /follow-tool-vite
+- solid-js: /follow-framework-solidjs
+- @tanstack/solid-query: /follow-lib-tanstack-ecosystem
+- @tanstack/solid-router: /follow-lib-tanstack-ecosystem
+- @solidjs/router: /learn-from-web
+- elysia: /follow-lib-elysia
+- drizzle-orm: /follow-lib-drizzle
+- zod: /follow-lib-zod
+- wrangler: /follow-service-cloudflare
+- cloudflare workers: /follow-service-cloudflare
+- probot: /follow-create-github-bots
 - unocss: /follow-lib-unocss
-- cloudflare workers: /follow-tool-wrangler
+- workos: /follow-service-workos
+- stripe: /follow-service-stripe
 
 ### 3. Platform
 
@@ -105,7 +108,7 @@ Development teams and open-source maintainers who want an AI-assisted, approval-
 - realize-implementation: /realize-implementation
 - refactor-codebase: /refactor-codebase
 - run-verify: /run-verify
-- report-uxui: /report-uxui
+- review-uxui: /review-uxui
 - report-what-you-do: /report-what-you-do
 - deploy-to-cloudflare: /deploy-to-cloudflare
 - follow-create-bun-cli: /follow-create-bun-cli
@@ -141,16 +144,21 @@ All `AGENTS.md` files are written in English only.
 ### 3. Tech Mapping
 
 - `bun`: /follow-lang-bun
-- `solid-js`: /follow-lib-solid
-- `@tanstack/solid-query`: /follow-lib-tanstack-query
-- `@tanstack/solid-router`: /follow-lib-tanstack-router
-- `@solidjs/router`: /follow-lib-solid-router
-- `elysia`: /follow-framework-elysia
-- `drizzle-orm`: /follow-tool-drizzle
-- `zod`: /follow-tool-zod
-- `wrangler`: /follow-tool-wrangler
-- `probot`: /follow-github-app
+- `typescript`: /follow-lang-typescript
+- `vite`: /follow-tool-vite
+- `solid-js`: /follow-framework-solidjs
+- `@tanstack/solid-query`: /follow-lib-tanstack-ecosystem
+- `@tanstack/solid-router`: /follow-lib-tanstack-ecosystem
+- `@solidjs/router`: /learn-from-web
+- `elysia`: /follow-lib-elysia
+- `drizzle-orm`: /follow-lib-drizzle
+- `zod`: /follow-lib-zod
+- `wrangler`: /follow-service-cloudflare
+- `cloudflare workers`: /follow-service-cloudflare
+- `probot`: /follow-create-github-bots
 - `unocss`: /follow-lib-unocss
+- `workos`: /follow-service-workos
+- `stripe`: /follow-service-stripe
 
 ### 4. Workspace Rules
 
