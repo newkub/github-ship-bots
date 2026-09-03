@@ -1,7 +1,7 @@
 import apiApp from "@ship-feed/api";
 import botWorker from "@ship-feed/bot/worker";
 import orchestratorWorker from "@ship-feed/orchestrator/worker";
-import { timingSafeEquals } from "@ship-feed/shared";
+import { constantTimeCompare } from "@ship-feed/shared";
 import { toBotEnv } from "./lib/env-adapter";
 import type { Env } from "@ship-feed/shared";
 
@@ -14,13 +14,19 @@ export default {
     }
 
     if (url.pathname === "/dashboard") {
-      return new Response(null, { status: 301, headers: { Location: "/dashboard/" } });
+      return new Response(null, {
+        status: 301,
+        headers: { Location: `/dashboard/${url.search}` },
+      });
     }
 
     if (url.pathname === "/orchestrate" || url.pathname === "/ship") {
+      if (request.method !== "POST") {
+        return new Response("method not allowed", { status: 405 });
+      }
       const cronSecret = env.CRON_SECRET;
       const provided = request.headers.get("x-cron-secret") ?? "";
-      if (!cronSecret || cronSecret.length < 32 || !timingSafeEquals(provided, cronSecret)) {
+      if (!cronSecret || cronSecret.length < 32 || !(await constantTimeCompare(provided, cronSecret))) {
         return new Response("unauthorized", { status: 401 });
       }
       return orchestratorWorker.fetch(request, env);
@@ -28,7 +34,8 @@ export default {
 
     if (request.method === "GET" && url.pathname === "/") {
       if (env.ASSETS) {
-        const asset = await env.ASSETS.fetch(request);
+        const indexUrl = new URL("/index.html", url);
+        const asset = await env.ASSETS.fetch(new Request(indexUrl.toString(), request));
         if (asset.status !== 404) return asset;
       }
     }
@@ -46,5 +53,9 @@ export default {
       return env.ASSETS.fetch(request);
     }
     return apiRes;
+  },
+
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
+    await orchestratorWorker.scheduled(controller, env, ctx);
   },
 };

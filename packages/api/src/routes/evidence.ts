@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
-import { timingSafeEquals } from "@ship-feed/shared";
+import { constantTimeCompare } from "@ship-feed/shared";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { withEnv } from "../lib/env";
@@ -61,7 +61,7 @@ evidence.post("/", async ({ request, set, env, body }) => {
 
 evidence.post("/webhook", async ({ request, set, env, body }) => {
   const token = request.headers.get("x-bot-token") ?? "";
-  if (!env.BOT_TOKEN || env.BOT_TOKEN.length < 32 || !timingSafeEquals(token, env.BOT_TOKEN)) {
+  if (!env.BOT_TOKEN || env.BOT_TOKEN.length < 32 || !(await constantTimeCompare(token, env.BOT_TOKEN))) {
     set.status = 401;
     return { error: "unauthorized" };
   }

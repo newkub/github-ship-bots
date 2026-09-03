@@ -1,10 +1,20 @@
 export type Theme = "dark" | "light";
 
+const THEMES: readonly Theme[] = ["dark", "light"];
+
+function isTheme(value: unknown): value is Theme {
+  return typeof value === "string" && THEMES.some((theme) => theme === value);
+}
+
 export function getInitialTheme(): Theme {
-  try {
-    const saved = localStorage.getItem("sf-theme") as Theme | null;
-    if (saved) return saved;
-  } catch {}
+  if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+    try {
+      const saved = localStorage.getItem("sf-theme");
+      if (saved && isTheme(saved)) return saved;
+    } catch (error) {
+      console.warn("Failed to read theme from localStorage", error);
+    }
+  }
 
   if (typeof window === "undefined") return "dark";
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -15,12 +25,18 @@ export function applyTheme(theme: Theme) {
 
   document.documentElement.setAttribute("data-theme", theme);
 
-  try {
-    localStorage.setItem("sf-theme", theme);
-  } catch {}
+  if (typeof localStorage !== "undefined") {
+    try {
+      localStorage.setItem("sf-theme", theme);
+    } catch (error) {
+      console.warn("Failed to persist theme to localStorage", error);
+    }
+  }
 
-  const meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
-  if (meta) meta.content = theme === "dark" ? "#020617" : "#f8fafc";
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta && meta instanceof HTMLMetaElement) {
+    meta.content = theme === "dark" ? "#020617" : "#f8fafc";
+  }
 }
 
 export function toggleTheme(theme: Theme): Theme {
