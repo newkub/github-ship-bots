@@ -29,6 +29,7 @@ export function rowToCard(row: Record<string, unknown>): ShipCard {
     phase: row.phase as ShipCard["phase"],
     score: row.score as number,
     evidenceIds: parseEvidenceIds(row.evidence_ids as string),
+    creatorId: (row.creator_id as string) || undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };

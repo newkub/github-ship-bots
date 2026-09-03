@@ -10,9 +10,14 @@ repos.get("/", async ({ request, set, env }) => {
     set.status = 401;
     return { error: "unauthorized" };
   }
-  const { results } = await env.DB.prepare(
-    "SELECT DISTINCT repo_full_name as name FROM cards ORDER BY repo_full_name"
-  ).all<{ name: string }>();
+  const { results } = await env.DB
+    .prepare(
+      `SELECT DISTINCT repo_full_name as name FROM cards
+       WHERE creator_id = ? OR repo_full_name IN (SELECT repo_full_name FROM user_repos WHERE user_id = ?)
+       ORDER BY repo_full_name`
+    )
+    .bind(session.id, session.id)
+    .all<{ name: string }>();
   return (results ?? []).map((r) => r.name);
 });
 

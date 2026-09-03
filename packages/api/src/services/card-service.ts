@@ -12,9 +12,26 @@ export async function fetchCardById(db: Env["DB"], id: string): Promise<ShipCard
   return rowToCard(row);
 }
 
+export async function requireCard(db: Env["DB"], id: string, userId: string): Promise<ShipCard | undefined> {
+  const card = await fetchCardById(db, id);
+  if (!card) return undefined;
+  if (!(await canAccessCard(db, card, userId))) return undefined;
+  return card;
+}
+
+export async function canAccessCard(db: Env["DB"], card: ShipCard, userId: string): Promise<boolean> {
+  if (card.creatorId === userId) return true;
+  const row = await db
+    .prepare("SELECT 1 FROM user_repos WHERE user_id = ? AND repo_full_name = ?")
+    .bind(userId, card.repoFullName)
+    .first();
+  return Boolean(row);
+}
+
 export async function insertCard(
   env: Env,
-  card: Omit<ShipCard, "id" | "score" | "createdAt" | "updatedAt" | "evidenceIds">
+  card: Omit<ShipCard, "id" | "score" | "createdAt" | "updatedAt" | "evidenceIds">,
+  creatorId?: string
 ): Promise<ShipCard> {
   const id = generateId();
   const score = await autoScore(env.DB, card.repoFullName, {
@@ -25,7 +42,7 @@ export async function insertCard(
     phase: card.phase,
   });
   const evidenceIds: string[] = [];
-  const inserted: ShipCard = { ...card, id, score, evidenceIds, createdAt: now(), updatedAt: now() };
+  const inserted: ShipCard = { ...card, id, creatorId, score, evidenceIds, createdAt: now(), updatedAt: now() };
   if (shouldAutoApprove(env, inserted)) {
     inserted.status = "approved";
     await updateLearningWeights(env.DB, inserted, "approve");
@@ -33,11 +50,12 @@ export async function insertCard(
   await notifyCardStatus(env, inserted, inserted.status === "approved" ? "approved" : "created");
   await env.DB
     .prepare(
-      `INSERT INTO cards (id, kind, title, description, status, repo_full_name, issue_number, pull_number, impact, risk, effect, phase, score, evidence_ids, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO cards (id, creator_id, kind, title, description, status, repo_full_name, issue_number, pull_number, impact, risk, effect, phase, score, evidence_ids, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       id,
+      creatorId ?? null,
       card.kind,
       card.title,
       card.description,

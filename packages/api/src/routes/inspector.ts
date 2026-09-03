@@ -32,17 +32,21 @@ inspector.post("/", async ({ request, set, env, body }) => {
     .bind(id, body.url, body.selector, body.prompt, now())
     .run();
 
-  const card = await insertCard(env, {
-    kind: "work",
-    title: body.prompt,
-    description: `Inspector: ${body.url}\nSelector: ${body.selector}`,
-    status: "pending",
-    repoFullName: body.repoFullName,
-    impact: body.impact,
-    risk: body.risk,
-    effect: body.effect,
-    phase: body.phase,
-  });
+  const card = await insertCard(
+    env,
+    {
+      kind: "work",
+      title: body.prompt,
+      description: `Inspector: ${body.url}\nSelector: ${body.selector}`,
+      status: "pending",
+      repoFullName: body.repoFullName,
+      impact: body.impact,
+      risk: body.risk,
+      effect: body.effect,
+      phase: body.phase,
+    },
+    session.id
+  );
 
   await env.DB.prepare("UPDATE inspector_annotations SET card_id = ? WHERE id = ?")
     .bind(card.id, id)

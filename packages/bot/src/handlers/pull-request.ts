@@ -21,6 +21,7 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
       description: pull_request.body ?? "",
       repoFullName: `${payload.repository.owner.login}/${payload.repository.name}`,
       pullNumber: pull_request.number,
+      creatorLogin: payload.sender?.login,
     });
 
     try {

@@ -20,6 +20,7 @@ export function issuesHandler(webhooks: ShipFeedWebhooks) {
       description: issue.body ?? "",
       repoFullName: `${payload.repository.owner.login}/${payload.repository.name}`,
       issueNumber: issue.number,
+      creatorLogin: payload.sender?.login,
     });
 
     const body = renderCard({

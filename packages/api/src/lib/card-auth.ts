@@ -8,6 +8,10 @@ export function notFound() {
   return { error: "card not found" };
 }
 
+export function forbidden() {
+  return { error: "forbidden" };
+}
+
 export function ensureAuth(
   set: { status?: number | string },
   user: Awaited<ReturnType<typeof getSession>>

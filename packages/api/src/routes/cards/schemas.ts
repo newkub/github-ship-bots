@@ -19,6 +19,7 @@ export const cardInputSchema = z.object({
   risk: riskSchema.default("medium"),
   effect: effectSchema.default("medium"),
   phase: phaseSchema.default("mvp"),
+  creatorLogin: z.string().optional(),
 });
 
 export const swipeSchema = z.object({

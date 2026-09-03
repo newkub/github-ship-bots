@@ -12,6 +12,7 @@ export const users = sqliteTable("users", {
 
 export const cards = sqliteTable("cards", {
   id: text("id").primaryKey(),
+  creatorId: text("creator_id"),
   kind: text("kind").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -208,6 +209,14 @@ export const agentSdks = sqliteTable("agent_sdks", {
   config: text("config").notNull().default("{}"),
   createdAt: text("created_at").notNull(),
 });
+
+export const userRepos = sqliteTable("user_repos", {
+  userId: text("user_id").notNull(),
+  repoFullName: text("repo_full_name").notNull(),
+  createdAt: text("created_at").notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.repoFullName] }),
+}));
 
 export const notificationChannels = sqliteTable("notification_channels", {
   id: text("id").primaryKey(),

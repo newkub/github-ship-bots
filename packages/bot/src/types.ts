@@ -40,6 +40,7 @@ export interface PullRequest {
 export interface IssueOpenedPayload {
   repository: Repository;
   issue: Issue;
+  sender?: { login: string } | null;
 }
 
 export interface IssueCommentPayload {
@@ -51,6 +52,7 @@ export interface IssueCommentPayload {
 export interface PullRequestOpenedPayload {
   repository: Repository;
   pull_request: PullRequest;
+  sender?: { login: string } | null;
 }
 
 export interface ShipFeedContext<T = unknown> {
