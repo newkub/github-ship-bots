@@ -70,6 +70,15 @@ export async function rejectCardAction(cardId: string) {
 export function loginUrl() {
   return `${API_URL}/auth/login`;
 }
+export async function logout(): Promise<void> {
+  const res = await fetch(`${API_URL}/auth/logout`, { method: "POST", credentials: "include" });
+  if (!res.ok) throw new Error("Failed to log out");
+}
+export async function createCheckout(): Promise<{ url: string }> {
+  const res = await fetch(`${API_URL}/api/stripe/checkout`, { method: "POST", credentials: "include" });
+  if (!res.ok) throw new Error("Failed to start checkout");
+  return res.json();
+}
 export async function fetchPlugins(): Promise<{ id: string; name: string; description: string; installs: number; icon: string; installed: boolean }[]> {
   const res = await fetch(`${API_URL}/api/plugins`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch plugins");

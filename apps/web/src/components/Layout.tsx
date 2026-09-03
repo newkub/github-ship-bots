@@ -1,14 +1,36 @@
 import { A } from "@solidjs/router";
-import { useQuery } from "@tanstack/solid-query";
-import { Home, GitBranch, CreditCard, MousePointer, Puzzle, Settings, LogIn, LayoutDashboard } from "lucide-solid";
-import { fetchSession, loginUrl } from "../api";
-import { Show } from "solid-js";
+import { useQuery, useQueryClient } from "@tanstack/solid-query";
+import {
+  GitBranch,
+  CreditCard,
+  MousePointer,
+  Puzzle,
+  Settings,
+  LogOut,
+  LayoutDashboard,
+} from "lucide-solid";
+import { fetchSession, loginUrl, logout } from "../api";
+import { Show, createEffect } from "solid-js";
 
 export default function Layout(props: { children?: any }) {
+  const queryClient = useQueryClient();
   const session = useQuery(() => ({ queryKey: ["session"], queryFn: fetchSession }));
   const user = () => session.data?.user;
 
-  const nav = (href: string, icon: typeof Home, label: string) => {
+  createEffect(() => {
+    if (!session.isPending && !user()) {
+      // Not authenticated and session resolved: redirect to WorkOS login.
+      window.location.href = loginUrl();
+    }
+  });
+
+  const handleLogout = async () => {
+    await logout();
+    queryClient.clear();
+    window.location.href = "/";
+  };
+
+  const nav = (href: string, icon: typeof LayoutDashboard, label: string) => {
     const Icon = icon;
     return (
       <A
@@ -31,37 +53,49 @@ export default function Layout(props: { children?: any }) {
           <span class="font-bold text-lg">ship-feed</span>
         </A>
 
-        <nav class="space-y-1 flex-1">
-          {nav("/", LayoutDashboard, "Dashboard")}
-          {nav("/repos", GitBranch, "Repositories")}
-          {nav("/billing", CreditCard, "Billing")}
-          {nav("/inspector", MousePointer, "Inspector")}
-          {nav("/marketplace", Puzzle, "Marketplace")}
-          {nav("/settings", Settings, "Settings")}
-        </nav>
+        <Show when={session.isPending}>
+          <div class="flex-1 flex items-center justify-center text-gray-500 text-sm">
+            <div class="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mr-2" />
+            Checking session…
+          </div>
+        </Show>
 
-        <div class="border-t border-gray-200 pt-4">
-          <Show
-            when={user()}
-            fallback={
-              <a
-                href={loginUrl()}
-                class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+        <Show when={!session.isPending}>
+          <Show when={user()} fallback={null}>
+            <nav class="space-y-1 flex-1">
+              {nav("/", LayoutDashboard, "Dashboard")}
+              {nav("/repos", GitBranch, "Repositories")}
+              {nav("/billing", CreditCard, "Billing")}
+              {nav("/inspector", MousePointer, "Inspector")}
+              {nav("/marketplace", Puzzle, "Marketplace")}
+              {nav("/settings", Settings, "Settings")}
+            </nav>
+
+            <div class="border-t border-gray-200 pt-4 space-y-2">
+              <div class="px-4 py-2">
+                <div class="text-sm font-medium">{user()?.githubLogin ?? "User"}</div>
+                <div class="text-xs text-gray-500 capitalize">{user()?.plan ?? "free"} plan</div>
+              </div>
+              <button
+                onClick={handleLogout}
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
               >
-                <LogIn size={18} />
-                Sign in with GitHub
-              </a>
-            }
-          >
-            <div class="px-4 py-2">
-              <div class="text-sm font-medium">{user()?.githubLogin ?? "User"}</div>
-              <div class="text-xs text-gray-500 capitalize">{user()?.plan ?? "free"} plan</div>
+                <LogOut size={18} />
+                Sign out
+              </button>
             </div>
           </Show>
-        </div>
+        </Show>
       </aside>
 
-      <main class="flex-1 overflow-auto p-8">{props.children}</main>
+      <main class="flex-1 overflow-auto p-8">
+        <Show when={session.error}>
+          <div class="rounded-2xl bg-rose-50 border border-rose-100 p-6 text-rose-700 mb-6">
+            Failed to verify your session. <a href={loginUrl()} class="underline">Sign in again</a>.
+          </div>
+        </Show>
+        <Show when={user()}>{props.children}</Show>
+      </main>
     </div>
   );
 }
