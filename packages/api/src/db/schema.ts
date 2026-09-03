@@ -76,6 +76,13 @@ export const inspectorAnnotations = sqliteTable("inspector_annotations", {
   createdAt: text("created_at").notNull(),
 });
 
+export const webhookEvents = sqliteTable("webhook_events", {
+  id: text("id").primaryKey(),
+  stripeEventId: text("stripe_event_id").notNull().unique(),
+  eventType: text("event_type").notNull(),
+  processedAt: text("processed_at").notNull(),
+});
+
 export const pushSubscriptions = sqliteTable("push_subscriptions", {
   id: text("id").primaryKey(),
   userId: text("user_id"),

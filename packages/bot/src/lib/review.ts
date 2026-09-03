@@ -1,4 +1,5 @@
 import { getBotEnv } from "./api";
+import { fetchExternal, getCorrelationId } from "@ship-feed/shared";
 
 function heuristicReview(diff: string): string {
   const added = (diff.match(/^\+[^+]/gm) ?? []).length;
@@ -34,8 +35,8 @@ function heuristicReview(diff: string): string {
   return lines.join("\n");
 }
 
-async function openaiReview(diff: string, apiKey: string, baseUrl: string, model: string): Promise<string> {
-  const res = await fetch(`${baseUrl}/chat/completions`, {
+async function openaiReview(diff: string, apiKey: string, baseUrl: string, model: string, correlationId: string): Promise<string> {
+  const res = await fetchExternal("openai", "chat.completions", correlationId, `${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -65,8 +66,9 @@ export async function generateReviewComment(diff: string): Promise<string> {
   }
   const baseUrl = env.OPENAI_API_URL || "https://api.openai.com/v1";
   const model = env.OPENAI_MODEL || "gpt-4o-mini";
+  const correlationId = getCorrelationId();
   try {
-    return await openaiReview(diff, env.OPENAI_API_KEY, baseUrl, model);
+    return await openaiReview(diff, env.OPENAI_API_KEY, baseUrl, model, correlationId);
   } catch {
     return heuristicReview(diff);
   }

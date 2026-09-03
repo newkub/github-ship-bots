@@ -1,4 +1,5 @@
 import type { Env, ShipCard } from "@ship-feed/shared";
+import { fetchExternal, getCorrelationId } from "@ship-feed/shared";
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -11,29 +12,30 @@ export async function notifyCardStatus(env: Env, card: ShipCard, event: "created
   const title = `[ship-feed] ${event}: ${card.title}`;
   const body = `repo: ${card.repoFullName}\nscore: ${card.score.toFixed(1)}\nstatus: ${card.status}`;
   const githubWeb = env.GITHUB_WEB_URL || "https://github.com";
+  const correlationId = getCorrelationId();
   if (card.issueNumber) {
     const url = `${githubWeb}/${card.repoFullName}/issues/${card.issueNumber}`;
-    const tasks = [notifySlack(env, title, body, url), notifyTelegram(env, title, body, url)];
+    const tasks = [notifySlack(env, title, body, correlationId, url), notifyTelegram(env, title, body, correlationId, url)];
     await Promise.all(tasks.map((p) => p.catch(() => undefined)));
   } else if (card.pullNumber) {
     const url = `${githubWeb}/${card.repoFullName}/pull/${card.pullNumber}`;
-    const tasks = [notifySlack(env, title, body, url), notifyTelegram(env, title, body, url)];
+    const tasks = [notifySlack(env, title, body, correlationId, url), notifyTelegram(env, title, body, correlationId, url)];
     await Promise.all(tasks.map((p) => p.catch(() => undefined)));
   } else {
-    const tasks = [notifySlack(env, title, body), notifyTelegram(env, title, body)];
+    const tasks = [notifySlack(env, title, body, correlationId), notifyTelegram(env, title, body, correlationId)];
     await Promise.all(tasks.map((p) => p.catch(() => undefined)));
   }
 }
-async function notifySlack(env: Env, title: string, body: string, url?: string) {
+async function notifySlack(env: Env, title: string, body: string, correlationId: string, url?: string) {
   if (!env.SLACK_WEBHOOK_URL) return;
   const text = url ? `${title}\n${body}\n${url}` : `${title}\n${body}`;
-  await fetch(env.SLACK_WEBHOOK_URL, {
+  await fetchExternal("slack", "send", correlationId, env.SLACK_WEBHOOK_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ text }),
   });
 }
-async function notifyTelegram(env: Env, title: string, body: string, url?: string) {
+async function notifyTelegram(env: Env, title: string, body: string, correlationId: string, url?: string) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
   const safeTitle = escapeHtml(title);
   const safeBody = escapeHtml(body);
@@ -41,7 +43,7 @@ async function notifyTelegram(env: Env, title: string, body: string, url?: strin
   const text = safeUrl
     ? `<b>${safeTitle}</b>\n<pre>${safeBody}</pre>\n<a href="${safeUrl}">Open</a>`
     : `<b>${safeTitle}</b>\n<pre>${safeBody}</pre>`;
-  await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+  await fetchExternal("telegram", "send", correlationId, `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
