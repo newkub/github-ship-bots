@@ -23,7 +23,7 @@ export async function checkRateLimit(
   windowSeconds = 60
 ): Promise<RateLimitResult> {
   if (!env.SESSION_KV) {
-    return { allowed: true, remaining: limit, retryAfter: 0 };
+    return { allowed: false, remaining: 0, retryAfter: windowSeconds };
   }
 
   const ip = clientIp(request);
@@ -33,7 +33,7 @@ export async function checkRateLimit(
   const current = await env.SESSION_KV.get(key);
   const count = current ? parseInt(current, 10) : 0;
   if (Number.isNaN(count)) {
-    return { allowed: true, remaining: limit, retryAfter: 0 };
+    return { allowed: false, remaining: 0, retryAfter: windowSeconds };
   }
 
   if (count >= limit) {

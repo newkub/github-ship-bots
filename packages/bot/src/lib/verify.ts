@@ -1,3 +1,5 @@
+import { timingSafeEquals } from "@ship-feed/shared";
+
 export async function verifyWebhookSignature(
   payload: string,
   signature: string,
@@ -27,7 +29,7 @@ export async function verifyWebhookSignature(
   );
   const expectedSignature = "sha256=" + array2hex(signed);
 
-  if (!safeCompare(expectedSignature, signature)) {
+  if (!timingSafeEquals(expectedSignature, signature)) {
     throw new Error("Signature does not match event payload and secret");
   }
 }
@@ -38,18 +40,4 @@ function array2hex(arr: ArrayBuffer): string {
     .join("");
 }
 
-function safeCompare(expected: string, actual: string): boolean {
-  const lenExpected = expected.length;
-  let result = 0;
 
-  if (lenExpected !== actual.length) {
-    actual = expected;
-    result = 1;
-  }
-
-  for (let i = 0; i < lenExpected; i++) {
-    result |= expected.charCodeAt(i) ^ actual.charCodeAt(i);
-  }
-
-  return result === 0;
-}
