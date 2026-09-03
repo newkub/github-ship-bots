@@ -56,7 +56,11 @@ jobs:
           console.log('triggers found:', (triggers || []).length);
 
           for (const t of triggers || []) {
-            const id = t.uuid || t.id;
+            const id = t.trigger_uuid;
+            if (!id) {
+              console.error('Trigger has no trigger_uuid', t);
+              continue;
+            }
             await api('/accounts/' + accountId + '/builds/triggers/' + id, { method: 'DELETE' });
             console.log('deleted trigger', id, t.trigger_name);
           }
