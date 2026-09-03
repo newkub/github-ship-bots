@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { ShipFeedWebhooks, ShipFeedHandler } from "../types";
 import { getBotEnv } from "../lib/api";
 
@@ -13,7 +12,7 @@ async function upsertUser(db: NonNullable<ReturnType<typeof getBotEnv>["DB"]>, g
     .first<{ id: string }>();
   if (existing) return existing.id;
 
-  const id = randomUUID();
+  const id = crypto.randomUUID();
   await db
     .prepare("INSERT INTO users (id, github_login, plan, created_at) VALUES (?, ?, ?, ?)")
     .bind(id, githubLogin, "free", now())
