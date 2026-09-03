@@ -1,4 +1,4 @@
-import type { ShipCard, User } from "@ship-feed/shared";
+import type { ShipCard, User, EvidenceRecord, CommentTemplate, CardComment } from "@ship-feed/shared";
 export const API_URL = import.meta.env.VITE_API_URL;
 if (!API_URL) throw new Error("Missing VITE_API_URL");
 export async function fetchCards(): Promise<ShipCard[]> {
@@ -26,7 +26,7 @@ export async function fetchCard(id: string): Promise<ShipCard> {
   if (!res.ok) throw new Error("Failed to fetch card");
   return res.json();
 }
-export async function fetchEvidence(cardId: string): Promise<Record<string, unknown>[]> {
+export async function fetchEvidence(cardId: string): Promise<EvidenceRecord[]> {
   const res = await fetch(`${API_URL}/api/cards/${cardId}/evidence`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch evidence");
   return res.json();
@@ -133,7 +133,7 @@ export async function fetchVotes(id: string): Promise<{
   if (!res.ok) throw new Error("Failed to fetch votes");
   return res.json();
 }
-export async function fetchTemplates(repo?: string): Promise<{ id: string; name: string; body: string; repoFullName?: string }[]> {
+export async function fetchTemplates(repo?: string): Promise<CommentTemplate[]> {
   const url = repo ? `${API_URL}/api/templates?repo=${encodeURIComponent(repo)}` : `${API_URL}/api/templates`;
   const res = await fetch(url, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch templates");
@@ -159,7 +159,7 @@ export async function applyTemplate(templateId: string, cardId: string) {
   if (!res.ok) throw new Error("Failed to apply template");
   return res.json();
 }
-export async function fetchComments(cardId: string): Promise<{ id: string; user: string; body: string; postedToGitHub: boolean; createdAt: string }[]> {
+export async function fetchComments(cardId: string): Promise<CardComment[]> {
   const res = await fetch(`${API_URL}/api/cards/${cardId}/comments`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch comments");
   return res.json();

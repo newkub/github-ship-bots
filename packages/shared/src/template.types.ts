@@ -12,6 +12,7 @@ export interface CardComment {
   cardId: string;
   userId: string;
   templateId?: string;
+  user?: string;
   body: string;
   postedToGitHub: boolean;
   createdAt: string;
