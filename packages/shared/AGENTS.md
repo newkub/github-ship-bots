@@ -1,51 +1,51 @@
 ---
 name: shared
-description: Domain types and utilities shared across ship-feed
+description: Shared domain types, crypto, and card mapping for ship-feed
 related:
-  - AGENTS.md
-  - package.json
+  - ../../AGENTS.md
 ---
 
 ## Goal
 
-Provide a single source of truth for types, constants, and utilities used by all workspaces.
+Provide domain types, utilities, and card mapping used by all other workspaces.
 
 ## Scope
 
-A dependency-free package with shared TypeScript types and helpers.
+Zero-dependency (or dev-only types) shared package. Imported by `apps/*` and `packages/*`.
 
 ## Execute
 
 ### 1. Architecture
 
-- Language: TypeScript
-- Runtime: Bun
-- Exports: `src/index.ts`
+- bun: /follow-lang-bun
+- typescript: /learn-from-web
+- cloudflare workers types: /learn-from-web
 
 ### 2. Platform
 
-- Target: all other `@ship-feed/*` workspaces
-- Deployment: imported at build/bundle time
+- Imported by apps and packages
+- Not deployed independently
+- Entry: `src/index.ts`
 
 ### 3. Target User
 
-Other ship-feed packages and apps.
+Other workspaces in the monorepo.
 
 ### 4. Skills
 
-- bun: /follow-lang-bun
-- typescript: /follow-lang-typescript
+- report-what-you-do: /report-what-you-do
 
 ### 5. Workspaces
 
-- used by: `apps/landing`, `apps/web`, `apps/mobile`, `packages/api`, `packages/bot`, `packages/orchestrator`, `packages/worker`
+- `packages/shared`: use —
 
 ## Rules
 
-1. Keep this package dependency-free.
-2. Only export domain types and pure utilities.
-3. Do not import from other workspaces.
+- Keep the package free of runtime dependencies.
+- Split types into focused files under `src/types/`.
+- Centralize card mapping in `src/card-mapper.ts`.
+- Keep crypto helpers in `src/crypto.ts`.
 
 ## Expected Outcome
 
-Type-safe contracts across the entire monorepo.
+All workspaces import types and utilities from `packages/shared` without circular dependencies.

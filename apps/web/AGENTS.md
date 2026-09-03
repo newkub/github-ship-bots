@@ -1,57 +1,55 @@
 ---
 name: web
-description: Web dashboard for ship-feed cards, repos, billing, and settings
+description: Web dashboard for ship-feed
 related:
-  - AGENTS.md
-  - package.json
+  - ../../AGENTS.md
 ---
 
 ## Goal
 
-Provide a web dashboard where users view, manage, approve, and ship cards.
+Provide a desktop dashboard where maintainers can review cards, manage repositories, inspect evidence, and configure billing.
 
 ## Scope
 
-A SolidJS SPA served at `/dashboard/`. Uses `@solidjs/router` for routing and TanStack Query for remote state.
+Authenticated web dashboard. Talks to `packages/api` and uses `packages/shared` types.
 
 ## Execute
 
 ### 1. Architecture
 
-- Framework: SolidJS
-- Router: `@solidjs/router`
-- State: `@tanstack/solid-query`
-- Styling: UnoCSS
-- Icons: lucide-solid
-- Build output: `docs/dashboard/`
+- solid-js: /follow-lib-solid
+- @solidjs/router: /follow-lib-solid-router
+- @tanstack/solid-query: /follow-lib-tanstack-query
+- unocss: /follow-lib-unocss
+- vite: /learn-from-web
+- zod: /follow-tool-zod
 
 ### 2. Platform
 
-- Runtime: Bun
-- Build tool: Vite
-- Deployment: Cloudflare Workers static assets
-- Target: desktop and tablet browsers
+- Client-side SPA built with Vite
+- Deployed to Cloudflare Pages via `docs/dashboard/` output
+- Build output: `../../docs/dashboard/`
 
 ### 3. Target User
 
-Team members and maintainers who manage cards from a browser.
+Maintainers and team leads who prefer a desktop browser for managing the ship pipeline.
 
 ### 4. Skills
 
-- solid-js: /follow-lib-solid
-- tanstack-solid-query: /follow-lib-tanstack-query
-- unocss: /follow-lib-unocss
+- report-uxui: /report-uxui
+- report-uxui-sketch: /report-uxui-sketch
 
 ### 5. Workspaces
 
-- uses: `packages/shared`
+- `apps/web`: use `packages/shared`
 
 ## Rules
 
-1. Reuse the shared type definitions from `packages/shared`.
-2. Prefer `createQuery` and `createMutation` over manual `fetch`.
-3. Keep pages responsive and dark-themed.
+- Use `@solidjs/router` for in-app navigation.
+- Use TanStack Query for all server state.
+- Reuse types from `packages/shared`.
+- Keep page components under `src/pages/` and feature components under `src/components/`.
 
 ## Expected Outcome
 
-A reliable, fast dashboard for the full ship-feed workflow.
+Dashboard builds to `docs/dashboard/` with real-time card queues, repo settings, and billing views.

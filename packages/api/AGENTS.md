@@ -1,63 +1,61 @@
 ---
 name: api
-description: Backend HTTP API for ship-feed
+description: HTTP API for ship-feed
 related:
-  - AGENTS.md
-  - package.json
+  - ../../AGENTS.md
 ---
 
 ## Goal
 
-Expose a secure, type-safe HTTP API for cards, auth, evidence, billing, and inspector features.
+Expose a type-safe HTTP API for cards, auth, evidence, billing, learning, and notifications.
 
 ## Scope
 
-A Cloudflare Worker package that currently uses Hono and is migrating to Elysia with Drizzle ORM and Zod.
+Elysia-based API mounted by `packages/worker`. Uses D1 for persistence, R2 for evidence, KV for sessions, WorkOS for auth, and Stripe for billing.
 
 ## Execute
 
 ### 1. Architecture
 
-- Server: Hono and Elysia
-- Database: Cloudflare D1 with Drizzle ORM
-- Validation: Zod
-- Storage: Cloudflare R2, KV
-- Auth: WorkOS
-- Billing: Stripe
-- Web Push: @mmmike/web-push
-- Deployment: Wrangler
+- elysia: /follow-framework-elysia
+- zod: /follow-tool-zod
+- drizzle-orm: /follow-tool-drizzle
+- stripe: /learn-from-web
+- @workos-inc/node: /learn-from-web
+- @mmmike/web-push: /learn-from-web
+- cloudflare workers types: /learn-from-web
 
 ### 2. Platform
 
-- Runtime: Bun
-- Serverless: Cloudflare Workers
-- Database: D1 (SQLite)
-- Target: `packages/worker`
+- Runs on Cloudflare Workers
+- Database: Cloudflare D1 (SQLite)
+- Object storage: Cloudflare R2
+- Session store: Cloudflare KV
+- Auth: WorkOS
+- Billing: Stripe
+- Exports: `./src/index.ts`
 
 ### 3. Target User
 
-Other workspaces and the GitHub bot that call this API.
+Frontend clients (web, mobile) and the GitHub bot. Not called directly by end users.
 
 ### 4. Skills
 
-- bun: /follow-lang-bun
-- hono: /follow-framework-hono
-- elysia: /follow-framework-elysia
-- drizzle: /follow-tool-drizzle
-- zod: /follow-tool-zod
-- wrangler: /follow-tool-wrangler
+- follow-framework-elysia: /follow-framework-elysia
+- follow-tool-zod: /follow-tool-zod
+- follow-tool-drizzle: /follow-tool-drizzle
 
 ### 5. Workspaces
 
-- uses: `packages/orchestrator`, `packages/shared`
-- used by: `packages/worker`
+- `packages/api`: use `packages/orchestrator`, `packages/shared`
 
 ## Rules
 
-1. All new routes use Zod for input validation.
-2. New tables use Drizzle ORM with D1.
-3. Keep the API backward-compatible while migrating from Hono to Elysia.
+- Keep routes under `src/routes/`.
+- Use `withEnv` for request-scoped environment.
+- Validate all inputs with Zod.
+- Run `bun run db:migrate:local` before local tests.
 
 ## Expected Outcome
 
-A typed, validated, and well-documented backend API.
+API mounts cleanly in `packages/worker` and passes lint and tests.

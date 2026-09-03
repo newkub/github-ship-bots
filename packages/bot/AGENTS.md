@@ -1,56 +1,53 @@
 ---
 name: bot
-description: GitHub App worker for ship-feed
+description: GitHub App bot for ship-feed
 related:
-  - AGENTS.md
-  - package.json
+  - ../../AGENTS.md
 ---
 
 ## Goal
 
-React to GitHub issues, pull requests, and comments by creating and updating cards.
+Receive GitHub webhooks and turn issues and pull requests into ship cards, then react to `/approve`, `/reject`, and `/ship` comments.
 
 ## Scope
 
-A Probot + Octokit-based GitHub App that runs on Cloudflare Workers via `packages/worker`.
+Probot/Octokit GitHub App. Mounted by `packages/worker`. Uses `packages/shared` types and no direct database access.
 
 ## Execute
 
 ### 1. Architecture
 
-- Framework: Probot
-- GitHub SDK: Octokit (`@octokit/app`, `@octokit/rest`, `@octokit/webhooks`)
-- Worker entry: `packages/worker`
-- Deployment: Wrangler
+- probot: /follow-github-app
+- @octokit/rest: /learn-from-web
+- @octokit/app: /learn-from-web
+- cloudflare workers types: /learn-from-web
 
 ### 2. Platform
 
-- Runtime: Bun
-- Serverless: Cloudflare Workers
-- Trigger: GitHub webhooks
-- Target: `packages/worker`
+- Runs as part of `packages/worker` on Cloudflare Workers
+- Local dev: `probot run ./src/index.ts`
+- Exports: `./src/index.ts`, `./src/worker.ts`
 
 ### 3. Target User
 
-GitHub repositories that install the ship-feed GitHub App.
+GitHub repositories that have installed the ship-feed app.
 
 ### 4. Skills
 
-- bun: /follow-lang-bun
-- probot: /follow-github-app
-- wrangler: /follow-tool-wrangler
+- follow-github-app: /follow-github-app
+- implement-github-issue: /implement-github-issue
 
 ### 5. Workspaces
 
-- uses: `packages/shared`
-- used by: `packages/worker`
+- `packages/bot`: use `packages/shared`
 
 ## Rules
 
-1. Parse `/approve`, `/reject`, and `/ship` commands from comments.
-2. Create cards in the database for new issues and pull requests.
-3. Keep webhook handlers stateless.
+- Keep handlers under `src/handlers/`.
+- Use `runWithBotEnv` for request-scoped bot environment.
+- Avoid global mutable bot state.
+- Use timing-safe comparison for secrets.
 
 ## Expected Outcome
 
-A responsive GitHub App that bridges GitHub and the ship-feed pipeline.
+Bot responds to issues and pull requests and routes commands back to the API and orchestrator.

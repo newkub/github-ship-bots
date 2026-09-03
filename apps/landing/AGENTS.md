@@ -2,56 +2,53 @@
 name: landing
 description: Marketing landing site for ship-feed
 related:
-  - AGENTS.md
-  - package.json
+  - ../../AGENTS.md
 ---
 
 ## Goal
 
-Present ship-feed to visitors and guide them to install the GitHub App or open the dashboard.
+Provide a fast, responsive marketing site that explains ship-feed and drives users to install the GitHub app and open the dashboard.
 
 ## Scope
 
-A single-page application split into routes: `/`, `/about`, `/features`, `/how-it-works`, `/commands`, `/install`. Built with SolidJS, TanStack Router, and UnoCSS.
+Static landing site with multiple routes and scroll-reveal animations. No live data or auth.
 
 ## Execute
 
 ### 1. Architecture
 
-- Framework: SolidJS
-- Router: `@tanstack/solid-router`
-- Styling: UnoCSS
-- Animation: animejs
-- Icons: lucide-solid
-- Build output: `docs/`
+- solid-js: /follow-lib-solid
+- @tanstack/solid-router: /follow-lib-tanstack-router
+- unocss: /follow-lib-unocss
+- animejs: /learn-from-web
+- vite: /learn-from-web
 
 ### 2. Platform
 
-- Runtime: Bun
-- Build tool: Vite
-- Deployment: Cloudflare Pages / Workers static assets
-- Target: web browsers
+- Client-side SPA built with Vite
+- Deployed to Cloudflare Pages via `docs/` output
+- Build output: `../../docs/`
 
 ### 3. Target User
 
-Visitors and potential users evaluating ship-feed before installing the GitHub App.
+First-time visitors and open-source maintainers evaluating ship-feed before installing the GitHub app.
 
 ### 4. Skills
 
-- unocss: /follow-lib-unocss
-- solid-js: /follow-lib-solid
-- tanstack-solid-router: /follow-lib-tanstack-router
+- report-uxui: /report-uxui
+- report-uxui-sketch: /report-uxui-sketch
 
 ### 5. Workspaces
 
-- uses: `packages/shared`
+- `apps/landing`: use —
 
 ## Rules
 
-1. Keep pages route-based, not hash-based.
-2. Install buttons link to `/install` before sending users to GitHub.
-3. Maintain dark, indigo/emerald/orange/purple visual language.
+- Use UnoCSS for all styles.
+- Use animejs only for scroll-reveal and micro-interactions.
+- Keep landing routes under `src/pages/`.
+- Link install CTAs to `/install` instead of new tabs.
 
 ## Expected Outcome
 
-A fast, responsive marketing site with clear navigation and consistent visuals.
+Landing site builds to `docs/` with clear product messaging and fast first paint.

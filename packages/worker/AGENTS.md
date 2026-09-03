@@ -2,57 +2,53 @@
 name: worker
 description: Cloudflare Worker entry for ship-feed
 related:
-  - AGENTS.md
-  - package.json
+  - ../../AGENTS.md
 ---
 
 ## Goal
 
-Serve the landing, dashboard, and mobile static assets plus route GitHub webhooks, API calls, and cron triggers to the correct workers.
+Mount the API, bot, and orchestrator behind a single Cloudflare Worker with routing, static assets, and environment adaptation.
 
 ## Scope
 
-The top-level Cloudflare Worker that mounts `packages/api`, `packages/bot`, and `packages/orchestrator` and serves static assets.
+The top-level worker entry. Routes `/api/*` to `packages/api`, `/webhook` to `packages/bot`, `/orchestrate` and cron to `packages/orchestrator`, and serves static assets.
 
 ## Execute
 
 ### 1. Architecture
 
-- Runtime: Cloudflare Workers
-- Tooling: Wrangler
-- Mounted workers:
-  - `packages/api` for `/api/*`
-  - `packages/bot` for `/webhook`
-  - `packages/orchestrator` for `/orchestrate` and `/ship`
-- Static assets: landing, dashboard, mobile
+- wrangler: /follow-tool-wrangler
+- cloudflare workers: /follow-tool-wrangler
+- elysia: /follow-framework-elysia (via packages/api)
+- probot: /follow-github-app (via packages/bot)
 
 ### 2. Platform
 
-- Runtime: Bun (dev), Cloudflare Workers (deploy)
-- Build: Wrangler
-- Target: public internet
+- Runs on Cloudflare Workers
+- Wrangler dev and deploy
+- Entry: `src/index.ts`
+- Static assets: `ASSETS` binding, fallback to dashboard
 
 ### 3. Target User
 
-All end users and GitHub services reaching ship-feed.
+Public internet and GitHub webhook delivery. End users reach the API, dashboard, and bot through this worker.
 
 ### 4. Skills
 
-- bun: /follow-lang-bun
-- wrangler: /follow-tool-wrangler
-- cloudflare: /follow-platform-cloudflare
+- deploy-to-cloudflare: /deploy-to-cloudflare
+- follow-tool-wrangler: /follow-tool-wrangler
 
 ### 5. Workspaces
 
-- uses: `packages/api`, `packages/bot`, `packages/orchestrator`, `packages/shared`
+- `packages/worker`: use `packages/api`, `packages/bot`, `packages/orchestrator`, `packages/shared`
 
 ## Rules
 
-1. Return 401 for cron endpoints without `x-cron-secret`.
-2. Redirect `/dashboard` to `/dashboard/`.
-3. Serve `index.html` for landing SPA routes.
-4. Serve `dashboard/index.html` for dashboard SPA routes.
+- Keep `src/lib/env-adapter.ts` as the only boundary between Worker env and bot env.
+- Use `setRequestEnv` before invoking the Elysia app.
+- Use timing-safe comparison for `x-cron-secret` and `x-bot-token`.
+- Route `/dashboard` to `/dashboard/` and fall back to `ASSETS`.
 
 ## Expected Outcome
 
-A single worker entry that routes all traffic correctly.
+Worker deploys to Cloudflare and serves API, webhooks, orchestration, and static assets from one entry.

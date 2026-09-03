@@ -1,59 +1,57 @@
 ---
 name: mobile
-description: Progressive web app for swiping ship-feed cards
+description: Mobile PWA for ship-feed card review
 related:
-  - AGENTS.md
-  - package.json
+  - ../../AGENTS.md
 ---
 
 ## Goal
 
-Let users approve or reject cards quickly on mobile with a swipe-based interface.
+Provide a mobile-first, swipe-based PWA for quickly approving, rejecting, or prompting on ship cards.
 
 ## Scope
 
-A SolidJS PWA with offline queue support, served from `dist/`.
+PWA with offline queue, push notifications, and a TikTok-like card stack. Talks to `packages/api` and uses `packages/shared` types.
 
 ## Execute
 
 ### 1. Architecture
 
-- Framework: SolidJS
-- Router: `@solidjs/router`
-- State: `@tanstack/solid-query`
-- Styling: UnoCSS
-- PWA: vite-plugin-pwa
-- Push: @mmmike/web-push
-- Build output: `dist/`
+- solid-js: /follow-lib-solid
+- @solidjs/router: /follow-lib-solid-router
+- @tanstack/solid-query: /follow-lib-tanstack-query
+- unocss: /follow-lib-unocss
+- vite: /learn-from-web
+- vite-plugin-pwa: /learn-from-web
+- @mmmike/web-push: /learn-from-web
 
 ### 2. Platform
 
-- Runtime: Bun
-- Build tool: Vite
-- Deployment: Cloudflare Workers static assets or PWA install
-- Target: iOS and Android browsers
+- Mobile-first PWA built with Vite
+- Works offline with service worker precache
+- Push notification support via Web Push
+- Build output: `dist/`
 
 ### 3. Target User
 
-Maintainers who want to vote on cards from their phone.
+Maintainers on mobile devices who want to vote on cards and attach voice or sketch prompts on the go.
 
 ### 4. Skills
 
-- solid-js: /follow-lib-solid
-- tanstack-solid-query: /follow-lib-tanstack-query
-- unocss: /follow-lib-unocss
-- pwa: /follow-tool-vite-plugin-pwa
+- report-uxui: /report-uxui
+- report-uxui-sketch: /report-uxui-sketch
 
 ### 5. Workspaces
 
-- uses: `packages/shared`
+- `apps/mobile`: use `packages/shared`
 
 ## Rules
 
-1. Support offline swipe queue and replay.
-2. Keep bundle small for mobile networks.
-3. Follow the swipe UX from the design system.
+- Use `@solidjs/router` for navigation.
+- Use TanStack Query for server state and offline queue for local state.
+- Keep card swipe logic under `src/components/card/`.
+- Register PWA service worker via `vite-plugin-pwa`.
 
 ## Expected Outcome
 
-A smooth mobile PWA with offline-first voting.
+PWA installs to home screen and lets users swipe, prompt, and receive push updates.

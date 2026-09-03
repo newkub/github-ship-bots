@@ -2,54 +2,52 @@
 name: orchestrator
 description: Continuous ship loop for approved cards
 related:
-  - AGENTS.md
-  - package.json
+  - ../../AGENTS.md
 ---
 
 ## Goal
 
-Implement, test, gather evidence, deploy, and learn from approved cards.
+Poll approved cards and trigger the shipping pipeline (merge, release, evidence collection, rollback) for each one.
 
 ## Scope
 
-A headless package that implements the continuous ship loop. It is invoked by `packages/worker` on cron or HTTP triggers.
+Shared library used by `packages/api` and `packages/worker`. Contains the core ship loop, context builder, and GitHub interactions.
 
 ## Execute
 
 ### 1. Architecture
 
-- Language: TypeScript / Bun
-- GitHub SDK: Octokit
-- Trigger: Cron or HTTP from `packages/worker`
-- Integration: `packages/api`
+- bun: /follow-lang-bun
+- typescript: /learn-from-web
+- cloudflare workers types: /learn-from-web
 
 ### 2. Platform
 
-- Runtime: Bun
-- Serverless: Cloudflare Workers
-- Trigger: `/orchestrate` and `/ship` endpoints
-- Target: `packages/worker`
+- Runs as part of `packages/worker` on Cloudflare Workers
+- Triggered by cron or HTTP `/orchestrate`
+- Exports: `./src/index.ts`, `./src/worker.ts`
 
 ### 3. Target User
 
-The ship-feed system; not directly by end users.
+The ship-feed system itself. Not exposed directly to end users.
 
 ### 4. Skills
 
-- bun: /follow-lang-bun
-- cli: /follow-create-bun-cli
+- ship: /ship
+- realize-implementation: /realize-implementation
+- report-what-you-do: /report-what-you-do
 
 ### 5. Workspaces
 
-- uses: `packages/shared`
-- used by: `packages/api`, `packages/worker`
+- `packages/orchestrator`: use `packages/shared`
 
 ## Rules
 
-1. Run the loop only for cards that pass approval rules.
-2. Collect evidence and update card status.
-3. Record learning weights after each ship.
+- Keep ship loop deterministic and idempotent.
+- Use `createContext` to build runtime context.
+- Return `{ ok, card, github }` results for every card.
+- Handle missing GitHub credentials gracefully in tests.
 
 ## Expected Outcome
 
-An autonomous yet approval-gated ship loop.
+Orchestrator ships all approved cards and updates their status in D1.

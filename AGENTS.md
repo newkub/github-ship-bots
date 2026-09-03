@@ -7,6 +7,7 @@ related:
   - apps/mobile
   - packages/api
   - packages/bot
+  - packages/cli
   - packages/orchestrator
   - packages/shared
   - packages/worker
@@ -18,11 +19,17 @@ Build and ship GitHub projects with a human-in-the-loop card workflow. Ideas, pu
 
 ## Scope
 
-This is a Bun + TypeScript monorepo. It contains a marketing landing site, a web dashboard, a mobile PWA, a GitHub bot, a Cloudflare Worker API, an orchestrator for the ship loop, and a shared package. This file is the root source of truth for architecture, platform, target users, and workspace conventions.
+This is a Bun + TypeScript monorepo. It contains a marketing landing site, a web dashboard, a mobile PWA, a GitHub bot, a dependency update CLI, a Cloudflare Worker API, an orchestrator for the ship loop, and a shared package. This file is the root source of truth for architecture, platform, target users, and workspace conventions.
 
 ## Execute
 
-### 1. Architecture
+### 1. Analyze Project
+
+1. Read this `AGENTS.md` and `package.json` before editing.
+2. Use `bun --filter '*' lint` and `bun --filter '*' test` for verification.
+3. Update this file when the workspace graph or tech stack changes.
+
+### 2. Architecture
 
 ```text
                     ┌─────────────┐
@@ -38,7 +45,7 @@ This is a Bun + TypeScript monorepo. It contains a marketing landing site, a web
                            ▼
                   ┌──────────────────┐
                   │ packages/api     │
-                  │ (Hono + Elysia   │
+                  │ (Elysia          │
                   │  D1 + R2 + KV)   │
                   └────────┬─────────┘
                            ▼
@@ -49,15 +56,32 @@ This is a Bun + TypeScript monorepo. It contains a marketing landing site, a web
 ```
 
 - `apps/landing`: SolidJS + TanStack Router + UnoCSS marketing site
-- `apps/web`: SolidJS + TanStack Query + `@solidjs/router` dashboard
+- `apps/web`: SolidJS + `@solidjs/router` + TanStack Query dashboard
 - `apps/mobile`: SolidJS + `@solidjs/router` + TanStack Query PWA
-- `packages/api`: Hono + Elysia + Drizzle ORM + Zod + D1/R2/KV/WorkOS/Stripe
+- `packages/api`: Elysia + Drizzle ORM + Zod + D1/R2/KV/WorkOS/Stripe
 - `packages/bot`: Probot + Octokit for GitHub App webhooks
+- `packages/cli`: Bun CLI `updatedeps` for dependency updates and conversions
 - `packages/orchestrator`: Continuous ship loop for approved cards
-- `packages/shared`: Domain types and utilities
+- `packages/shared`: Domain types, crypto, and card mapping utilities
 - `packages/worker`: Cloudflare Worker entry that mounts api, bot, and orchestrator
 
-### 2. Platform
+#### Tech Mapping
+
+- bun: /follow-lang-bun
+- typescript: /learn-from-web
+- solid-js: /follow-lib-solid
+- @tanstack/solid-query: /follow-lib-tanstack-query
+- @tanstack/solid-router: /follow-lib-tanstack-router
+- @solidjs/router: /follow-lib-solid-router
+- elysia: /follow-framework-elysia
+- drizzle-orm: /follow-tool-drizzle
+- zod: /follow-tool-zod
+- wrangler: /follow-tool-wrangler
+- probot: /follow-github-app
+- unocss: /follow-lib-unocss
+- cloudflare workers: /follow-tool-wrangler
+
+### 3. Platform
 
 - Runtime: Bun `>=1.4.0`
 - Server: Cloudflare Workers via Wrangler
@@ -69,27 +93,25 @@ This is a Bun + TypeScript monorepo. It contains a marketing landing site, a web
 - Routing: TanStack Router (landing), `@solidjs/router` (web/mobile)
 - State: TanStack Query
 - Build output: `docs/` (landing), `docs/dashboard/` (web), `dist/` (mobile)
+- CLI binary: `updatedeps` in `packages/cli`
 
-### 3. Target User
+### 4. Target User
 
 Development teams and open-source maintainers who want an AI-assisted, approval-first shipping pipeline inside GitHub.
 
-### 4. Skills
+### 5. Skills
 
-- update-project: /update-project
-- follow-lib-unocss: /follow-lib-unocss
-- follow-lib-solid: /follow-lib-solid
-- follow-lib-tanstack-query: /follow-lib-tanstack-query
-- follow-lib-tanstack-router: /follow-lib-tanstack-router
-- follow-framework-hono: /follow-framework-hono
-- follow-framework-elysia: /follow-framework-elysia
-- follow-tool-drizzle: /follow-tool-drizzle
-- follow-tool-zod: /follow-tool-zod
-- follow-github-app: /follow-github-app
+- ship: /ship
+- realize-implementation: /realize-implementation
+- refactor-codebase: /refactor-codebase
+- run-verify: /run-verify
+- report-uxui: /report-uxui
+- report-what-you-do: /report-what-you-do
+- deploy-to-cloudflare: /deploy-to-cloudflare
 - follow-create-bun-cli: /follow-create-bun-cli
-- follow-tool-wrangler: /follow-tool-wrangler
+- update-devin-global-rules: /update-devin-global-rules
 
-### 5. Workspaces
+### 6. Workspaces
 
 | No. | Workspace | Role | Uses |
 |-----|-----------|------|------|
@@ -98,9 +120,10 @@ Development teams and open-source maintainers who want an AI-assisted, approval-
 | 3 | `apps/mobile` | TikTok-like swipe PWA | `packages/shared` |
 | 4 | `packages/api` | HTTP API and auth | `packages/orchestrator`, `packages/shared` |
 | 5 | `packages/bot` | GitHub App worker | `packages/shared` |
-| 6 | `packages/orchestrator` | Continuous ship loop | `packages/shared` |
-| 7 | `packages/shared` | Domain types and utilities | — |
-| 8 | `packages/worker` | Cloudflare Worker entry | `packages/api`, `packages/bot`, `packages/orchestrator`, `packages/shared` |
+| 6 | `packages/cli` | Dependency update and conversion CLI | — |
+| 7 | `packages/orchestrator` | Continuous ship loop | `packages/shared` |
+| 8 | `packages/shared` | Domain types, crypto, and utilities | — |
+| 9 | `packages/worker` | Cloudflare Worker entry | `packages/api`, `packages/bot`, `packages/orchestrator`, `packages/shared` |
 
 ## Rules
 
@@ -122,7 +145,6 @@ All `AGENTS.md` files are written in English only.
 - `@tanstack/solid-query`: /follow-lib-tanstack-query
 - `@tanstack/solid-router`: /follow-lib-tanstack-router
 - `@solidjs/router`: /follow-lib-solid-router
-- `hono`: /follow-framework-hono
 - `elysia`: /follow-framework-elysia
 - `drizzle-orm`: /follow-tool-drizzle
 - `zod`: /follow-tool-zod
