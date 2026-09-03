@@ -1,4 +1,4 @@
-import { For, Show, createResource } from "solid-js";
+import { For, Show, createResource, createSignal } from "solid-js";
 import { Activity, AlertTriangle, CheckCircle, Loader, ScrollText, Server, Sparkles, Rocket, X, Eye } from "lucide-solid";
 import type { ShipCard } from "@ship-feed/shared";
 import { fetchQueue, shipCard, rejectCardAction, API_URL } from "../api";
@@ -9,13 +9,25 @@ export default function StatusPanel() {
     return res.ok;
   });
   const pending = () => queue()?.filter((c) => c.status === "pending").length ?? 0;
+  const [actionError, setActionError] = createSignal<string | null>(null);
+
   const runShip = async (id: string) => {
-    await shipCard(id).catch(() => {});
-    await refetch();
+    setActionError(null);
+    try {
+      await shipCard(id);
+      await refetch();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : `Failed to ship ${id}`);
+    }
   };
   const runReject = async (id: string) => {
-    await rejectCardAction(id).catch(() => {});
-    await refetch();
+    setActionError(null);
+    try {
+      await rejectCardAction(id);
+      await refetch();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : `Failed to reject ${id}`);
+    }
   };
   return (
     <div class="mb-8 grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -27,6 +39,11 @@ export default function StatusPanel() {
           </h2>
           <span class="text-xs text-gray-500">{pending()} pending review</span>
         </div>
+        <Show when={actionError()}>
+          <div class="rounded-xl bg-rose-50 border border-rose-100 p-3 text-sm text-rose-700 mb-3">
+            {actionError()}
+          </div>
+        </Show>
         <div class="space-y-2">
           <Show when={queue.loading}>
             <div class="flex items-center justify-center py-6 text-gray-400">

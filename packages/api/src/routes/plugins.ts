@@ -47,11 +47,17 @@ plugins.post("/:id/install", async ({ request, set, env, params }) => {
     return { error: "plugin not found" };
   }
 
-  await env.DB.prepare("INSERT OR IGNORE INTO user_plugins (user_id, plugin_id, created_at) VALUES (?, ?, ?)")
-    .bind(session.id, id, now())
-    .run();
+  const alreadyInstalled = await env.DB
+    .prepare("SELECT 1 FROM user_plugins WHERE user_id = ? AND plugin_id = ?")
+    .bind(session.id, id)
+    .first();
 
-  await env.DB.prepare("UPDATE plugins SET installs = installs + 1 WHERE id = ?").bind(id).run();
+  if (!alreadyInstalled) {
+    await env.DB.prepare("INSERT INTO user_plugins (user_id, plugin_id, created_at) VALUES (?, ?, ?)")
+      .bind(session.id, id, now())
+      .run();
+    await env.DB.prepare("UPDATE plugins SET installs = installs + 1 WHERE id = ?").bind(id).run();
+  }
 
   return { ok: true };
 });
@@ -64,8 +70,15 @@ plugins.post("/:id/uninstall", async ({ request, set, env, params }) => {
   }
   const id = params.id;
 
-  await env.DB.prepare("DELETE FROM user_plugins WHERE user_id = ? AND plugin_id = ?").bind(session.id, id).run();
-  await env.DB.prepare("UPDATE plugins SET installs = MAX(0, installs - 1) WHERE id = ?").bind(id).run();
+  const alreadyInstalled = await env.DB
+    .prepare("SELECT 1 FROM user_plugins WHERE user_id = ? AND plugin_id = ?")
+    .bind(session.id, id)
+    .first();
+
+  if (alreadyInstalled) {
+    await env.DB.prepare("DELETE FROM user_plugins WHERE user_id = ? AND plugin_id = ?").bind(session.id, id).run();
+    await env.DB.prepare("UPDATE plugins SET installs = MAX(0, installs - 1) WHERE id = ?").bind(id).run();
+  }
 
   return { ok: true };
 });
