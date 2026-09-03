@@ -15,7 +15,7 @@ export function isOptionalNumber(value: unknown): value is number | undefined {
 }
 
 export function isEnumValue<T extends string>(value: unknown, allowed: readonly T[]): value is T {
-  return isString(value) && (allowed as readonly string[]).includes(value);
+  return isString(value) && allowed.some((item) => item === value);
 }
 
 export function isStringArray(value: unknown): value is string[] {
@@ -51,7 +51,7 @@ export function assertEnumValue<T extends string>(value: unknown, allowed: reado
 import type { User, PlanTier } from "./user.types";
 
 export function assertRecord(value: unknown, name: string): Record<string, unknown> {
-  if (value === null || typeof value !== "object") {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
     throw new Error(`Expected ${name} to be an object`);
   }
   return value as Record<string, unknown>;
@@ -74,10 +74,7 @@ export function assertArray(value: unknown, name: string): unknown[] {
 const PLAN_TIERS: readonly PlanTier[] = ["free", "pro", "team"];
 
 export function assertUser(value: unknown): User {
-  if (value === null || typeof value !== "object") {
-    throw new Error("Expected User to be an object");
-  }
-  const record = value as Record<string, unknown>;
+  const record = assertRecord(value, "User");
   return {
     id: assertString(record.id, "id"),
     githubLogin: assertString(record.githubLogin, "githubLogin"),
