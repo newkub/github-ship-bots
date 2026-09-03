@@ -5,7 +5,7 @@ export function first<T>(rows: T[]): T | undefined {
 }
 
 export function generateId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return crypto.randomUUID();
 }
 
 export function now() {

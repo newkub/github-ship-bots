@@ -1,0 +1,17 @@
+{
+  "name": "@ship-feed/cli",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "updatedeps": "./src/cli.ts"
+  },
+  "scripts": {
+    "lint": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.0",
+    "typescript": "^7.0.2"
+  }
+}

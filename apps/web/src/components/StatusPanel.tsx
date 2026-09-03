@@ -1,29 +1,22 @@
 import { For, Show, createResource } from "solid-js";
 import { Activity, AlertTriangle, CheckCircle, Loader, ScrollText, Server, Sparkles, Rocket, X, Eye } from "lucide-solid";
 import type { ShipCard } from "@ship-feed/shared";
-import { fetchQueue, shipCard, rejectCardAction } from "../api";
-
-const API_URL = import.meta.env.VITE_API_URL || "https://github-ship-bots.newkubise.workers.dev";
-
+import { fetchQueue, shipCard, rejectCardAction, API_URL } from "../api";
 export default function StatusPanel() {
   const [queue, { refetch }] = createResource(fetchQueue);
   const [health] = createResource(async () => {
     const res = await fetch(`${API_URL}/health`, { credentials: "include" });
     return res.ok;
   });
-
   const pending = () => queue()?.filter((c) => c.status === "pending").length ?? 0;
-
   const runShip = async (id: string) => {
     await shipCard(id).catch(() => {});
     await refetch();
   };
-
   const runReject = async (id: string) => {
     await rejectCardAction(id).catch(() => {});
     await refetch();
   };
-
   return (
     <div class="mb-8 grid grid-cols-1 xl:grid-cols-3 gap-5">
       <div class="rounded-2xl bg-white border border-gray-200 p-5">
@@ -84,7 +77,6 @@ export default function StatusPanel() {
           </For>
         </div>
       </div>
-
       <div class="rounded-2xl bg-white border border-gray-200 p-5">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
@@ -107,7 +99,6 @@ export default function StatusPanel() {
           <a href="/dashboard/settings" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50">View logs</a>
           <a href="/dashboard/settings" class="px-3 py-1.5 rounded-lg bg-rose-600 text-xs font-medium text-white hover:bg-rose-700">Rollback</a>
         </div>
-
         <div class="mt-4 pt-4 border-t border-gray-100">
           <div class="text-xs text-gray-500 mb-1">Sort</div>
           <div class="flex items-center gap-2 text-sm text-gray-700">
@@ -117,7 +108,6 @@ export default function StatusPanel() {
           </div>
         </div>
       </div>
-
       <div class="rounded-2xl bg-white border border-gray-200 p-5">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
@@ -140,7 +130,6 @@ export default function StatusPanel() {
     </div>
   );
 }
-
 function StatusBadge(props: { status: ShipCard["status"] }) {
   const colors: Record<string, string> = {
     pending: "bg-amber-100 text-amber-700",

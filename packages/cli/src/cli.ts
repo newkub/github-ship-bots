@@ -86,7 +86,12 @@ function refactor() {
   const custom = getFlag("--command");
   if (custom) {
     const parts = custom.split(" ");
-    run(parts[0], parts.slice(1));
+    const command = parts[0];
+    if (!command) {
+      console.error("[updatedeps] refactor --command cannot be empty");
+      process.exit(1);
+    }
+    run(command, parts.slice(1));
   } else {
     console.log("[updatedeps] refactor (lint)");
     run("bun", ["run", "lint"]);

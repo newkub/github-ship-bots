@@ -26,7 +26,6 @@
   "dependencies": {
     "@octokit/app": "^16.1.4",
     "@octokit/rest": "^22.0.1",
-    "@octokit/webhooks": "^14.2.0",
     "@ship-feed/shared": "workspace:*",
     "probot": "^14.3.2"
   }

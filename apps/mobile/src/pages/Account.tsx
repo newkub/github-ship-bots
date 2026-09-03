@@ -1,6 +1,6 @@
 import { Show, createSignal } from "solid-js";
 import { useQuery } from "@tanstack/solid-query";
-import { getSession, loginUrl } from "../api";
+import { getSession, loginUrl, API_URL } from "../api";
 import { enablePush, canPush } from "../lib/push";
 import BottomNav from "../components/BottomNav";
 import ThemeToggle from "../components/ThemeToggle";
@@ -69,7 +69,7 @@ export default function Account() {
             </div>
           </div>
           <a
-            href="https://github-ship-bots.newkubise.workers.dev/api/stripe/checkout"
+            href={`${API_URL}/api/stripe/checkout`}
             class="block w-full text-center bg-success text-white font-semibold py-3 rounded-xl active:scale-95 transition shadow-lg"
           >
             Upgrade to Pro

@@ -1,10 +1,11 @@
-import { createSignal, onMount, Show } from "solid-js";
-import { Keyboard, Mic, Pen, Send, X, Eraser } from "lucide-solid";
-import type { Component } from "solid-js";
+import { createSignal, onMount } from "solid-js";
+import { Keyboard, Mic, Pen, Send, X } from "lucide-solid";
+import ModeButton from "./PromptInput/ModeButton";
+import TextPrompt from "./PromptInput/TextPrompt";
+import VoiceRecorder from "./PromptInput/VoiceRecorder";
+import SketchCanvas from "./PromptInput/SketchCanvas";
 
 type PromptMode = "text" | "voice" | "sketch";
-
-type IconType = Component<{ size?: number; class?: string; strokeWidth?: number }>;
 
 interface PromptInputProps {
   onSubmit: (text: string) => void;
@@ -181,81 +182,27 @@ export default function PromptInput(props: PromptInputProps) {
       </div>
 
       {mode() === "text" && (
-        <div class="relative">
-          <textarea
-            ref={(el) => (textarea = el)}
-            value={text()}
-            onInput={(e) => {
-              setText(e.currentTarget.value);
-              adjustHeight();
-            }}
-            placeholder="Comment or instruction before action..."
-            rows={3}
-            class="w-full min-h-[96px] rounded-xl bg-elevated text-primary p-3 text-sm resize-none border border-divider placeholder:text-muted-2 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none"
-          />
-          <div class="absolute bottom-2 right-3 text-xs text-muted">
-            {text().length}
-          </div>
-        </div>
+        <TextPrompt
+          text={text}
+          setText={setText}
+          textareaRef={(el) => (textarea = el)}
+          adjustHeight={adjustHeight}
+        />
       )}
 
       {mode() === "voice" && (
-        <div class="flex flex-col items-center justify-center h-32 rounded-xl bg-elevated border border-divider">
-          <button
-            onClick={toggleRecord}
-            class={`relative h-14 w-14 rounded-full flex items-center justify-center transition active:scale-95 ${
-              recording() ? "bg-danger animate-pulse" : "bg-accent"
-            } text-white shadow-lg`}
-            aria-label={recording() ? "Stop recording" : "Start recording"}
-          >
-            <Mic size={28} />
-            {recording() && <span class="absolute inset-0 rounded-full border border-white/30 animate-pulse-ring" />}
-          </button>
-          {recording() ? (
-            <div class="flex items-end gap-1 h-6 mt-3">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div
-                  class="w-1 bg-accent rounded-full animate-wave"
-                  style={{
-                    height: "18px",
-                    "animation-delay": `${i * 90}ms`,
-                  }}
-                />
-              ))}
-            </div>
-          ) : null}
-          <span class="text-xs text-muted mt-3">
-            {recording() ? "Recording... tap to stop" : "Tap to record your comment"}
-          </span>
-        </div>
+        <VoiceRecorder recording={recording} toggleRecord={toggleRecord} />
       )}
 
       {mode() === "sketch" && (
-        <div class="relative rounded-xl bg-elevated border border-dashed border-divider overflow-hidden">
-          <canvas
-            ref={initCanvas}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            onPointerLeave={onPointerUp}
-            class="w-full h-32 touch-none block"
-            style={{ "touch-action": "none" }}
-          />
-          {canvasEmpty() && (
-            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-muted">
-              <Pen size={24} class="mb-2 opacity-50" />
-              <span class="text-xs">Tap and draw to explain</span>
-            </div>
-          )}
-          <button
-            onClick={clearCanvas}
-            disabled={canvasEmpty()}
-            class="absolute top-2 right-2 h-8 w-8 rounded-full bg-surface/80 backdrop-blur flex items-center justify-center text-muted hover:text-primary disabled:opacity-30 transition"
-            aria-label="Clear sketch"
-          >
-            <Eraser size={16} />
-          </button>
-        </div>
+        <SketchCanvas
+          canvasEmpty={canvasEmpty}
+          initCanvas={initCanvas}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          clearCanvas={clearCanvas}
+        />
       )}
 
       <div class="flex justify-end mt-3">
@@ -269,29 +216,5 @@ export default function PromptInput(props: PromptInputProps) {
         </button>
       </div>
     </div>
-  );
-}
-
-function ModeButton(props: {
-  active: boolean;
-  onClick: () => void;
-  icon: IconType;
-  label: string;
-}) {
-  return (
-    <button
-      onClick={props.onClick}
-      class={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition active:scale-95 ${
-        props.active
-          ? "bg-accent text-white shadow-sm"
-          : "bg-transparent text-muted hover:text-primary"
-      }`}
-    >
-      {(() => {
-        const Icon = props.icon;
-        return <Icon size={14} />;
-      })()}
-      {props.label}
-    </button>
   );
 }
