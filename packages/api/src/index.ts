@@ -1,7 +1,9 @@
 import { Elysia } from "elysia";
 import type { Env } from "@ship-feed/shared";
-import { setRequestEnv } from "./lib/env";
+import { setRequestEnv, getRequestEnv } from "./lib/env";
 import { corsHeaders, applyCors } from "./lib/cors";
+import { checkRateLimit } from "./lib/rate-limit";
+import { validateRuntimeEnv } from "./lib/validate-env";
 import auth from "./routes/auth";
 import cards from "./routes/cards";
 import repos from "./routes/repos";
@@ -15,6 +17,27 @@ import learning from "./routes/learning";
 import push from "./routes/push";
 
 const app = new Elysia()
+  .onBeforeHandle(async ({ request, set }) => {
+    const url = new URL(request.url);
+    if (url.pathname === "/" || url.pathname === "/health") return;
+
+    const env = getRequestEnv(request);
+    if (!env?.DB) return;
+
+    const missing = validateRuntimeEnv(env);
+    if (missing.length > 0) {
+      set.status = 503;
+      return { error: "service unavailable", missing };
+    }
+
+    const limit = url.pathname.startsWith("/auth") ? 30 : 100;
+    const rate = await checkRateLimit(env, request, limit);
+    if (!rate.allowed) {
+      set.status = 429;
+      set.headers["retry-after"] = String(rate.retryAfter);
+      return { error: "rate limit exceeded", retryAfter: rate.retryAfter };
+    }
+  })
   .get("/", () => "")
   .get("/health", () => ({ ok: true, service: "ship-feed-api" }))
   .use(auth)
