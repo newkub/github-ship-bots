@@ -2,6 +2,7 @@ import { createShipFeedApp } from "./app";
 import { verifyWebhookSignature } from "./lib/verify";
 import { issuesHandler } from "./handlers/issues";
 import { pullRequestHandler } from "./handlers/pull-request";
+import { installationHandler } from "./handlers/installation";
 import { runWithBotEnv } from "./lib/api";
 import type { BotEnv, ShipFeedWebhooks } from "./types";
 
@@ -25,9 +26,27 @@ export default {
       const webhooks = app.webhooks as unknown as ShipFeedWebhooks;
       issuesHandler(webhooks);
       pullRequestHandler(webhooks);
+      installationHandler(webhooks);
+      webhooks.on("ping", async () => {});
       const id = request.headers.get("x-github-delivery") ?? "";
       const name = request.headers.get("x-github-event") ?? "";
       const signature = request.headers.get("x-hub-signature-256") ?? "";
+
+      const allowedEvents = new Set([
+        "ping",
+        "issues.opened",
+        "issue_comment.created",
+        "pull_request.opened",
+        "installation.created",
+        "installation_repositories.added",
+      ]);
+      if (!allowedEvents.has(name)) {
+        return new Response(JSON.stringify({ error: "unsupported event" }), {
+          status: 400,
+          headers: { "content-type": "application/json" },
+        });
+      }
+
       const payloadString = await request.text();
       try {
         await verifyWebhookSignature(payloadString, signature, env.WEBHOOK_SECRET);

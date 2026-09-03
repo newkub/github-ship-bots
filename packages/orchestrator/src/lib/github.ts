@@ -1,6 +1,19 @@
 import { createSign } from "node:crypto";
 import { fetchExternal, getCorrelationId } from "@ship-feed/shared";
 
+const REPO_FULL_NAME_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+
+function parseRepo(repoFullName: string): { owner: string; repo: string } | undefined {
+  if (!REPO_FULL_NAME_RE.test(repoFullName)) return undefined;
+  const [owner, repo] = repoFullName.split("/");
+  if (!owner || !repo || owner.includes("/") || repo.includes("/")) return undefined;
+  return { owner, repo };
+}
+
+function encodeRepoPath(owner: string, repo: string): string {
+  return `${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+}
+
 export interface GitHubActionResult {
   ok: boolean;
   skipped?: boolean;
@@ -53,14 +66,15 @@ async function githubFetch(ctx: ShipActionContext, path: string, token: string, 
 }
 
 async function getInstallationToken(ctx: ShipActionContext): Promise<string | undefined> {
-  const [owner, repo] = ctx.repoFullName.split("/");
-  if (!owner || !repo) return undefined;
+  const parsed = parseRepo(ctx.repoFullName);
+  if (!parsed) return undefined;
+  const { owner, repo } = parsed;
 
   const jwt = createJwt(ctx.appId, ctx.privateKey);
 
   const installation = (await githubFetch(
     ctx,
-    `/repos/${owner}/${repo}/installation`,
+    `/repos/${encodeRepoPath(owner, repo)}/installation`,
     jwt
   )) as { id: number } | undefined;
   if (!installation?.id) return undefined;
@@ -79,10 +93,11 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
     return { ok: true, skipped: true, message: "GitHub App credentials not configured" };
   }
 
-  const [owner, repo] = ctx.repoFullName.split("/");
-  if (!owner || !repo) {
+  const parsed = parseRepo(ctx.repoFullName);
+  if (!parsed) {
     return { ok: true, skipped: true, message: "Invalid repoFullName" };
   }
+  const { owner, repo } = parsed;
 
   const token = await getInstallationToken(ctx);
   if (!token) {
@@ -92,7 +107,7 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
   try {
     if (ctx.pullNumber) {
       if (ctx.action === "approve") {
-        await githubFetch(ctx, `/repos/${owner}/${repo}/pulls/${ctx.pullNumber}/merge`, token, {
+        await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/pulls/${ctx.pullNumber}/merge`, token, {
           method: "PUT",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -101,18 +116,18 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
             merge_method: "squash",
           }),
         });
-        await githubFetch(ctx, `/repos/${owner}/${repo}/issues/${ctx.pullNumber}/comments`, token, {
+        await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/issues/${ctx.pullNumber}/comments`, token, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ body: ":rocket: Shipped via ship-feed" }),
         });
       } else {
-        await githubFetch(ctx, `/repos/${owner}/${repo}/pulls/${ctx.pullNumber}`, token, {
+        await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/pulls/${ctx.pullNumber}`, token, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ state: "closed", state_reason: "not_planned" }),
         });
-        await githubFetch(ctx, `/repos/${owner}/${repo}/issues/${ctx.pullNumber}/comments`, token, {
+        await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/issues/${ctx.pullNumber}/comments`, token, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ body: `:x: Rejected via ship-feed${ctx.reason ? `: ${ctx.reason}` : ""}` }),
@@ -120,23 +135,23 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
       }
     } else if (ctx.issueNumber) {
       if (ctx.action === "approve") {
-        await githubFetch(ctx, `/repos/${owner}/${repo}/issues/${ctx.issueNumber}`, token, {
+        await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/issues/${ctx.issueNumber}`, token, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ state: "closed" }),
         });
-        await githubFetch(ctx, `/repos/${owner}/${repo}/issues/${ctx.issueNumber}/comments`, token, {
+        await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/issues/${ctx.issueNumber}/comments`, token, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ body: ":rocket: Shipped via ship-feed" }),
         });
       } else {
-        await githubFetch(ctx, `/repos/${owner}/${repo}/issues/${ctx.issueNumber}`, token, {
+        await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/issues/${ctx.issueNumber}`, token, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ state: "closed" }),
         });
-        await githubFetch(ctx, `/repos/${owner}/${repo}/issues/${ctx.issueNumber}/comments`, token, {
+        await githubFetch(ctx, `/repos/${encodeRepoPath(owner, repo)}/issues/${ctx.issueNumber}/comments`, token, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ body: `:x: Rejected via ship-feed${ctx.reason ? `: ${ctx.reason}` : ""}` }),
