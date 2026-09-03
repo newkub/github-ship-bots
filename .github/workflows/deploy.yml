@@ -12,10 +12,31 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.0
+
+      - name: Set Cloudflare account ID
+        run: |
+          ACCOUNT_ID="${{ vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}"
+          if [ -z "$ACCOUNT_ID" ]; then
+            echo "::error::CLOUDFLARE_ACCOUNT_ID is not set. Add it under Settings > Secrets and variables > Variables (or Secrets)."
+            exit 1
+          fi
+          echo "CLOUDFLARE_ACCOUNT_ID=$ACCOUNT_ID" >> "$GITHUB_ENV"
+
+      - name: Validate Cloudflare API token
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          curl -sS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/user/tokens/verify" | tee /tmp/token-verify.json
+          if ! grep -q '"success":true' /tmp/token-verify.json; then
+            echo "::error::Cloudflare API token validation failed"
+            cat /tmp/token-verify.json >&2
+            exit 1
+          fi
+
       - run: bun install
       - run: bun --filter @ship-feed/landing build
       - run: bun --filter @ship-feed/web build
       - run: bun --filter @ship-feed/worker deploy
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
