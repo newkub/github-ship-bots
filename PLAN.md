@@ -94,8 +94,8 @@ Single Cloudflare worker: `packages/worker` (name `github-ship-bots`) combines A
 
 ## WorkOS AuthKit (Staging)
 
-- App ID: `app_01M19F99TR4QZ2XVW36W39R7N8`
-- Client ID: `client_01M19F99TQW7CRED4Q65YAE0DH`
-- Environment: `environment_01JNEQB3JNQKNK97BB3WD7W638`
-- Redirect URIs: `https://github-ship-bots.newkubise.workers.dev/auth/callback`,
+- App ID: `${WORKOS_APP_ID}`
+- Client ID: `${WORKOS_CLIENT_ID}`
+- Environment: `${WORKOS_ENVIRONMENT_ID}`
+- Redirect URIs: `${PUBLIC_APP_URL}/auth/callback`,
   `http://localhost:5173/auth/callback`, `http://localhost:5174/auth/callback`

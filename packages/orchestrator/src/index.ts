@@ -2,9 +2,14 @@ import type { ShipCard, Env } from "@ship-feed/shared";
 import { rowToCard } from "@ship-feed/shared";
 import { shipToGitHub } from "./lib/github";
 
+import { getCorrelationId } from "@ship-feed/shared";
+
 export interface OrchestratorContext {
   db: D1Database;
   apiUrl: string;
+  githubApiUrl: string;
+  githubWebUrl: string;
+  correlationId: string;
   githubAppId: string;
   githubAppPrivateKey: string;
 }
@@ -13,6 +18,9 @@ export function createContext(env: Env): OrchestratorContext {
   return {
     db: env.DB,
     apiUrl: env.PUBLIC_APP_URL,
+    githubApiUrl: env.GITHUB_API_URL || "https://api.github.com",
+    githubWebUrl: env.GITHUB_WEB_URL || "https://github.com",
+    correlationId: getCorrelationId(),
     githubAppId: env.GITHUB_APP_ID,
     githubAppPrivateKey: env.GITHUB_APP_PRIVATE_KEY,
   };
@@ -48,6 +56,9 @@ export async function onApprove(ctx: OrchestratorContext, card: ShipCard) {
   const gh = await shipToGitHub({
     appId: ctx.githubAppId,
     privateKey: ctx.githubAppPrivateKey,
+    githubApiUrl: ctx.githubApiUrl,
+    githubWebUrl: ctx.githubWebUrl,
+    correlationId: ctx.correlationId,
     repoFullName: card.repoFullName,
     issueNumber: card.issueNumber,
     pullNumber: card.pullNumber,
@@ -68,6 +79,9 @@ export async function onReject(ctx: OrchestratorContext, card: ShipCard) {
   const gh = await shipToGitHub({
     appId: ctx.githubAppId,
     privateKey: ctx.githubAppPrivateKey,
+    githubApiUrl: ctx.githubApiUrl,
+    githubWebUrl: ctx.githubWebUrl,
+    correlationId: ctx.correlationId,
     repoFullName: card.repoFullName,
     issueNumber: card.issueNumber,
     pullNumber: card.pullNumber,

@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { getSession } from "../../lib/session";
 import { explainScore } from "../../lib/score";
 import { unauthorized, notFound, ensureAuth } from "../../lib/card-auth";
-import { fetchCardById } from "../../services/card-service";
+import { requireCard } from "../../services/card-service";
 import { rowToCard } from "../../lib/card-mapper";
 import { withEnv } from "../../lib/env";
 import { paramsSchema } from "./schemas";
@@ -12,7 +12,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await fetchCardById(env.DB, id);
+    const card = await requireCard(env.DB, session.id, id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -24,7 +24,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await fetchCardById(env.DB, id);
+    const card = await requireCard(env.DB, session.id, id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -42,7 +42,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await fetchCardById(env.DB, id);
+    const card = await requireCard(env.DB, session.id, id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -66,6 +66,11 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
+    const card = await requireCard(env.DB, session.id, id);
+    if (!card) {
+      set.status = 404;
+      return notFound();
+    }
     const { results } = await env.DB
       .prepare("SELECT c.*, u.github_login as user FROM card_comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.card_id = ? ORDER BY c.created_at DESC")
       .bind(id)
@@ -84,7 +89,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await fetchCardById(env.DB, id);
+    const card = await requireCard(env.DB, session.id, id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -98,27 +103,44 @@ const read = withEnv(new Elysia())
   .get("/", async ({ request, set, env }) => {
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
-    const { results } = await env.DB.prepare(
-      "SELECT * FROM cards WHERE status = 'pending' ORDER BY score DESC LIMIT 100"
-    ).all<Record<string, unknown>>();
+    const { results } = await env.DB
+      .prepare(
+        `SELECT * FROM cards
+         WHERE creator_id = ? OR repo_full_name IN (SELECT repo_full_name FROM user_repos WHERE user_id = ?)
+         ORDER BY updated_at DESC LIMIT 100`
+      )
+      .bind(session.id, session.id)
+      .all<Record<string, unknown>>();
     return (results ?? []).map(rowToCard);
   })
 
   .get("/queue", async ({ request, set, env }) => {
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
-    const { results } = await env.DB.prepare(
-      "SELECT * FROM cards WHERE status IN ('pending', 'approved', 'rejected') ORDER BY updated_at DESC LIMIT 20"
-    ).all<Record<string, unknown>>();
+    const { results } = await env.DB
+      .prepare(
+        `SELECT * FROM cards
+         WHERE status IN ('pending', 'approved', 'rejected')
+           AND (creator_id = ? OR repo_full_name IN (SELECT repo_full_name FROM user_repos WHERE user_id = ?))
+         ORDER BY updated_at DESC LIMIT 20`
+      )
+      .bind(session.id, session.id)
+      .all<Record<string, unknown>>();
     return (results ?? []).map(rowToCard);
   })
 
   .get("/nudges", async ({ request, set, env }) => {
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
-    const { results } = await env.DB.prepare(
-      "SELECT * FROM cards WHERE status = 'pending' ORDER BY score DESC LIMIT 20"
-    ).all<Record<string, unknown>>();
+    const { results } = await env.DB
+      .prepare(
+        `SELECT * FROM cards
+         WHERE status = 'pending'
+           AND (creator_id = ? OR repo_full_name IN (SELECT repo_full_name FROM user_repos WHERE user_id = ?))
+         ORDER BY score DESC LIMIT 20`
+      )
+      .bind(session.id, session.id)
+      .all<Record<string, unknown>>();
     return (results ?? []).map(rowToCard);
   });
 

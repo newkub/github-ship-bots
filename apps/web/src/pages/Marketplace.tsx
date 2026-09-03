@@ -1,5 +1,5 @@
-import { For, Show, createResource } from "solid-js";
-import { Check, Download, Loader, Puzzle, Sparkles, TestTube, Wand2 } from "lucide-solid";
+import { For, Show, createResource, createSignal } from "solid-js";
+import { Check, Download, Loader, Puzzle, Sparkles, TestTube, Wand2, XCircle } from "lucide-solid";
 import { fetchPlugins, installPlugin, uninstallPlugin } from "../api";
 
 const iconMap: Record<string, typeof Puzzle> = {
@@ -13,14 +13,24 @@ const iconMap: Record<string, typeof Puzzle> = {
 
 export default function Marketplace() {
   const [plugins, { refetch }] = createResource(fetchPlugins);
+  const [pending, setPending] = createSignal<Record<string, boolean>>({});
+  const [error, setError] = createSignal<string | null>(null);
 
   const toggle = async (id: string, installed: boolean) => {
-    if (installed) {
-      await uninstallPlugin(id).catch(() => {});
-    } else {
-      await installPlugin(id).catch(() => {});
+    setPending((p) => ({ ...p, [id]: true }));
+    setError(null);
+    try {
+      if (installed) {
+        await uninstallPlugin(id);
+      } else {
+        await installPlugin(id);
+      }
+      await refetch();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to ${installed ? "uninstall" : "install"} plugin`);
+    } finally {
+      setPending((p) => ({ ...p, [id]: false }));
     }
-    await refetch();
   };
 
   return (
@@ -43,6 +53,13 @@ export default function Marketplace() {
         </div>
       </Show>
 
+      <Show when={error()}>
+        <div class="rounded-2xl bg-rose-50 border border-rose-100 p-4 mb-6 text-rose-700 flex items-center gap-2">
+          <XCircle size={18} />
+          {error()}
+        </div>
+      </Show>
+
       <Show when={!plugins.loading && !plugins.error && (plugins() ?? []).length === 0}>
         <div class="rounded-2xl bg-gray-50 border border-gray-200 p-8 text-center text-gray-500">
           No skills available in the marketplace yet.
@@ -53,6 +70,7 @@ export default function Marketplace() {
         <For each={plugins() ?? []}>
           {(skill) => {
             const Icon = iconMap[skill.icon] ?? Puzzle;
+            const busy = () => pending()[skill.id] ?? false;
             return (
               <div class="rounded-2xl bg-white border border-gray-200 p-5 hover:shadow-md transition">
                 <div class="flex items-start justify-between mb-3">
@@ -65,13 +83,19 @@ export default function Marketplace() {
                 <p class="text-sm text-gray-500 mb-4">{skill.description}</p>
                 <button
                   onClick={() => toggle(skill.id, skill.installed)}
+                  disabled={busy()}
                   class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                     skill.installed
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       : "bg-indigo-600 text-white hover:bg-indigo-700"
-                  }`}
+                  } disabled:opacity-60`}
                 >
-                  {skill.installed ? (
+                  {busy() ? (
+                    <>
+                      <Loader size={14} class="animate-spin" />
+                      {skill.installed ? "Uninstalling..." : "Installing..."}
+                    </>
+                  ) : skill.installed ? (
                     <>
                       <Check size={14} />
                       Installed

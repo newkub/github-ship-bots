@@ -6,6 +6,7 @@ export interface Env {
   ASSETS?: { fetch: (request: Request) => Promise<Response> };
   WORKOS_API_KEY: string;
   WORKOS_CLIENT_ID: string;
+  WORKOS_REDIRECT_URI?: string;
   WORKOS_COOKIE_PASSWORD: string;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
@@ -27,4 +28,8 @@ export interface Env {
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_ID?: string;
   OPENAI_API_KEY?: string;
+  OPENAI_API_URL?: string;
+  OPENAI_MODEL?: string;
+  GITHUB_API_URL?: string;
+  GITHUB_WEB_URL?: string;
 }

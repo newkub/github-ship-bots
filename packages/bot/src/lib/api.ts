@@ -42,6 +42,7 @@ export async function createCardFromWebhook(
     repoFullName: string;
     issueNumber?: number;
     pullNumber?: number;
+    creatorLogin?: string;
   }
 ) {
   const env = getBotEnv();

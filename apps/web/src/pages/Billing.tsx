@@ -1,32 +1,48 @@
-import { createResource, Show } from "solid-js";
-import { checkoutUrl, fetchSession } from "../api";
+import { For, createResource, Show } from "solid-js";
+import { Loader } from "lucide-solid";
+import { checkoutUrl, fetchPlans, fetchSession } from "../api";
 
 export default function Billing() {
   const [session] = createResource(() => fetchSession());
+  const [plans] = createResource(() => fetchPlans());
 
   return (
     <div>
       <h1 class="text-2xl font-bold mb-6">Billing</h1>
-      <Show when={!session.loading} fallback={<div class="text-gray-500">Loading plans...</div>}>
-        <Show when={session.error}>
-          <div class="rounded-lg bg-rose-50 text-rose-700 p-4">{(session.error as Error).message}</div>
-        </Show>
-        <div class="grid md:grid-cols-3 gap-4">
-          <PlanCard
-            name="Free"
-            price="$0"
-            features={["3 cards/day", "Public repos", "Email support"]}
-            current={session()?.user?.plan === "free"}
-          />
-          <PlanCard
-            name="Pro"
-            price="$19"
-            features={["Unlimited cards", "Private repos", "Evidence vault", "Priority support"]}
-            cta={session()?.user?.plan === "pro" ? "Current" : "Upgrade"}
-            href={session()?.user?.plan === "pro" ? undefined : checkoutUrl()}
-          />
-          <PlanCard name="Team" price="$49" features={["Everything in Pro", "Multiple seats", "Custom CI", "SLA"]} cta="Contact" />
+      <Show when={!session.loading && !plans.loading} fallback={
+        <div class="flex items-center gap-2 text-gray-500">
+          <Loader size={20} class="animate-spin" />
+          Loading plans...
         </div>
+      }>
+        <Show when={session.error || plans.error}>
+          <div class="rounded-lg bg-rose-50 text-rose-700 p-4">
+            {(session.error as Error | undefined)?.message ?? (plans.error as Error | undefined)?.message ?? "Failed to load billing"}
+          </div>
+        </Show>
+        <Show when={plans() && plans()!.length > 0} fallback={
+          <div class="rounded-2xl bg-gray-50 border border-gray-200 p-8 text-center text-gray-500">
+            No plans available.
+          </div>
+        }>
+          <div class="grid md:grid-cols-3 gap-4">
+            <For each={plans()}>
+              {(plan) => {
+                const current = session()?.user?.plan === plan.id;
+                return (
+                  <PlanCard
+                    name={plan.name}
+                    price={plan.price}
+                    features={plan.features}
+                    current={current}
+                    cta={current ? "Current" : plan.id === "pro" ? "Upgrade" : "Contact"}
+                    href={current ? undefined : plan.id === "pro" ? checkoutUrl() : undefined}
+                  />
+                );
+              }}
+            </For>
+          </div>
+        </Show>
       </Show>
     </div>
   );

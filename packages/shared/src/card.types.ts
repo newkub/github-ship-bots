@@ -20,6 +20,7 @@ export interface ShipCard {
   phase: Phase;
   score: number;
   evidenceIds: string[];
+  creatorId?: string;
   createdAt: string;
   updatedAt: string;
 }

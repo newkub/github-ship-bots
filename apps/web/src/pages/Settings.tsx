@@ -3,7 +3,9 @@ import { fetchSession } from "../api";
 
 export default function Settings() {
   const [session] = createResource(() => fetchSession());
-  const webhookUrl = `${import.meta.env.VITE_API_URL || "https://github-ship-bots.newkubise.workers.dev"}/webhook`;
+  const apiUrl = import.meta.env.VITE_API_URL;
+  if (!apiUrl) throw new Error("Missing VITE_API_URL");
+  const webhookUrl = `${apiUrl}/webhook`;
 
   return (
     <div>

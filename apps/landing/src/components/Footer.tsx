@@ -3,10 +3,12 @@ import { Link } from "@tanstack/solid-router";
 import { appName, dashboardUrl } from "../data";
 import ExternalLink from "./ExternalLink";
 
+const repoUrl = import.meta.env.VITE_GITHUB_REPO_URL || "https://github.com/newkub/github-ship-bots";
+
 const links = [
   { label: "Open Dashboard", href: dashboardUrl, type: "external" as const },
   { label: "Install GitHub App", href: "/install", type: "internal" as const },
-  { label: "GitHub", href: "https://github.com/newkub/github-ship-bots", type: "external" as const },
+  { label: "GitHub", href: repoUrl, type: "external" as const },
 ];
 
 export default function Footer() {
@@ -52,7 +54,7 @@ export default function Footer() {
           <p class="flex items-center gap-1.5">
             Built for the {appName} workflow. Open source on{" "}
             <ExternalLink
-              href="https://github.com/newkub/github-ship-bots"
+              href={repoUrl}
               class="text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1"
             >
               <ExternalLinkIcon size={14} />

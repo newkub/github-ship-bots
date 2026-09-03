@@ -7,7 +7,7 @@ import { resolveApprovalStatus } from "../../lib/approval";
 import { notifyCardStatus } from "../../lib/notify";
 import { createContext, onApprove, onReject } from "@ship-feed/orchestrator";
 import { unauthorized, notFound, ensureAuth } from "../../lib/card-auth";
-import { fetchCardById } from "../../services/card-service";
+import { requireCard } from "../../services/card-service";
 import { withEnv } from "../../lib/env";
 import { paramsSchema, swipeSchema, statusSchema } from "./schemas";
 
@@ -16,7 +16,7 @@ const write = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await fetchCardById(env.DB, id);
+    const card = await requireCard(env.DB, id, session.id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -47,7 +47,7 @@ const write = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await fetchCardById(env.DB, id);
+    const card = await requireCard(env.DB, id, session.id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -63,7 +63,7 @@ const write = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await fetchCardById(env.DB, id);
+    const card = await requireCard(env.DB, id, session.id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -79,17 +79,19 @@ const write = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
+    const existing = await requireCard(env.DB, id, session.id);
+    if (!existing) {
+      set.status = 404;
+      return notFound();
+    }
     if (body.status === "approved" || body.status === "rejected") {
-      const card = await fetchCardById(env.DB, id);
-      if (card) {
-        const direction = body.status === "approved" ? "approve" : "reject";
-        await updateLearningWeights(env.DB, card, direction);
-      }
+      const direction = body.status === "approved" ? "approve" : "reject";
+      await updateLearningWeights(env.DB, existing, direction);
     }
     await env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
       .bind(body.status, now(), id)
       .run();
-    const updated = await fetchCardById(env.DB, id);
+    const updated = await requireCard(env.DB, id, session.id);
     if (updated) {
       await notifyCardStatus(env, updated, body.status as "created" | "approved" | "rejected" | "shipped");
     }

@@ -12,6 +12,7 @@ export const users = sqliteTable("users", {
 
 export const cards = sqliteTable("cards", {
   id: text("id").primaryKey(),
+  creatorId: text("creator_id"),
   kind: text("kind").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -73,6 +74,13 @@ export const inspectorAnnotations = sqliteTable("inspector_annotations", {
   screenshotR2Key: text("screenshot_r2_key"),
   cardId: text("card_id"),
   createdAt: text("created_at").notNull(),
+});
+
+export const webhookEvents = sqliteTable("webhook_events", {
+  id: text("id").primaryKey(),
+  stripeEventId: text("stripe_event_id").notNull().unique(),
+  eventType: text("event_type").notNull(),
+  processedAt: text("processed_at").notNull(),
 });
 
 export const pushSubscriptions = sqliteTable("push_subscriptions", {
@@ -208,6 +216,14 @@ export const agentSdks = sqliteTable("agent_sdks", {
   config: text("config").notNull().default("{}"),
   createdAt: text("created_at").notNull(),
 });
+
+export const userRepos = sqliteTable("user_repos", {
+  userId: text("user_id").notNull(),
+  repoFullName: text("repo_full_name").notNull(),
+  createdAt: text("created_at").notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.repoFullName] }),
+}));
 
 export const notificationChannels = sqliteTable("notification_channels", {
   id: text("id").primaryKey(),
