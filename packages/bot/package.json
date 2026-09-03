@@ -1,6 +1,7 @@
 {
   "name": "@ship-feed/bot",
   "version": "0.0.1",
+  "license": "MIT",
   "module": "src/index.ts",
   "type": "module",
   "private": true,

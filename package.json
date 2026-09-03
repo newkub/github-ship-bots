@@ -1,6 +1,7 @@
 {
   "name": "ship-feed",
   "version": "0.0.5",
+  "license": "MIT",
   "type": "module",
   "private": true,
   "workspaces": [
