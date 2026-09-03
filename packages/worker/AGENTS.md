@@ -17,10 +17,10 @@ The top-level worker entry. Routes `/api/*` to `packages/api`, `/webhook` to `pa
 
 ### 1. Architecture
 
-- wrangler: /follow-tool-wrangler
-- cloudflare workers: /follow-tool-wrangler
-- elysia: /follow-framework-elysia (via packages/api)
-- probot: /follow-github-app (via packages/bot)
+- wrangler: /follow-service-cloudflare
+- cloudflare workers: /follow-service-cloudflare
+- elysia: /follow-lib-elysia (via packages/api)
+- probot: /follow-create-github-bots (via packages/bot)
 
 ### 2. Platform
 
@@ -36,7 +36,7 @@ Public internet and GitHub webhook delivery. End users reach the API, dashboard,
 ### 4. Skills
 
 - deploy-to-cloudflare: /deploy-to-cloudflare
-- follow-tool-wrangler: /follow-tool-wrangler
+- follow-service-cloudflare: /follow-service-cloudflare
 
 ### 5. Workspaces
 

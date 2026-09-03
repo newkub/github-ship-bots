@@ -17,11 +17,11 @@ Static landing site with multiple routes and scroll-reveal animations. No live d
 
 ### 1. Architecture
 
-- solid-js: /follow-lib-solid
-- @tanstack/solid-router: /follow-lib-tanstack-router
+- solid-js: /follow-framework-solidjs
+- @tanstack/solid-router: /follow-lib-tanstack-ecosystem
 - unocss: /follow-lib-unocss
 - animejs: /learn-from-web
-- vite: /learn-from-web
+- vite: /follow-tool-vite
 
 ### 2. Platform
 
@@ -35,7 +35,7 @@ First-time visitors and open-source maintainers evaluating ship-feed before inst
 
 ### 4. Skills
 
-- report-uxui: /report-uxui
+- review-uxui: /review-uxui
 - report-uxui-sketch: /report-uxui-sketch
 
 ### 5. Workspaces

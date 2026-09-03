@@ -17,12 +17,12 @@ Authenticated web dashboard. Talks to `packages/api` and uses `packages/shared` 
 
 ### 1. Architecture
 
-- solid-js: /follow-lib-solid
-- @solidjs/router: /follow-lib-solid-router
-- @tanstack/solid-query: /follow-lib-tanstack-query
+- solid-js: /follow-framework-solidjs
+- @solidjs/router: /learn-from-web
+- @tanstack/solid-query: /follow-lib-tanstack-ecosystem
 - unocss: /follow-lib-unocss
-- vite: /learn-from-web
-- zod: /follow-tool-zod
+- vite: /follow-tool-vite
+- zod: /follow-lib-zod
 
 ### 2. Platform
 
@@ -36,7 +36,7 @@ Maintainers and team leads who prefer a desktop browser for managing the ship pi
 
 ### 4. Skills
 
-- report-uxui: /report-uxui
+- review-uxui: /review-uxui
 - report-uxui-sketch: /report-uxui-sketch
 
 ### 5. Workspaces

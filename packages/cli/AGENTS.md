@@ -18,7 +18,7 @@ Internal tooling package. Not deployed to npm. Binary `updatedeps` exposed from 
 ### 1. Architecture
 
 - bun: /follow-lang-bun
-- typescript: /learn-from-web
+- typescript: /follow-lang-typescript
 - node:child_process: /learn-from-web
 
 ### 2. Platform

@@ -18,7 +18,7 @@ Zero-dependency (or dev-only types) shared package. Imported by `apps/*` and `pa
 ### 1. Architecture
 
 - bun: /follow-lang-bun
-- typescript: /learn-from-web
+- typescript: /follow-lang-typescript
 - cloudflare workers types: /learn-from-web
 
 ### 2. Platform

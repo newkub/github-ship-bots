@@ -18,7 +18,7 @@ Shared library used by `packages/api` and `packages/worker`. Contains the core s
 ### 1. Architecture
 
 - bun: /follow-lang-bun
-- typescript: /learn-from-web
+- typescript: /follow-lang-typescript
 - cloudflare workers types: /learn-from-web
 
 ### 2. Platform
