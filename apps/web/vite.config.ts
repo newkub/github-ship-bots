@@ -11,5 +11,6 @@ export default defineConfig({
   build: {
     outDir: "../../docs/dashboard",
     sourcemap: false,
+    emptyOutDir: false,
   },
 });

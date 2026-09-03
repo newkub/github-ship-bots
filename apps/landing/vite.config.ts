@@ -16,10 +16,14 @@ export default defineConfig({
     },
   ],
   base: "./",
+  define: {
+    "import.meta.env.VITE_APP_URL": JSON.stringify(appUrl),
+  },
   server: {
     port: 5175,
   },
   build: {
     outDir: "../../docs",
+    emptyOutDir: false,
   },
 });
