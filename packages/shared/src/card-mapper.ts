@@ -15,7 +15,7 @@ const RISKS: readonly Risk[] = ["high", "medium", "low"];
 const EFFECTS: readonly Effect[] = ["high", "medium", "low"];
 const PHASES: readonly Phase[] = ["mvp", "v2", "done"];
 
-function parseEvidenceIds(raw: unknown): string[] {
+export function parseEvidenceIds(raw: unknown): string[] {
   if (raw === null || raw === undefined || raw === "") return [];
   const text = typeof raw === "string" ? raw : assertString(raw, "evidence_ids");
   try {

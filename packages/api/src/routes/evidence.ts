@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
-import { constantTimeCompare } from "@ship-feed/shared";
+import { constantTimeCompare, parseEvidenceIds } from "@ship-feed/shared";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { withEnv } from "../lib/env";
@@ -45,6 +45,21 @@ async function storeEvidence(
   )
     .bind(id, body.cardId ?? null, body.kind, key, hash, body.ciRunUrl ?? null, now())
     .run();
+
+  if (body.cardId) {
+    const row = await env.DB
+      .prepare("SELECT evidence_ids FROM cards WHERE id = ?")
+      .bind(body.cardId)
+      .first<{ evidence_ids: string }>();
+    const existing = row ? parseEvidenceIds(row.evidence_ids) : [];
+    if (!existing.includes(id)) {
+      const updated = JSON.stringify([...existing, id]);
+      await env.DB
+        .prepare("UPDATE cards SET evidence_ids = ?, updated_at = ? WHERE id = ?")
+        .bind(updated, now(), body.cardId)
+        .run();
+    }
+  }
 
   return { id, key, hash };
 }
