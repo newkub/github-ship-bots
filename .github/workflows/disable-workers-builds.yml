@@ -35,21 +35,30 @@ jobs:
                 'Content-Type': 'application/json',
               },
             });
-            const data = await res.json();
+            const text = await res.text();
+            const data = text ? (() => {
+              try { return JSON.parse(text); } catch { return { raw: text.slice(0, 500) }; }
+            })() : null;
             if (!res.ok) throw new Error(res.status + ' ' + JSON.stringify(data));
-            return data.result;
+            return data ? data.result : null;
           }
 
-          const script = await api('/accounts/' + accountId + '/workers/scripts/' + worker);
+          const scripts = await api('/accounts/' + accountId + '/workers/scripts');
+          const script = scripts.find(s => s.id === worker || s.name === worker);
+          if (!script || !script.tag) {
+            console.error('Worker', worker, 'not found or has no tag. Available:', scripts.map(s => s.id || s.name).join(', '));
+            process.exit(1);
+          }
           const tag = script.tag;
           console.log('worker tag:', tag);
 
           const triggers = await api('/accounts/' + accountId + '/builds/workers/' + tag + '/triggers');
-          console.log('triggers found:', triggers.length);
+          console.log('triggers found:', (triggers || []).length);
 
-          for (const t of triggers) {
-            await api('/accounts/' + accountId + '/builds/triggers/' + t.uuid, { method: 'DELETE' });
-            console.log('deleted trigger', t.uuid, t.trigger_name);
+          for (const t of triggers || []) {
+            const id = t.uuid || t.id;
+            await api('/accounts/' + accountId + '/builds/triggers/' + id, { method: 'DELETE' });
+            console.log('deleted trigger', id, t.trigger_name);
           }
 
           console.log('Workers Builds disabled for', worker);
