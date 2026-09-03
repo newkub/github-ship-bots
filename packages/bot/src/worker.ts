@@ -1,22 +1,19 @@
-import { createShipFeedApp } from "./app.ts";
-import { verifyWebhookSignature } from "./lib/verify.ts";
-import { issuesHandler } from "./handlers/issues.ts";
-import { pullRequestHandler } from "./handlers/pull-request.ts";
-import { setBotEnv } from "./lib/api.ts";
-import type { BotEnv, ShipFeedWebhooks } from "./types.ts";
+import { createShipFeedApp } from "./app";
+import { verifyWebhookSignature } from "./lib/verify";
+import { issuesHandler } from "./handlers/issues";
+import { pullRequestHandler } from "./handlers/pull-request";
+import { runWithBotEnv } from "./lib/api";
+import type { BotEnv, ShipFeedWebhooks } from "./types";
 
 interface AssetFetcher {
   fetch: (request: Request) => Promise<Response>;
 }
-
 export interface Env extends BotEnv {
   ASSETS: AssetFetcher;
 }
-
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-
     if (request.method === "POST" && url.pathname === "/webhook") {
       if (!env.PRIVATE_KEY || !env.APP_ID || !env.WEBHOOK_SECRET) {
         return new Response(JSON.stringify({ error: "Missing app credentials" }), {
@@ -24,19 +21,14 @@ export default {
           headers: { "content-type": "application/json" },
         });
       }
-
-      setBotEnv(env);
-
       const app = createShipFeedApp(env);
       const webhooks = app.webhooks as unknown as ShipFeedWebhooks;
       issuesHandler(webhooks);
       pullRequestHandler(webhooks);
-
       const id = request.headers.get("x-github-delivery") ?? "";
       const name = request.headers.get("x-github-event") ?? "";
       const signature = request.headers.get("x-hub-signature-256") ?? "";
       const payloadString = await request.text();
-
       try {
         await verifyWebhookSignature(payloadString, signature, env.WEBHOOK_SECRET);
       } catch (error) {
@@ -46,11 +38,18 @@ export default {
           headers: { "content-type": "application/json" },
         });
       }
-
-      const payload = JSON.parse(payloadString);
-
+      let payload: unknown;
       try {
-        await app.webhooks.receive({ id, name: name as any, payload });
+        payload = JSON.parse(payloadString) as unknown;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Invalid JSON";
+        return new Response(JSON.stringify({ error: `Malformed payload: ${message}` }), {
+          status: 400,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      try {
+        await runWithBotEnv(env, () => webhooks.receive({ id, name, payload }));
         return new Response(JSON.stringify({ ok: true }), {
           headers: { "content-type": "application/json" },
         });
@@ -62,7 +61,6 @@ export default {
         });
       }
     }
-
     return env.ASSETS.fetch(request);
   },
 };

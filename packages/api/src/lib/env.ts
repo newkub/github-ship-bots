@@ -19,7 +19,7 @@ export function withEnv<const BasePath extends string = "">(
     if (!env) {
       throw new Error("Missing Env for request");
     }
-    return { env } as { env: Env };
+    return { env };
   });
 }
 

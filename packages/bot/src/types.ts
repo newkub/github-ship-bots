@@ -62,4 +62,5 @@ export type ShipFeedHandler<T = unknown> = (ctx: ShipFeedContext<T>) => Promise<
 
 export interface ShipFeedWebhooks {
   on: <T = unknown>(event: string | string[], handler: ShipFeedHandler<T>) => void;
+  receive: (event: { id: string; name: string; payload: unknown }) => Promise<void>;
 }

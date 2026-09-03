@@ -1,0 +1,30 @@
+export interface Env {
+  DB: D1Database;
+  EVIDENCE_BUCKET: R2Bucket;
+  BASELINE_BUCKET: R2Bucket;
+  SESSION_KV: KVNamespace;
+  ASSETS?: { fetch: (request: Request) => Promise<Response> };
+  WORKOS_API_KEY: string;
+  WORKOS_CLIENT_ID: string;
+  WORKOS_COOKIE_PASSWORD: string;
+  STRIPE_SECRET_KEY: string;
+  STRIPE_WEBHOOK_SECRET: string;
+  STRIPE_PRICE_PRO: string;
+  GITHUB_APP_ID: string;
+  GITHUB_APP_PRIVATE_KEY: string;
+  GITHUB_WEBHOOK_SECRET: string;
+  PUBLIC_APP_URL: string;
+  BOT_TOKEN?: string;
+  VAPID_PUBLIC_KEY?: string;
+  VAPID_PRIVATE_KEY?: string;
+  VAPID_SUBJECT?: string;
+  CRON_SECRET?: string;
+  ADMIN_LOGINS?: string;
+  CORS_ALLOWED_ORIGINS?: string;
+  AUTO_APPROVE_THRESHOLD?: string;
+  AUTO_APPROVE_RISK?: string;
+  SLACK_WEBHOOK_URL?: string;
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_CHAT_ID?: string;
+  OPENAI_API_KEY?: string;
+}

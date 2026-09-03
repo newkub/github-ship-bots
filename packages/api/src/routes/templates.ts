@@ -3,16 +3,27 @@ import { z } from "zod";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { withEnv } from "../lib/env";
-
+const repoNameRegex = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
 const templates = withEnv(new Elysia({ prefix: "/api/templates" }));
-
+const createTemplateSchema = z.object({
+  name: z.string().min(1).max(120),
+  body: z.string().min(1).max(4000),
+  repoFullName: z.string().regex(repoNameRegex).optional(),
+});
+const applyTemplateSchema = z.object({
+  cardId: z.string().uuid(),
+});
 templates.get("/", async ({ request, set, env, query }) => {
   const session = await getSession({ request, set, env });
   if (!session) {
     set.status = 401;
     return { error: "unauthorized" };
   }
-  const repo = query.repo;
+  const repo = typeof query.repo === "string" ? query.repo : undefined;
+  if (repo && !repoNameRegex.test(repo)) {
+    set.status = 400;
+    return { error: "invalid repo" };
+  }
   const { results } = repo
     ? await env.DB.prepare("SELECT * FROM comment_templates WHERE user_id = ? AND (repo_full_name = ? OR repo_full_name IS NULL) ORDER BY name")
         .bind(session.id, repo)
@@ -29,7 +40,6 @@ templates.get("/", async ({ request, set, env, query }) => {
     createdAt: row.created_at,
   }));
 });
-
 templates.post("/", async ({ request, set, env, body }) => {
   const session = await getSession({ request, set, env });
   if (!session) {
@@ -42,8 +52,7 @@ templates.post("/", async ({ request, set, env, body }) => {
     .bind(id, session.id, body.repoFullName ?? null, body.name, body.body, now())
     .run();
   return { id, ok: true };
-}, { body: z.object({ name: z.string(), body: z.string(), repoFullName: z.string().optional() }) });
-
+}, { body: createTemplateSchema });
 templates.post("/:id/comment", async ({ request, set, env, params, body }) => {
   const session = await getSession({ request, set, env });
   if (!session) {
@@ -51,7 +60,6 @@ templates.post("/:id/comment", async ({ request, set, env, params, body }) => {
     return { error: "unauthorized" };
   }
   const templateId = params.id;
-
   const template = await env.DB.prepare("SELECT * FROM comment_templates WHERE id = ? AND user_id = ?")
     .bind(templateId, session.id)
     .first<Record<string, unknown>>();
@@ -59,14 +67,16 @@ templates.post("/:id/comment", async ({ request, set, env, params, body }) => {
     set.status = 404;
     return { error: "template not found" };
   }
-
+  const card = await env.DB.prepare("SELECT id FROM cards WHERE id = ?").bind(body.cardId).first<{ id: string }>();
+  if (!card) {
+    set.status = 404;
+    return { error: "card not found" };
+  }
   const id = generateId();
   await env.DB
     .prepare("INSERT INTO card_comments (id, card_id, user_id, template_id, body, posted_to_github, created_at) VALUES (?, ?, ?, ?, ?, 0, ?)")
     .bind(id, body.cardId, session.id, templateId, template.body as string, now())
     .run();
-
   return { id, ok: true };
-}, { params: z.object({ id: z.string() }), body: z.object({ cardId: z.string() }) });
-
+}, { params: z.object({ id: z.string().uuid() }), body: applyTemplateSchema });
 export default templates;

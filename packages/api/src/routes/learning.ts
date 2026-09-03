@@ -3,22 +3,24 @@ import { z } from "zod";
 import { getSession } from "../lib/session";
 import { now } from "../lib/db";
 import { withEnv } from "../lib/env";
-
+const repoNameRegex = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
 const learning = withEnv(new Elysia({ prefix: "/api/learning" }));
-
 learning.get("/weights", async ({ request, set, env, query }) => {
   const session = await getSession({ request, set, env });
   if (!session) {
     set.status = 401;
     return { error: "unauthorized" };
   }
-  const repo = query.repo;
+  const repo = typeof query.repo === "string" ? query.repo : undefined;
+  if (repo && !repoNameRegex.test(repo)) {
+    set.status = 400;
+    return { error: "invalid repo" };
+  }
   const { results } = repo
     ? await env.DB.prepare("SELECT * FROM learning_weights WHERE repo_full_name = ?").bind(repo).all()
     : await env.DB.prepare("SELECT * FROM learning_weights").all();
   return results;
 });
-
 learning.post("/weights", async ({ request, set, env, body }) => {
   const session = await getSession({ request, set, env });
   if (!session) {
@@ -31,6 +33,5 @@ learning.post("/weights", async ({ request, set, env, body }) => {
     .bind(body.repoFullName, body.feature, body.weight, now())
     .run();
   return { ok: true };
-}, { body: z.object({ repoFullName: z.string(), feature: z.string(), weight: z.number() }) });
-
+}, { body: z.object({ repoFullName: z.string().regex(repoNameRegex), feature: z.string(), weight: z.number() }) });
 export default learning;

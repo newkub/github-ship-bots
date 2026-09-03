@@ -2,36 +2,32 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
-import { insertCard } from "./cards";
+import { insertCard } from "../services/card-service";
 import { withEnv } from "../lib/env";
-
-const inspector = withEnv(new Elysia({ prefix: "/api/inspector" }));
-
+const repoNameRegex = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
 const inspectorSchema = z.object({
-  url: z.string(),
-  selector: z.string(),
-  prompt: z.string(),
-  repoFullName: z.string(),
+  url: z.string().url().max(2048),
+  selector: z.string().min(1).max(500),
+  prompt: z.string().min(1).max(1000),
+  repoFullName: z.string().regex(repoNameRegex),
   impact: z.enum(["high", "medium", "low"]).default("medium"),
   risk: z.enum(["high", "medium", "low"]).default("medium"),
   effect: z.enum(["high", "medium", "low"]).default("medium"),
   phase: z.enum(["mvp", "v2", "done"]).default("mvp"),
 });
-
+const inspector = withEnv(new Elysia({ prefix: "/api/inspector" }));
 inspector.post("/", async ({ request, set, env, body }) => {
   const session = await getSession({ request, set, env });
   if (!session) {
     set.status = 401;
     return { error: "unauthorized" };
   }
-
   const id = generateId();
   await env.DB.prepare(
     "INSERT INTO inspector_annotations (id, url, selector, prompt, created_at) VALUES (?, ?, ?, ?, ?)"
   )
     .bind(id, body.url, body.selector, body.prompt, now())
     .run();
-
   const card = await insertCard(env, {
     kind: "work",
     title: body.prompt,
@@ -43,11 +39,9 @@ inspector.post("/", async ({ request, set, env, body }) => {
     effect: body.effect,
     phase: body.phase,
   });
-
   await env.DB.prepare("UPDATE inspector_annotations SET card_id = ? WHERE id = ?")
     .bind(card.id, id)
     .run();
-
   return {
     ok: true,
     id,
@@ -55,5 +49,4 @@ inspector.post("/", async ({ request, set, env, body }) => {
     message: "Inspector annotation queued and ship-feed card created.",
   };
 }, { body: inspectorSchema });
-
 export default inspector;

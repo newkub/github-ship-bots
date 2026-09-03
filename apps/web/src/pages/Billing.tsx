@@ -1,37 +1,33 @@
-import { createResource, Show } from "solid-js";
-import { checkoutUrl, fetchSession } from "../api";
-
+import { createResource, Show, For } from "solid-js";
+import { checkoutUrl, fetchSession, fetchPlans } from "../api";
 export default function Billing() {
   const [session] = createResource(() => fetchSession());
-
+  const [plans] = createResource(() => fetchPlans());
   return (
     <div>
       <h1 class="text-2xl font-bold mb-6">Billing</h1>
-      <Show when={!session.loading} fallback={<div class="text-gray-500">Loading plans...</div>}>
-        <Show when={session.error}>
-          <div class="rounded-lg bg-rose-50 text-rose-700 p-4">{(session.error as Error).message}</div>
+      <Show when={!session.loading && !plans.loading} fallback={<div class="text-gray-500">Loading plans...</div>}>
+        <Show when={session.error || plans.error}>
+          <div class="rounded-lg bg-rose-50 text-rose-700 p-4">{((session.error ?? plans.error) as Error).message}</div>
         </Show>
         <div class="grid md:grid-cols-3 gap-4">
+          <For each={plans() ?? []}>
+            {(plan) => (
           <PlanCard
-            name="Free"
-            price="$0"
-            features={["3 cards/day", "Public repos", "Email support"]}
-            current={session()?.user?.plan === "free"}
+                name={plan.name}
+                price={plan.price}
+                features={plan.features}
+                current={session()?.user?.plan === plan.id}
+                cta={plan.id === "team" ? "Contact" : session()?.user?.plan === plan.id ? "Current" : "Upgrade"}
+                href={plan.id === "pro" && session()?.user?.plan !== "pro" ? checkoutUrl() : undefined}
           />
-          <PlanCard
-            name="Pro"
-            price="$19"
-            features={["Unlimited cards", "Private repos", "Evidence vault", "Priority support"]}
-            cta={session()?.user?.plan === "pro" ? "Current" : "Upgrade"}
-            href={session()?.user?.plan === "pro" ? undefined : checkoutUrl()}
-          />
-          <PlanCard name="Team" price="$49" features={["Everything in Pro", "Multiple seats", "Custom CI", "SLA"]} cta="Contact" />
+            )}
+          </For>
         </div>
       </Show>
     </div>
   );
 }
-
 function PlanCard(props: { name: string; price: string; features: string[]; current?: boolean; cta?: string; href?: string }) {
   return (
     <div class={`bg-white rounded-xl border p-6 ${props.current ? "border-indigo-500 ring-1 ring-indigo-500" : "border-gray-200"}`}>

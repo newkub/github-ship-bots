@@ -1,7 +1,6 @@
 import { For, Show, createSignal } from "solid-js";
 import { Eye, Send } from "lucide-solid";
 import { submitInspector } from "../api";
-
 export default function Inspector() {
   const [url, setUrl] = createSignal("");
   const [selector, setSelector] = createSignal("");
@@ -10,8 +9,7 @@ export default function Inspector() {
   const [result, setResult] = createSignal<string | null>(null);
   const [error, setError] = createSignal<string | null>(null);
   const [loading, setLoading] = createSignal(false);
-  const [selectedElement, setSelectedElement] = createSignal(".hero > h1");
-
+  const [selectedElement, setSelectedElement] = createSignal<string | null>(null);
   const onSubmit = async () => {
     setLoading(true);
     setError(null);
@@ -30,17 +28,14 @@ export default function Inspector() {
       setLoading(false);
     }
   };
-
   const elements = [
     { label: "Hero headline", selector: ".hero > h1" },
     { label: "Login button", selector: "button.login" },
     { label: "Pricing card", selector: ".pricing-card" },
   ];
-
   return (
     <div>
       <h1 class="text-2xl font-bold mb-6">Web Inspector</h1>
-
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <div class="bg-white rounded-2xl border border-gray-200 p-6">
           <div class="space-y-4">
@@ -102,7 +97,6 @@ export default function Inspector() {
             <div class="mt-4 p-3 bg-rose-50 text-rose-700 rounded text-sm">{error()}</div>
           </Show>
         </div>
-
         <div class="bg-white rounded-2xl border border-gray-200 p-6">
           <h2 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <Eye size={16} />
@@ -110,6 +104,7 @@ export default function Inspector() {
           </h2>
           <div class="rounded-xl bg-gray-50 border border-gray-200 h-64 p-4 relative">
             <div class="text-xs text-gray-400 mb-3">{url() || "https://example.com"}</div>
+            <p class="text-xs text-gray-500 mb-2">Example selectors (click to use)</p>
             <div class="space-y-2">
               <For each={elements}>
                 {(el) => (

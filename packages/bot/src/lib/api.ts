@@ -1,16 +1,14 @@
-import type { BotEnv } from "../types.ts";
-
-let currentEnv: BotEnv | undefined;
-
-export function setBotEnv(env: BotEnv) {
-  currentEnv = env;
+import { AsyncLocalStorage } from "node:async_hooks";
+import type { BotEnv } from "../types";
+const botEnvStore = new AsyncLocalStorage<BotEnv>();
+export function runWithBotEnv<T>(env: BotEnv, callback: () => Promise<T> | T): Promise<T> {
+  return botEnvStore.run(env, callback) as Promise<T>;
 }
-
 export function getBotEnv(): BotEnv {
-  if (!currentEnv) throw new Error("Bot environment not set");
-  return currentEnv;
+  const env = botEnvStore.getStore();
+  if (!env) throw new Error("Bot environment not set");
+  return env;
 }
-
 export async function uploadEvidence(
   body: {
     cardId?: string;
@@ -20,7 +18,8 @@ export async function uploadEvidence(
   }
 ) {
   const env = getBotEnv();
-  const url = env.API_URL ?? "https://github-ship-bots.newkubise.workers.dev";
+  const url = env.API_URL;
+  if (!url) throw new Error("Missing API_URL");
   const res = await fetch(`${url}/api/evidence/webhook`, {
     method: "POST",
     headers: {
@@ -35,7 +34,6 @@ export async function uploadEvidence(
   }
   return (await res.json()) as { id: string; key: string; hash: string };
 }
-
 export async function createCardFromWebhook(
   body: {
     kind: "idea" | "work" | "merge" | "release";
@@ -47,7 +45,8 @@ export async function createCardFromWebhook(
   }
 ) {
   const env = getBotEnv();
-  const url = env.API_URL ?? "https://github-ship-bots.newkubise.workers.dev";
+  const url = env.API_URL;
+  if (!url) throw new Error("Missing API_URL");
   const res = await fetch(`${url}/api/cards/webhook`, {
     method: "POST",
     headers: {

@@ -1,9 +1,6 @@
 import { Show, For, createSignal, createResource } from "solid-js";
-import { fetchCard, fetchComments, fetchEvidence, fetchEvidenceContent, fetchExplain, fetchTemplates, fetchVotes, applyTemplate } from "../api";
+import { fetchCard, fetchComments, fetchEvidence, fetchEvidenceContent, fetchExplain, fetchTemplates, fetchVotes, applyTemplate, API_URL } from "../api";
 import type { ShipCard } from "@ship-feed/shared";
-
-const API_URL = import.meta.env.VITE_API_URL || "https://github-ship-bots.newkubise.workers.dev";
-
 export default function CardDetail(props: { cardId: string; onClose: () => void }) {
   const [card] = createResource(() => props.cardId, fetchCard);
   const [evidence] = createResource(() => props.cardId, fetchEvidence);
@@ -14,12 +11,10 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
   const [activeEvidence, setActiveEvidence] = createSignal<string | null>(null);
   const [activeKind, setActiveKind] = createSignal<string>("");
   const [content] = createResource(activeEvidence, fetchEvidenceContent);
-
   const selectEvidence = (id: string, kind: string) => {
     setActiveEvidence(id);
     setActiveKind(kind);
   };
-
   return (
     <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4">
       <div class="w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
@@ -44,17 +39,14 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                   Close
                 </button>
               </div>
-
               <div class="p-6 space-y-6">
                 <p class="text-gray-700 text-sm leading-relaxed">{c.description}</p>
-
                 <div class="grid grid-cols-4 gap-2 text-center text-xs">
                   <Metric label="score" value={c.score.toFixed(2)} />
                   <Metric label="impact" value={c.impact} />
                   <Metric label="risk" value={c.risk} />
                   <Metric label="effect" value={c.effect} />
                 </div>
-
                 <Show when={explain()}>
                   <div class="rounded-xl bg-indigo-50 border border-indigo-100 p-4">
                     <h3 class="font-semibold text-indigo-900 mb-2">Why this score?</h3>
@@ -75,7 +67,6 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                     </ul>
                   </div>
                 </Show>
-
                 <Show when={votes()}>
                   <div class="rounded-xl bg-zinc-50 border border-zinc-200 p-4">
                     <h3 class="font-semibold text-zinc-900 mb-2">
@@ -95,7 +86,6 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                     </ul>
                   </div>
                 </Show>
-
                 <Show when={templates() && templates()!.length > 0}>
                   <div>
                     <h3 class="font-semibold text-gray-900 mb-2">Quick comment</h3>
@@ -116,7 +106,6 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                     </div>
                   </div>
                 </Show>
-
                 <Show when={comments() && comments()!.length > 0}>
                   <div>
                     <h3 class="font-semibold text-gray-900 mb-2">Comments</h3>
@@ -135,7 +124,6 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                     </ul>
                   </div>
                 </Show>
-
                 <div>
                   <h3 class="font-semibold text-gray-900 mb-3">Evidence</h3>
                   <Show when={evidence() && evidence()!.length > 0} fallback={<p class="text-sm text-gray-500">No evidence yet.</p>}>
@@ -157,7 +145,6 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                       </For>
                     </ul>
                   </Show>
-
                   <Show when={activeEvidence()}>
                     <div class="mt-4 rounded-lg bg-gray-900 text-gray-100 p-4 overflow-x-auto">
                       <Show when={activeKind() === "image"}>
@@ -188,7 +175,6 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
     </div>
   );
 }
-
 function Metric(props: { label: string; value: string }) {
   return (
     <div class="bg-gray-100 rounded-lg p-2">

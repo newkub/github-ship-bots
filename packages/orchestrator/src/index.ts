@@ -1,4 +1,5 @@
 import type { ShipCard, Env } from "@ship-feed/shared";
+import { rowToCard } from "@ship-feed/shared";
 import { shipToGitHub } from "./lib/github";
 
 export interface OrchestratorContext {
@@ -19,27 +20,6 @@ export function createContext(env: Env): OrchestratorContext {
 
 function now() {
   return new Date().toISOString();
-}
-
-function rowToCard(row: Record<string, unknown>): ShipCard {
-  return {
-    id: row.id as string,
-    kind: row.kind as ShipCard["kind"],
-    title: row.title as string,
-    description: row.description as string,
-    status: row.status as ShipCard["status"],
-    repoFullName: row.repo_full_name as string,
-    issueNumber: row.issue_number as number | undefined,
-    pullNumber: row.pull_number as number | undefined,
-    impact: row.impact as ShipCard["impact"],
-    risk: row.risk as ShipCard["risk"],
-    effect: row.effect as ShipCard["effect"],
-    phase: row.phase as ShipCard["phase"],
-    score: row.score as number,
-    evidenceIds: JSON.parse((row.evidence_ids as string) || "[]"),
-    createdAt: row.created_at as string,
-    updatedAt: row.updated_at as string,
-  };
 }
 
 export async function fetchPendingCards(ctx: OrchestratorContext): Promise<ShipCard[]> {

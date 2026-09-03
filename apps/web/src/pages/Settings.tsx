@@ -1,9 +1,9 @@
 import { createResource, Show } from "solid-js";
-import { fetchSession } from "../api";
+import { fetchSession, API_URL } from "../api";
 
 export default function Settings() {
   const [session] = createResource(() => fetchSession());
-  const webhookUrl = `${import.meta.env.VITE_API_URL || "https://github-ship-bots.newkubise.workers.dev"}/webhook`;
+  const webhookUrl = `${API_URL}/webhook`;
 
   return (
     <div>

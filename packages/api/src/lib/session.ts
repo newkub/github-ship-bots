@@ -1,5 +1,6 @@
 import type { User } from "@ship-feed/shared";
 import type { SessionContext } from "./env";
+import { z } from "zod";
 import {
   getSignedCookie,
   serializeSignedCookie,
@@ -7,6 +8,16 @@ import {
 } from "./cookie";
 
 const COOKIE = "ship_feed_session";
+
+const userSchema = z.object({
+  id: z.string(),
+  githubLogin: z.string(),
+  email: z.string().optional(),
+  workosUserId: z.string().optional(),
+  plan: z.enum(["free", "pro", "team"]),
+  stripeCustomerId: z.string().optional(),
+  createdAt: z.string(),
+});
 
 function cookieOptions(maxAge: number) {
   return {
@@ -29,7 +40,9 @@ export async function getSession(c: SessionContext): Promise<User | null> {
   if (!sessionId) return null;
   const raw = await c.env.SESSION_KV.get(`session:${sessionId}`);
   if (!raw) return null;
-  return JSON.parse(raw) as User;
+  const parsed = userSchema.safeParse(JSON.parse(raw));
+  if (!parsed.success) return null;
+  return parsed.data as User;
 }
 
 export async function setSession(

@@ -1,7 +1,7 @@
 import { Probot } from "probot";
-import { issuesHandler } from "./handlers/issues.ts";
-import { pullRequestHandler } from "./handlers/pull-request.ts";
-import type { ShipFeedWebhooks } from "./types.ts";
+import { issuesHandler } from "./handlers/issues";
+import { pullRequestHandler } from "./handlers/pull-request";
+import type { ShipFeedWebhooks } from "./types";
 
 export default (app: Probot) => {
   const webhooks = app as unknown as ShipFeedWebhooks;

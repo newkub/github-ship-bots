@@ -2,10 +2,10 @@ import {
   type ShipFeedWebhooks,
   type PullRequestOpenedPayload,
   type IssueCommentPayload,
-} from "../types.ts";
-import { parseCommand, renderCard } from "../domain/actions.ts";
-import { createCardFromWebhook, uploadEvidence } from "../lib/api.ts";
-import { generateReviewComment } from "../lib/review.ts";
+} from "../types";
+import { parseCommand, renderCard } from "../domain/actions";
+import { createCardFromWebhook, uploadEvidence } from "../lib/api";
+import { generateReviewComment } from "../lib/review";
 
 function isApprove(command: "approve" | "reject" | "ship"): boolean {
   return command === "approve";
