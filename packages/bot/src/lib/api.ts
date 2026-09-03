@@ -25,7 +25,7 @@ export async function uploadEvidence(
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-bot-token": env.API_TOKEN ?? "",
+      "x-bot-token": env.API_TOKEN,
     },
     body: JSON.stringify(body),
   });
@@ -59,7 +59,7 @@ export async function createCardFromWebhook(
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-bot-token": env.API_TOKEN ?? "",
+      "x-bot-token": env.API_TOKEN,
     },
     body: JSON.stringify(body),
   });
@@ -72,7 +72,7 @@ export async function createCardFromWebhook(
   assertBoolean(record.ok, "ok");
   const card = assertRecord(record.card, "card");
   return {
-    ok: true,
+    ok: record.ok,
     card: {
       id: assertString(card.id, "card.id"),
       score: assertNumber(card.score, "card.score"),

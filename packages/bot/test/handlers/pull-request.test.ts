@@ -21,7 +21,12 @@ function createMockContext(payload: any) {
           merge: async (args: any) => {
             calls.push({ name: "merge", args });
           },
-          get: async () => ({ data: "diff content" }),
+          get: async (args: any) => {
+            if (args?.mediaType?.format === "diff") {
+              return { data: "diff content" };
+            }
+            return { data: { mergeable: true, mergeable_state: "clean" } };
+          },
         },
       },
     },

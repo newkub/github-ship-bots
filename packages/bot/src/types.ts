@@ -5,8 +5,8 @@ export interface BotEnv {
   APP_ID: string;
   PRIVATE_KEY: string;
   WEBHOOK_SECRET: string;
-  API_URL?: string;
-  API_TOKEN?: string;
+  API_URL: string;
+  API_TOKEN: string;
   DB?: D1Database;
   OPENAI_API_KEY?: string;
   OPENAI_API_URL?: string;
@@ -20,6 +20,8 @@ export function createBotEnv(overrides?: Partial<BotEnv>): BotEnv {
     APP_ID: "",
     PRIVATE_KEY: "",
     WEBHOOK_SECRET: "",
+    API_URL: "",
+    API_TOKEN: "",
     ...overrides,
   };
 }
