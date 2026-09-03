@@ -1,4 +1,5 @@
 import { subscribe, serializeSubscription, getNotificationPermission, requestNotificationPermission } from "@mmmike/web-push/client";
+import { API_URL } from "../api";
 
 export async function enablePush() {
   const permission = await requestNotificationPermission();
@@ -11,9 +12,10 @@ export async function enablePush() {
   if (result.status !== "subscribed") return { ok: false, reason: result.status };
 
   const data = serializeSubscription(result.subscription);
-  const res = await fetch("/api/push/subscribe", {
+  const res = await fetch(`${API_URL}/api/push/subscribe`, {
     method: "POST",
     headers: { "content-type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(data),
   });
   if (!res.ok) return { ok: false, reason: "server-error" };
@@ -26,7 +28,8 @@ export async function canPush() {
 }
 
 async function fetchVapidPublicKey() {
-  const res = await fetch("/api/push/vapid-public-key");
-  const data = await res.json<{ publicKey: string | null }>();
+  const res = await fetch(`${API_URL}/api/push/vapid-public-key`, { credentials: "include" });
+  if (!res.ok) return null;
+  const data = await res.json() as { publicKey: string | null };
   return data.publicKey;
 }
