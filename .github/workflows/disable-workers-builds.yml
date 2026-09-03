@@ -1,0 +1,56 @@
+name: Disable Workers Builds
+
+on:
+  workflow_dispatch:
+
+jobs:
+  disable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Delete Workers Builds triggers
+        env:
+          CLOUDFLARE_BUILDS_TOKEN: ${{ secrets.CLOUDFLARE_BUILDS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          bun -e "
+          const token = process.env.CLOUDFLARE_BUILDS_TOKEN;
+          const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+          const worker = 'github-ship-bots';
+
+          if (!token || !accountId) {
+            console.error('Missing CLOUDFLARE_BUILDS_TOKEN or CLOUDFLARE_ACCOUNT_ID');
+            process.exit(1);
+          }
+
+          async function api(path, opts = {}) {
+            const res = await fetch('https://api.cloudflare.com/client/v4' + path, {
+              ...opts,
+              headers: {
+                Authorization: 'Bearer ' + token,
+                'Content-Type': 'application/json',
+              },
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(res.status + ' ' + JSON.stringify(data));
+            return data.result;
+          }
+
+          const script = await api('/accounts/' + accountId + '/workers/scripts/' + worker);
+          const tag = script.tag;
+          console.log('worker tag:', tag);
+
+          const triggers = await api('/accounts/' + accountId + '/builds/workers/' + tag + '/triggers');
+          console.log('triggers found:', triggers.length);
+
+          for (const t of triggers) {
+            await api('/accounts/' + accountId + '/builds/triggers/' + t.uuid, { method: 'DELETE' });
+            console.log('deleted trigger', t.uuid, t.trigger_name);
+          }
+
+          console.log('Workers Builds disabled for', worker);
+          "
