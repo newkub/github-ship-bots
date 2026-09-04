@@ -1,6 +1,8 @@
 import type { ShipCard, Env } from "@ship-feed/shared";
 import { rowToCard } from "@ship-feed/shared";
 import { shipToGitHub } from "./lib/github/ship";
+import { monitorAndRollback } from "./lib/github/rollback";
+import type { ShipActionContext } from "./lib/github/client";
 export { postCommentToGitHub, createCommentContext } from "./lib/github/comment";
 export type { CommentContext } from "./lib/github/comment";
 import { logger } from "./lib/logger";
@@ -55,7 +57,7 @@ async function updateCardStatus(ctx: OrchestratorContext, card: ShipCard, status
 }
 
 export async function onApprove(ctx: OrchestratorContext, card: ShipCard) {
-  const gh = await shipToGitHub({
+  const shipCtx: ShipActionContext = {
     appId: ctx.githubAppId,
     privateKey: ctx.githubAppPrivateKey,
     githubApiUrl: ctx.githubApiUrl,
@@ -65,7 +67,8 @@ export async function onApprove(ctx: OrchestratorContext, card: ShipCard) {
     issueNumber: card.issueNumber,
     pullNumber: card.pullNumber,
     action: "approve",
-  });
+  };
+  const gh = await shipToGitHub(shipCtx);
 
   if (!gh.ok) {
     logger.error(`failed to ship ${card.id}`, { cardId: card.id, reason: gh.message, correlationId: ctx.correlationId });
@@ -79,6 +82,16 @@ export async function onApprove(ctx: OrchestratorContext, card: ShipCard) {
   }
 
   await updateCardStatus(ctx, card, "shipped");
+
+  if (gh.ok && !gh.skipped) {
+    const rollback = await monitorAndRollback(shipCtx);
+    if (!rollback.ok && !rollback.skipped) {
+      logger.error(`rollback check failed for ${card.id}`, { cardId: card.id, reason: rollback.message, correlationId: ctx.correlationId });
+    } else if (rollback.pullNumber) {
+      logger.info(`opened revert PR for ${card.id}`, { cardId: card.id, pullNumber: rollback.pullNumber, correlationId: ctx.correlationId });
+    }
+  }
+
   return { ok: true, card: { ...card, status: "shipped" as const }, github: gh };
 }
 
