@@ -105,9 +105,16 @@ const read = withEnv(new Elysia())
     if (!ensureAuth(set, session)) return unauthorized();
     const { results } = await env.DB
       .prepare(
-        `SELECT * FROM cards
-         WHERE creator_id = ? OR repo_full_name IN (SELECT repo_full_name FROM user_repos WHERE user_id = ?)
-         ORDER BY updated_at DESC LIMIT 100`
+        `WITH visible AS (
+          SELECT id FROM cards WHERE creator_id = ?
+          UNION
+          SELECT c.id FROM cards c
+          JOIN user_repos ur ON ur.repo_full_name = c.repo_full_name
+          WHERE ur.user_id = ?
+        )
+        SELECT c.* FROM cards c
+        JOIN visible v ON c.id = v.id
+        ORDER BY c.updated_at DESC LIMIT 100`
       )
       .bind(session.id, session.id)
       .all<Record<string, unknown>>();
@@ -119,10 +126,17 @@ const read = withEnv(new Elysia())
     if (!ensureAuth(set, session)) return unauthorized();
     const { results } = await env.DB
       .prepare(
-        `SELECT * FROM cards
-         WHERE status IN ('pending', 'approved', 'rejected')
-           AND (creator_id = ? OR repo_full_name IN (SELECT repo_full_name FROM user_repos WHERE user_id = ?))
-         ORDER BY updated_at DESC LIMIT 20`
+        `WITH visible AS (
+          SELECT id FROM cards WHERE creator_id = ?
+          UNION
+          SELECT c.id FROM cards c
+          JOIN user_repos ur ON ur.repo_full_name = c.repo_full_name
+          WHERE ur.user_id = ?
+        )
+        SELECT c.* FROM cards c
+        JOIN visible v ON c.id = v.id
+        WHERE c.status IN ('pending', 'approved', 'rejected')
+        ORDER BY c.updated_at DESC LIMIT 20`
       )
       .bind(session.id, session.id)
       .all<Record<string, unknown>>();
@@ -134,10 +148,17 @@ const read = withEnv(new Elysia())
     if (!ensureAuth(set, session)) return unauthorized();
     const { results } = await env.DB
       .prepare(
-        `SELECT * FROM cards
-         WHERE status = 'pending'
-           AND (creator_id = ? OR repo_full_name IN (SELECT repo_full_name FROM user_repos WHERE user_id = ?))
-         ORDER BY score DESC LIMIT 20`
+        `WITH visible AS (
+          SELECT id FROM cards WHERE creator_id = ?
+          UNION
+          SELECT c.id FROM cards c
+          JOIN user_repos ur ON ur.repo_full_name = c.repo_full_name
+          WHERE ur.user_id = ?
+        )
+        SELECT c.* FROM cards c
+        JOIN visible v ON c.id = v.id
+        WHERE c.status = 'pending'
+        ORDER BY c.score DESC LIMIT 20`
       )
       .bind(session.id, session.id)
       .all<Record<string, unknown>>();
