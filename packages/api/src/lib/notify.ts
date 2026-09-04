@@ -31,7 +31,8 @@ export async function notifyCardStatus(env: Env, card: ShipCard, event: "created
   for (let i = 0; i < results.length; i++) {
     const result = results[i];
     if (result && result.status === "rejected") {
-      const reason = (result as PromiseRejectedResult).reason instanceof Error ? (result as PromiseRejectedResult).reason.message : String((result as PromiseRejectedResult).reason);
+      const rejected = result as PromiseRejectedResult;
+      const reason = rejected.reason instanceof Error ? rejected.reason.message : String(rejected.reason);
       failures.push(`${names[i]}: ${reason}`);
     }
   }

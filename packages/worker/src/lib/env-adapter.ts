@@ -1,4 +1,5 @@
 import type { Env } from "@ship-feed/shared";
+import { isEnumValue } from "@ship-feed/shared";
 
 export interface BotEnv extends Env {
   APP_ID: string;
@@ -10,12 +11,19 @@ export interface BotEnv extends Env {
   ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
+const REVIEW_MODES: readonly ("auto" | "heuristic" | "required")[] = ["auto", "heuristic", "required"];
+
 function checkString(env: Env, key: keyof Env): string | undefined {
   const value = env[key];
   if (typeof value !== "string" || value === "") {
     return undefined;
   }
   return value;
+}
+
+function parseReviewMode(value: unknown): "auto" | "heuristic" | "required" | undefined {
+  if (isEnumValue(value, REVIEW_MODES)) return value;
+  return undefined;
 }
 
 export type BotEnvResult =
@@ -49,8 +57,8 @@ export function toBotEnv(env: Env): BotEnvResult {
       API_TOKEN: botToken!,
       API_URL: publicAppUrl!,
       OPENAI_API_KEY: env.OPENAI_API_KEY,
-      OPENAI_REVIEW_MODE: (env.OPENAI_REVIEW_MODE as "auto" | "heuristic" | "required" | undefined) ?? "auto",
-      ASSETS: env.ASSETS,
-    } as BotEnv,
+      OPENAI_REVIEW_MODE: parseReviewMode(env.OPENAI_REVIEW_MODE) ?? "auto",
+      ASSETS: env.ASSETS!,
+    },
   };
 }
