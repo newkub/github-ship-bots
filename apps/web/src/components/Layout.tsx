@@ -3,29 +3,26 @@ import { useQuery, useQueryClient } from "@tanstack/solid-query";
 import {
   GitBranch,
   CreditCard,
+  FileText,
   MousePointer,
+  Moon,
   Puzzle,
   Settings,
+  Sun,
   LogOut,
   LayoutDashboard,
-  AlertCircle,
   User,
 } from "lucide-solid";
-import { fetchSession, loginUrl, logout } from "../api";
-import Skeleton from "./Skeleton";
-import { Show, createEffect, type JSX } from "solid-js";
+import { fetchSession, logout } from "../api";
+import { createTheme } from "../lib/theme";
+import LoginScreen from "./LoginScreen";
+import { Show, type JSX } from "solid-js";
 
 export default function Layout(props: { children?: JSX.Element }) {
   const queryClient = useQueryClient();
   const session = useQuery(() => ({ queryKey: ["session"], queryFn: fetchSession }));
   const user = () => session.data?.user;
-
-  createEffect(() => {
-    if (!session.isPending && !user()) {
-      // Not authenticated and session resolved: redirect to WorkOS login.
-      window.location.href = loginUrl();
-    }
-  });
+  const theme = createTheme();
 
   const handleLogout = async () => {
     await logout();
@@ -49,72 +46,64 @@ export default function Layout(props: { children?: JSX.Element }) {
   };
 
   return (
-    <div class="flex h-screen bg-gray-50">
-      <aside class="w-64 bg-white border-r border-gray-200 p-4 flex flex-col">
-        <A href="/" class="flex items-center gap-2 px-4 mb-8">
-          <img src="/dashboard/icon-192x192.png" alt="ship-feed" class="w-8 h-8" />
-          <span class="font-bold text-lg">ship-feed</span>
-        </A>
+    <Show when={!session.isPending} fallback={
+      <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950 p-6">
+        <div class="flex items-center gap-2 text-gray-500">
+          <div class="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          Loading…
+        </div>
+      </div>
+    }>
+      <Show when={user()} fallback={<LoginScreen error={session.error ? (session.error as Error).message : undefined} />}>
+        <div class="flex h-screen bg-gray-50 dark:bg-zinc-950">
+          <aside class="w-64 bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 p-4 flex flex-col">
+            <A href="/" class="flex items-center gap-2 px-4 mb-8">
+              <img src="/dashboard/icon-192x192.png" alt="ship-feed" class="w-8 h-8" />
+              <span class="font-bold text-lg text-gray-900 dark:text-white">ship-feed</span>
+            </A>
 
-        <Show when={session.isPending}>
-          <div class="flex-1 flex flex-col gap-4 px-2">
-            <Skeleton class="h-10 w-full" />
-            <Skeleton class="h-10 w-full" />
-            <Skeleton class="h-10 w-full" />
-            <Skeleton class="h-10 w-full" />
-            <Skeleton class="h-10 w-full" />
-            <Skeleton class="h-10 w-full" />
-          </div>
-        </Show>
-
-        <Show when={!session.isPending}>
-          <Show when={user()} fallback={null}>
             <nav class="space-y-1 flex-1">
               {nav("/", LayoutDashboard, "Dashboard")}
               {nav("/repos", GitBranch, "Repositories")}
+              {nav("/releases", FileText, "Releases")}
               {nav("/billing", CreditCard, "Billing")}
               {nav("/inspector", MousePointer, "Inspector")}
               {nav("/marketplace", Puzzle, "Marketplace")}
               {nav("/settings", Settings, "Settings")}
             </nav>
 
-            <div class="border-t border-gray-200 pt-4">
-              <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 mb-2">
-                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 shrink-0">
+            <div class="border-t border-gray-200 dark:border-zinc-800 pt-4">
+              <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-700 mb-2">
+                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 shrink-0">
                   <User size={18} />
                 </div>
                 <div class="min-w-0 flex-1">
-                  <div class="text-sm font-medium truncate text-gray-900">{user()?.githubLogin ?? "User"}</div>
-                  <div class="text-[10px] uppercase tracking-wide font-semibold text-indigo-600">{user()?.plan ?? "free"}</div>
+                  <div class="text-sm font-medium truncate text-gray-900 dark:text-white">{user()?.githubLogin ?? "User"}</div>
+                  <div class="text-[10px] uppercase tracking-wide font-semibold text-indigo-600 dark:text-indigo-400">{user()?.plan ?? "free"}</div>
                 </div>
               </div>
               <button
+                onClick={theme.toggle}
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-lg mb-1"
+              >
+                {theme.theme() === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+                {theme.theme() === "dark" ? "Light mode" : "Dark mode"}
+              </button>
+              <button
                 onClick={handleLogout}
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-lg"
               >
                 <LogOut size={18} />
                 Sign out
               </button>
             </div>
-          </Show>
-        </Show>
-      </aside>
+          </aside>
 
-      <main class="flex-1 overflow-auto p-8">
-        <Show when={session.error}>
-          <div class="rounded-2xl bg-rose-50 border border-rose-100 p-6 text-rose-700 mb-6 flex items-start gap-3">
-            <AlertCircle size={20} class="shrink-0 mt-0.5" />
-            <div>
-              <p class="font-medium">Failed to verify your session</p>
-              <p class="text-sm mt-1">{(session.error as Error).message}</p>
-              <a href={loginUrl()} class="inline-flex items-center gap-2 mt-3 text-sm font-medium underline hover:no-underline">
-                Sign in again
-              </a>
-            </div>
-          </div>
-        </Show>
-        <Show when={user()}>{props.children}</Show>
-      </main>
-    </div>
+          <main class="flex-1 overflow-auto p-8 dark:bg-zinc-950">
+            {props.children}
+          </main>
+        </div>
+      </Show>
+    </Show>
   );
 }

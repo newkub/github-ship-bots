@@ -15,6 +15,7 @@ import inspector from "./routes/inspector";
 import stripe from "./routes/stripe";
 import learning from "./routes/learning";
 import push from "./routes/push";
+import releases from "./routes/releases";
 
 const app = new Elysia()
   .onBeforeHandle(async ({ request, set }) => {
@@ -50,7 +51,8 @@ const app = new Elysia()
   .use(inspector)
   .use(stripe)
   .use(learning)
-  .use(push);
+  .use(push)
+  .use(releases);
 
 export default {
   async fetch(

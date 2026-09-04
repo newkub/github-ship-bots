@@ -167,3 +167,12 @@ export async function fetchComments(cardId: string): Promise<CardComment[]> {
   if (!res.ok) throw new Error("Failed to fetch comments");
   return res.json();
 }
+
+export async function fetchReleaseNotes(from?: string, to?: string): Promise<{ title: string; markdown: string; cards: { id: string; title: string; repoFullName: string }[] }> {
+  const params = new URLSearchParams();
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+  const res = await fetch(`${API_URL}/api/releases/notes?${params.toString()}`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch release notes");
+  return res.json();
+}
