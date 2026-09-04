@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS security_findings;
+DROP TABLE IF EXISTS rollback_events;
+DROP TABLE IF EXISTS refactor_artifacts;
+DROP TABLE IF EXISTS issue_traces;
+DROP TABLE IF EXISTS ci_diagnostics;
+DROP TABLE IF EXISTS usage_events;
+DROP TABLE IF EXISTS agent_sdks;
+DROP TABLE IF EXISTS notification_channels;
+DROP TABLE IF EXISTS health_checks;
+DROP TABLE IF EXISTS voice_commands;

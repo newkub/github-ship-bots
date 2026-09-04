@@ -155,70 +155,6 @@ export const cardComments = sqliteTable("card_comments", {
   createdAt: text("created_at").notNull(),
 });
 
-export const securityFindings = sqliteTable("security_findings", {
-  id: text("id").primaryKey(),
-  cardId: text("card_id"),
-  repoFullName: text("repo_full_name").notNull(),
-  type: text("type").notNull(),
-  severity: text("severity").notNull(),
-  description: text("description").notNull(),
-  resolvedAt: text("resolved_at"),
-  createdAt: text("created_at").notNull(),
-});
-
-export const rollbackEvents = sqliteTable("rollback_events", {
-  id: text("id").primaryKey(),
-  cardId: text("card_id").notNull(),
-  deploymentId: text("deployment_id"),
-  reason: text("reason").notNull(),
-  success: integer("success", { mode: "boolean" }).notNull().default(false),
-  rolledBackAt: text("rolled_back_at").notNull(),
-  createdAt: text("created_at").notNull(),
-});
-
-export const refactorArtifacts = sqliteTable("refactor_artifacts", {
-  id: text("id").primaryKey(),
-  cardId: text("card_id").notNull(),
-  diffKey: text("diff_key").notNull(),
-  status: text("status").notNull().default("pending"),
-  createdAt: text("created_at").notNull(),
-});
-
-export const issueTraces = sqliteTable("issue_traces", {
-  id: text("id").primaryKey(),
-  issueId: text("issue_id").notNull(),
-  cardId: text("card_id"),
-  event: text("event").notNull(),
-  detail: text("detail").notNull(),
-  createdAt: text("created_at").notNull(),
-});
-
-export const ciDiagnostics = sqliteTable("ci_diagnostics", {
-  id: text("id").primaryKey(),
-  cardId: text("card_id"),
-  runId: text("run_id").notNull(),
-  logKey: text("log_key").notNull(),
-  diagnosis: text("diagnosis").notNull(),
-  createdAt: text("created_at").notNull(),
-});
-
-export const usageEvents = sqliteTable("usage_events", {
-  id: text("id").primaryKey(),
-  userId: text("user_id"),
-  event: text("event").notNull(),
-  metadata: text("metadata").notNull().default("{}"),
-  createdAt: text("created_at").notNull(),
-});
-
-export const agentSdks = sqliteTable("agent_sdks", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  name: text("name").notNull().unique(),
-  token: text("token").notNull(),
-  config: text("config").notNull().default("{}"),
-  createdAt: text("created_at").notNull(),
-});
-
 export const userRepos = sqliteTable("user_repos", {
   userId: text("user_id").notNull(),
   repoFullName: text("repo_full_name").notNull(),
@@ -226,28 +162,3 @@ export const userRepos = sqliteTable("user_repos", {
 }, (t) => ({
   pk: primaryKey({ columns: [t.userId, t.repoFullName] }),
 }));
-
-export const notificationChannels = sqliteTable("notification_channels", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  provider: text("provider").notNull(),
-  channel: text("channel").notNull(),
-  webhook: text("webhook").notNull(),
-  createdAt: text("created_at").notNull(),
-});
-
-export const healthChecks = sqliteTable("health_checks", {
-  id: text("id").primaryKey(),
-  status: text("status").notNull(),
-  metrics: text("metrics").notNull().default("{}"),
-  runAt: text("run_at").notNull(),
-});
-
-export const voiceCommands = sqliteTable("voice_commands", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  audioKey: text("audio_key"),
-  transcript: text("transcript").notNull(),
-  action: text("action").notNull(),
-  createdAt: text("created_at").notNull(),
-});
