@@ -1,4 +1,4 @@
-import { getCorrelationId } from "@ship-feed/shared";
+import { getCorrelationId, logError, logWarn, logInfo } from "@ship-feed/shared";
 
 export interface LogContext {
   correlationId?: string;
@@ -9,11 +9,11 @@ function structured(level: string, message: string, ctx: LogContext = {}) {
   const correlationId = ctx.correlationId ?? getCorrelationId();
   const payload = { level, message, correlationId, ...ctx, timestamp: new Date().toISOString() };
   if (level === "error") {
-    console.error(JSON.stringify(payload));
+    logError(payload);
   } else if (level === "warn") {
-    console.warn(JSON.stringify(payload));
+    logWarn(payload);
   } else {
-    console.log(JSON.stringify(payload));
+    logInfo(payload);
   }
 }
 
