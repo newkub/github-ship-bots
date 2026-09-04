@@ -1,4 +1,4 @@
-import { For, createMemo } from "solid-js";
+import { For, createMemo, createSignal } from "solid-js";
 import { Check, Clock, Package, X } from "lucide-solid";
 import type { ShipCard, CardStatus } from "@ship-feed/shared";
 import CardTile from "./CardTile";
@@ -16,6 +16,9 @@ export default function Kanban(props: {
   onDetail: (id: string) => void;
   pendingId: string | null;
 }) {
+  const [draggedId, setDraggedId] = createSignal<string | null>(null);
+  const [dragOver, setDragOver] = createSignal<CardStatus | null>(null);
+
   const byColumn = createMemo(() => {
     const map: Record<CardStatus, ShipCard[]> = { pending: [], approved: [], rejected: [], shipped: [] };
     for (const card of props.cards) {
@@ -24,14 +27,56 @@ export default function Kanban(props: {
     return map;
   });
 
+  const handleDragStart = (card: ShipCard) => (e: DragEvent) => {
+    e.dataTransfer?.setData("text/plain", card.id);
+    e.dataTransfer?.setData("application/json", JSON.stringify({ id: card.id, status: card.status }));
+    e.dataTransfer!.effectAllowed = "move";
+    setDraggedId(card.id);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOver(null);
+  };
+
+  const handleDragOver = (status: CardStatus) => (e: DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer!.dropEffect = "move";
+    setDragOver(status);
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(null);
+  };
+
+  const handleDrop = (status: CardStatus) => (e: DragEvent) => {
+    e.preventDefault();
+    const id = e.dataTransfer?.getData("text/plain");
+    setDragOver(null);
+    setDraggedId(null);
+    if (id) {
+      props.onStatus(id, status);
+    }
+  };
+
   return (
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
       <For each={columns}>
         {(col) => {
           const Icon = col.icon;
           const items = byColumn()[col.status];
+          const isOver = () => dragOver() === col.status;
           return (
-            <div class="flex flex-col rounded-2xl bg-gray-50/80 dark:bg-zinc-900/60 border border-gray-200/60 dark:border-zinc-800 p-3 min-h-[200px]">
+            <div
+              class={`flex flex-col rounded-2xl border p-3 min-h-[200px] transition ${
+                isOver()
+                  ? "bg-indigo-50/80 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700"
+                  : "bg-gray-50/80 dark:bg-zinc-900/60 border-gray-200/60 dark:border-zinc-800"
+              }`}
+              onDragOver={handleDragOver(col.status)}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop(col.status)}
+            >
               <div class="flex items-center justify-between mb-3 px-1">
                 <div class="flex items-center gap-2">
                   <div
@@ -55,6 +100,9 @@ export default function Kanban(props: {
                       onDetail={() => props.onDetail(card.id)}
                       busy={props.pendingId === card.id}
                       compact
+                      draggable={card.status !== "shipped"}
+                      onDragStart={handleDragStart(card)}
+                      onDragEnd={handleDragEnd}
                     />
                   )}
                 </For>

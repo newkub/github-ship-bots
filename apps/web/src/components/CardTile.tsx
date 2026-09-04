@@ -67,6 +67,9 @@ export default function CardTile(props: {
   onDetail: () => void;
   busy: boolean;
   compact?: boolean;
+  draggable?: boolean;
+  onDragStart?: (e: DragEvent) => void;
+  onDragEnd?: () => void;
 }) {
   const meta = kindMeta[props.card.kind];
   const Icon = meta.icon;
@@ -74,8 +77,11 @@ export default function CardTile(props: {
 
   return (
     <div
-      class="group rounded-2xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-4 shadow-sm hover:shadow-lg transition cursor-pointer"
+      class={`group rounded-2xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-4 shadow-sm hover:shadow-lg transition ${props.draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
       onClick={props.onDetail}
+      draggable={props.draggable}
+      onDragStart={props.onDragStart}
+      onDragEnd={props.onDragEnd}
     >
       <div class="flex items-start justify-between gap-3 mb-3">
         <div class="flex items-center gap-2 min-w-0">
