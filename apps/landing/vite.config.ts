@@ -2,9 +2,13 @@ import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 import UnoCSS from "unocss/vite";
 
-const appUrl = process.env.VITE_APP_URL || "https://github-ship-bots.newkubise.workers.dev";
-const githubAppName = process.env.VITE_GITHUB_APP_NAME || "wrikka-ship-bot";
-const githubAppInstallUrl = process.env.VITE_GITHUB_APP_INSTALL_URL || `https://github.com/apps/${githubAppName}/installations/new`;
+const appUrl = process.env.VITE_APP_URL;
+const githubAppName = process.env.VITE_GITHUB_APP_NAME;
+const githubAppInstallUrl = process.env.VITE_GITHUB_APP_INSTALL_URL;
+
+if (!appUrl) throw new Error("Missing VITE_APP_URL");
+if (!githubAppName) throw new Error("Missing VITE_GITHUB_APP_NAME");
+if (!githubAppInstallUrl) throw new Error("Missing VITE_GITHUB_APP_INSTALL_URL");
 
 export default defineConfig({
   plugins: [

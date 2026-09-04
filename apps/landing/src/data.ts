@@ -54,7 +54,7 @@ export const appSlug = "github-ship-bots";
 
 export const dashboardUrl = "/dashboard/";
 
-export const installUrl = import.meta.env.VITE_GITHUB_APP_INSTALL_URL || "https://github.com/apps/wrikka-ship-bot";
+export const installUrl = import.meta.env.VITE_GITHUB_APP_INSTALL_URL;
 
 export const sections: Section[] = [
   { id: "home", label: "Home", icon: Sparkles },
@@ -148,8 +148,8 @@ export interface AppInfo {
 }
 
 export async function fetchAppInfo(): Promise<AppInfo> {
-  const baseUrl = import.meta.env.VITE_GITHUB_API_URL || "https://api.github.com";
-  const appName = import.meta.env.VITE_GITHUB_APP_NAME || "wrikka-ship-bot";
+  const baseUrl = import.meta.env.VITE_GITHUB_API_URL ?? "https://api.github.com";
+  const appName = import.meta.env.VITE_GITHUB_APP_NAME ?? "";
   const res = await fetch(`${baseUrl}/apps/${appName}`);
   if (!res.ok) throw new Error("Failed to load app info");
   return res.json();
