@@ -24,16 +24,17 @@ const write = withEnv(new Elysia())
     }
     await updateLearningWeights(env.DB, card, body.direction);
     const swipeId = generateId();
+    const createdAt = now();
     await env.DB.prepare("INSERT INTO swipes (id, card_id, user_id, direction, created_at) VALUES (?, ?, ?, ?, ?)")
-      .bind(swipeId, id, session.id, body.direction, now())
+      .bind(swipeId, id, session.id, body.direction, createdAt)
       .run();
     if (body.comment && body.comment.trim().length > 0) {
       const commentId = generateId();
       const trimmed = body.comment.trim();
       const postedToGitHub = await postSwipeCommentToGitHub(env, card, trimmed);
       await env.DB
-        .prepare("INSERT INTO card_comments (id, card_id, user_id, body, posted_to_github, created_at) VALUES (?, ?, ?, ?, ?, ?)")
-        .bind(commentId, id, session.id, trimmed, postedToGitHub ? 1 : 0, now())
+        .prepare("INSERT INTO card_comments (id, card_id, user_id, swipe_id, body, posted_to_github, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+        .bind(commentId, id, session.id, swipeId, trimmed, postedToGitHub ? 1 : 0, createdAt)
         .run();
     }
     const status = await resolveApprovalStatus(env.DB, card);
@@ -115,7 +116,39 @@ const write = withEnv(new Elysia())
       await notifyCardStatus(env, updated, body.status as "created" | "approved" | "rejected" | "shipped");
     }
     return { ok: true };
-  }, { params: paramsSchema, body: z.object({ status: statusSchema }) });
+  }, { params: paramsSchema, body: z.object({ status: statusSchema }) })
+
+  .post("/:id/undo", async ({ request, set, env, params }) => {
+    const session = await getSession({ request, set, env });
+    if (!ensureAuth(set, session)) return unauthorized();
+    const id = params.id;
+    const card = await requireCard(env.DB, id, session.id);
+    if (!card) {
+      set.status = 404;
+      return notFound();
+    }
+
+    const swipe = await env.DB
+      .prepare("SELECT id, direction FROM swipes WHERE card_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT 1")
+      .bind(id, session.id)
+      .first<{ id: string; direction: string }>();
+    if (!swipe) {
+      set.status = 400;
+      return { error: "nothing to undo" };
+    }
+
+    await env.DB.prepare("DELETE FROM swipes WHERE id = ?").bind(swipe.id).run();
+    await env.DB.prepare("DELETE FROM card_comments WHERE swipe_id = ?").bind(swipe.id).run();
+
+    const status = await resolveApprovalStatus(env.DB, card);
+    if (status !== card.status) {
+      await env.DB.prepare("UPDATE cards SET status = ?, updated_at = ? WHERE id = ?")
+        .bind(status, now(), id)
+        .run();
+    }
+
+    return { ok: true, status, undone: swipe.direction };
+  }, { params: paramsSchema })
 
 async function postSwipeCommentToGitHub(
   env: { GITHUB_APP_ID?: string; GITHUB_APP_PRIVATE_KEY?: string; GITHUB_API_URL?: string; GITHUB_WEB_URL?: string },

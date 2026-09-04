@@ -1,6 +1,6 @@
 import { createSignal, For, Show, onMount, onCleanup } from "solid-js";
 import type { ShipCard } from "@ship-feed/shared";
-import { fetchCards, fetchNudges, swipeCard, flushOfflineQueue } from "../api";
+import { fetchCards, fetchNudges, swipeCard, undoSwipe, flushOfflineQueue } from "../api";
 import BottomNav from "../components/BottomNav";
 import Card from "../components/Card";
 import PromptInput from "../components/PromptInput";
@@ -81,11 +81,11 @@ export default function Feed() {
     setSwipeError(null);
     setCurrent(last.previous);
     setLastSwipe(null);
-    const opposite = last.direction === "approve" ? "reject" : "approve";
     const card = cards()[last.previous];
     if (card) {
       try {
-        await swipeCard({ cardId: card.id, direction: opposite });
+        await undoSwipe(card.id);
+        query.refetch();
       } catch (err) {
         setSwipeError(err instanceof Error ? err.message : "Undo failed. Please try again.");
       }

@@ -38,6 +38,10 @@ export async function syncSwipe({
   return postJson(`${API_URL}/api/cards/${cardId}/swipe`, { direction, comment });
 }
 
+export async function undoSwipe(cardId: string): Promise<{ ok: true; status: string; undone: string }> {
+  return postJson(`${API_URL}/api/cards/${cardId}/undo`, {});
+}
+
 export async function flushOfflineQueue(onProgress?: (remaining: number) => void) {
   let queue = getQueue();
   while (queue.length > 0) {
