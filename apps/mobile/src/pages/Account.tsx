@@ -8,7 +8,7 @@ import { LogIn, CreditCard, Bell, Info, User, CheckCircle2, XCircle } from "luci
 
 export default function Account() {
   const session = useQuery(() => ({ queryKey: ["session"], queryFn: getSession }));
-  const user = () => session.data?.user as { githubLogin?: string; plan?: string } | undefined;
+  const user = () => session.data?.user;
   const [pushStatus, setPushStatus] = createSignal<string | null>(null);
   const [pushEnabled, setPushEnabled] = createSignal(false);
 

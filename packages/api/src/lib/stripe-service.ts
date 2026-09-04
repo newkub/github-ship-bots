@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 import type { Env } from "@ship-feed/shared";
-import { generateId, now } from "@ship-feed/shared";
+import { generateId, now, assertRecord } from "@ship-feed/shared";
 
 export async function wasWebhookProcessed(db: Env["DB"], stripeEventId: string): Promise<boolean> {
   const row = await db
@@ -28,37 +28,60 @@ export async function findUserById(db: Env["DB"], userId: string): Promise<{ id:
   return db.prepare("SELECT id FROM users WHERE id = ?").bind(userId).first<{ id: string }>();
 }
 
-function getPeriodEnd(sub: Stripe.Subscription): string | null {
-  const end = (sub as unknown as { current_period_end?: number }).current_period_end;
-  if (!end) return null;
+function getPeriodEnd(sub: unknown): string | null {
+  const record = assertRecord(sub, "Stripe subscription");
+  const end = record.current_period_end;
+  if (typeof end !== "number" || Number.isNaN(end)) return null;
   return new Date(end * 1000).toISOString();
+}
+
+function getPlanNickname(record: Record<string, unknown>): string {
+  const items = record.items;
+  if (items === null || typeof items !== "object") return "team";
+  const itemsRecord = assertRecord(items, "subscription items");
+  const data = itemsRecord.data;
+  if (!Array.isArray(data) || data.length === 0) return "team";
+  const first = data[0];
+  if (first === null || typeof first !== "object") return "team";
+  const firstRecord = assertRecord(first, "subscription item");
+  const plan = firstRecord.plan;
+  if (plan === null || typeof plan !== "object") return "team";
+  const planRecord = assertRecord(plan, "plan");
+  const nickname = planRecord.nickname;
+  return typeof nickname === "string" && nickname.toLowerCase().includes("pro") ? "pro" : "team";
 }
 
 export async function syncSubscription(
   db: Env["DB"],
   userId: string,
   customerId: string,
-  sub: Stripe.Subscription
+  sub: unknown
 ): Promise<void> {
+  const record = assertRecord(sub, "Stripe subscription");
+  const subscriptionId = typeof record.id === "string" ? record.id : undefined;
+  const status = typeof record.status === "string" ? record.status : undefined;
+  if (!subscriptionId) throw new Error("Missing subscription id");
+  if (!status) throw new Error("Missing subscription status");
+
   const existing = await db
     .prepare("SELECT id FROM subscriptions WHERE stripe_subscription_id = ?")
-    .bind(sub.id)
+    .bind(subscriptionId)
     .first<{ id: string }>();
 
-  const plan = sub.items.data[0]?.plan.nickname?.toLowerCase().includes("pro") ? "pro" : "team";
-  const periodEnd = getPeriodEnd(sub);
+  const plan = getPlanNickname(record);
+  const periodEnd = getPeriodEnd(record);
 
   if (existing) {
     await db
       .prepare("UPDATE subscriptions SET plan = ?, status = ?, current_period_end = ? WHERE id = ?")
-      .bind(plan, sub.status, periodEnd, existing.id)
+      .bind(plan, status, periodEnd, existing.id)
       .run();
   } else {
     await db
       .prepare(
         "INSERT INTO subscriptions (id, user_id, stripe_subscription_id, plan, status, current_period_end) VALUES (?, ?, ?, ?, ?, ?)"
       )
-      .bind(generateId(), userId, sub.id, plan, sub.status, periodEnd)
+      .bind(generateId(), userId, subscriptionId, plan, status, periodEnd)
       .run();
   }
 

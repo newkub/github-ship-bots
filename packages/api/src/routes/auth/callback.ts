@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { WorkOS } from "@workos-inc/node";
 import { setSession } from "../../lib/session";
-import { generateId, now, assertEnumValue } from "@ship-feed/shared";
+import { generateId, now, assertEnumValue, assertRecord } from "@ship-feed/shared";
 import { withEnv } from "../../lib/env";
 import type { User, PlanTier } from "@ship-feed/shared";
 import { getGitHubLoginFromToken } from "../../lib/github-user";
@@ -68,8 +68,15 @@ callback.get(
       return { error: "incomplete user profile" };
     }
 
-    const oauthTokens = (resp as { oauthTokens?: { accessToken?: string; providerAccessToken?: string } }).oauthTokens;
-    const providerToken = oauthTokens?.providerAccessToken;
+    const workosRecord = assertRecord(resp as unknown, "WorkOS response");
+    const oauthTokens = workosRecord.oauthTokens;
+    let providerToken: string | undefined;
+    if (oauthTokens !== null && typeof oauthTokens === "object") {
+      const tokens = assertRecord(oauthTokens, "WorkOS oauth tokens");
+      if (typeof tokens.providerAccessToken === "string" && tokens.providerAccessToken) {
+        providerToken = tokens.providerAccessToken;
+      }
+    }
 
     if (!providerToken) {
       set.status = 400;

@@ -1,4 +1,4 @@
-import { For, Show, createResource, createSignal } from "solid-js";
+import { For, Show, createResource, createSignal, createEffect } from "solid-js";
 import { Scale, AlertCircle, Save, Loader } from "lucide-solid";
 import { fetchRepos, fetchRule, setRule } from "../api";
 import type { ApprovalRule } from "@ship-feed/shared";
@@ -7,29 +7,36 @@ export default function Rules() {
   const [repos] = createResource(fetchRepos);
   const [selected, setSelected] = createSignal<string>("");
   const [rule, { refetch }] = createResource(selected, fetchRule);
+  const [draft, setDraft] = createSignal<ApprovalRule | null>(null);
   const [saving, setSaving] = createSignal(false);
   const [message, setMessage] = createSignal<string | null>(null);
 
+  createEffect(() => {
+    const current = rule();
+    if (current) setDraft(current);
+  });
+
   const update = async (e: Event) => {
     e.preventDefault();
-    if (!rule()) return;
+    const current = draft();
+    if (!current) return;
     setSaving(true);
     setMessage(null);
     try {
-      await setRule(rule()!);
+      await setRule(current);
       setMessage("Saved.");
       refetch();
     } catch (err) {
-      setMessage((err as Error).message);
+      setMessage(err instanceof Error ? err.message : String(err));
     } finally {
       setSaving(false);
     }
   };
 
-  const updateField = (key: keyof ApprovalRule, value: unknown) => {
-    const current = rule();
+  const updateField = <K extends keyof ApprovalRule>(key: K, value: ApprovalRule[K]) => {
+    const current = draft();
     if (!current) return;
-    ((current as unknown) as Record<string, unknown>)[key] = value;
+    setDraft({ ...current, [key]: value });
   };
 
   return (
@@ -71,7 +78,7 @@ export default function Rules() {
         </Show>
       </Show>
 
-      <Show when={rule()}>
+      <Show when={draft()}>
         <form onSubmit={update} class="rounded-2xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 shadow-sm">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
@@ -79,7 +86,7 @@ export default function Rules() {
               <input
                 type="number"
                 min={1}
-                value={rule()!.minApprovers}
+                value={draft()!.minApprovers}
                 onInput={(e) => updateField("minApprovers", parseInt(e.currentTarget.value) || 1)}
                 class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm dark:text-white"
               />
@@ -89,7 +96,7 @@ export default function Rules() {
               <input
                 type="number"
                 min={1}
-                value={rule()!.minRejectors}
+                value={draft()!.minRejectors}
                 onInput={(e) => updateField("minRejectors", parseInt(e.currentTarget.value) || 1)}
                 class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm dark:text-white"
               />
@@ -99,7 +106,7 @@ export default function Rules() {
               <input
                 type="number"
                 min={1}
-                value={rule()!.voteWeight}
+                value={draft()!.voteWeight}
                 onInput={(e) => updateField("voteWeight", parseInt(e.currentTarget.value) || 1)}
                 class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm dark:text-white"
               />
@@ -108,7 +115,7 @@ export default function Rules() {
               <input
                 id="veto"
                 type="checkbox"
-                checked={rule()!.vetoEnabled}
+                checked={draft()!.vetoEnabled}
                 onChange={(e) => updateField("vetoEnabled", e.currentTarget.checked)}
                 class="w-4 h-4 rounded border-gray-300 text-indigo-600"
               />

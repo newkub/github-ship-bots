@@ -16,13 +16,13 @@ export default function Inspector() {
     setError(null);
     setResult(null);
     try {
-      const res = (await submitInspector({
+      const res = await submitInspector({
         url: url(),
         selector: selector(),
         prompt: prompt(),
         repoFullName: repoFullName(),
-      })) as { message: string; id: string; card?: { id: string } };
-      setResult(`Inspector queued: ${res.message} (card ${res.card?.id ?? res.id})`);
+      });
+      setResult(`Inspector queued: ${res.message} (card ${res.card.id})`);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {

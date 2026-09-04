@@ -1,3 +1,4 @@
+import { assertShipConfig } from "@ship-feed/shared";
 import { API_URL, fetchJson } from "./client";
 
 export type ShipConfig = {
@@ -8,5 +9,5 @@ export type ShipConfig = {
 };
 
 export async function fetchConfig(): Promise<ShipConfig> {
-  return fetchJson(`${API_URL}/api/config`);
+  return fetchJson(`${API_URL}/api/config`, assertShipConfig);
 }

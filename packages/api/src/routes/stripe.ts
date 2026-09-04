@@ -1,8 +1,18 @@
 import { Elysia, t } from "elysia";
 import Stripe from "stripe";
+import { assertRecord } from "@ship-feed/shared";
 import { getSession } from "../lib/session";
 import { withEnv } from "../lib/env";
 import { wasWebhookProcessed, recordWebhookEvent, findUserByStripeCustomer, findUserById, syncSubscription, cancelSubscription } from "../lib/stripe-service";
+
+function getStripeStringId(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (value !== null && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return typeof record.id === "string" ? record.id : undefined;
+  }
+  return undefined;
+}
 
 const PLANS = [
   {
@@ -95,12 +105,16 @@ stripe.post("/webhook", async ({ request, set, env }) => {
   try {
     switch (event.type) {
       case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const customerId = session.customer as string;
-        const subscriptionId = session.subscription as string;
+        const session = assertRecord(event.data.object as unknown, "checkout session");
+        const customerId = getStripeStringId(session.customer);
+        const subscriptionId = getStripeStringId(session.subscription);
+        if (!customerId || !subscriptionId) {
+          set.status = 400;
+          return "Missing customer or subscription ID";
+        }
 
         const userId = session.client_reference_id;
-        if (!userId) {
+        if (typeof userId !== "string" || !userId) {
           set.status = 400;
           return "Missing client_reference_id";
         }
@@ -118,8 +132,9 @@ stripe.post("/webhook", async ({ request, set, env }) => {
 
       case "customer.subscription.created":
       case "customer.subscription.updated": {
-        const sub = event.data.object as Stripe.Subscription;
-        const customerId = sub.customer as string;
+        const sub = assertRecord(event.data.object as unknown, "subscription");
+        const customerId = getStripeStringId(sub.customer);
+        if (!customerId) break;
         const user = await findUserByStripeCustomer(env.DB, customerId);
         if (!user) break;
         await syncSubscription(env.DB, user.id, customerId, sub);
@@ -127,14 +142,17 @@ stripe.post("/webhook", async ({ request, set, env }) => {
       }
 
       case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-        await cancelSubscription(env.DB, sub.id);
+        const sub = assertRecord(event.data.object as unknown, "subscription");
+        const subscriptionId = getStripeStringId(sub.id);
+        if (subscriptionId) {
+          await cancelSubscription(env.DB, subscriptionId);
+        }
         break;
       }
 
       case "invoice.payment_failed": {
-        const invoice = event.data.object as unknown as { subscription?: string };
-        const subscriptionId = invoice.subscription;
+        const invoice = assertRecord(event.data.object as unknown, "invoice");
+        const subscriptionId = getStripeStringId(invoice.subscription);
         if (subscriptionId) {
           await cancelSubscription(env.DB, subscriptionId);
         }

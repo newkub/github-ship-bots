@@ -7,7 +7,7 @@ import { requireCard } from "../../services/card-service";
 import { rowToCard } from "../../lib/card-mapper";
 import { withEnv } from "../../lib/env";
 import { paramsSchema } from "./schemas";
-import type { CardComment, EvidenceRecord } from "@ship-feed/shared";
+import { assertEvidenceRecord, type CardComment } from "@ship-feed/shared";
 
 const read = withEnv(new Elysia())
   .get("/:id", async ({ request, set, env, params }) => {
@@ -98,15 +98,17 @@ const read = withEnv(new Elysia())
     const { results } = await env.DB.prepare("SELECT * FROM evidence WHERE card_id = ? ORDER BY created_at DESC")
       .bind(id)
       .all<Record<string, unknown>>();
-    return (results ?? []).map((row) => ({
-      id: String(row.id),
-      cardId: row.card_id ? String(row.card_id) : undefined,
-      kind: row.kind,
-      r2Key: String(row.r2_key),
-      sha256: String(row.sha256),
-      ciRunUrl: row.ci_run_url ? String(row.ci_run_url) : undefined,
-      createdAt: String(row.created_at),
-    } as EvidenceRecord));
+    return (results ?? []).map((row) =>
+      assertEvidenceRecord({
+        id: row.id,
+        cardId: row.card_id,
+        kind: row.kind,
+        r2Key: row.r2_key,
+        sha256: row.sha256,
+        ciRunUrl: row.ci_run_url,
+        createdAt: row.created_at,
+      })
+    );
   }, { params: paramsSchema })
 
   .get("/", async ({ request, set, env }) => {

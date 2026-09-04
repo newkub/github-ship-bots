@@ -1,3 +1,4 @@
+import { assertReleaseNotes } from "@ship-feed/shared";
 import { API_URL, fetchJson } from "./client";
 
 export async function fetchReleaseNotes(
@@ -7,5 +8,5 @@ export async function fetchReleaseNotes(
   const params = new URLSearchParams();
   if (from) params.set("from", from);
   if (to) params.set("to", to);
-  return fetchJson(`${API_URL}/api/releases/notes?${params.toString()}`);
+  return fetchJson(`${API_URL}/api/releases/notes?${params.toString()}`, assertReleaseNotes);
 }

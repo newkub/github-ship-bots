@@ -1,4 +1,5 @@
 import type { User } from "@ship-feed/shared";
+import { assertSession } from "@ship-feed/shared";
 import { API_URL, fetchJson } from "./client";
 
 export function loginUrl() {
@@ -6,7 +7,7 @@ export function loginUrl() {
 }
 
 export async function fetchSession(): Promise<{ user?: User }> {
-  return fetchJson(`${API_URL}/auth/session`);
+  return fetchJson(`${API_URL}/auth/session`, assertSession);
 }
 
 export async function logout(): Promise<void> {

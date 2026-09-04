@@ -1,14 +1,15 @@
 import type { ShipCard, SwipeEvent } from "@ship-feed/shared";
 import type { QueuedSwipe } from "../lib/offline";
+import { assertShipCardArray, assertOkStatus, assertOkStatusUndone } from "@ship-feed/shared";
 import { API_URL, fetchJson, postJson } from "./client";
 import { isOnline, queueSwipe, getQueue, setQueue } from "../lib/offline";
 
 export async function fetchCards(): Promise<ShipCard[]> {
-  return fetchJson(`${API_URL}/api/cards`);
+  return fetchJson(`${API_URL}/api/cards`, assertShipCardArray);
 }
 
 export async function fetchNudges(): Promise<ShipCard[]> {
-  return fetchJson(`${API_URL}/api/cards/nudges`);
+  return fetchJson(`${API_URL}/api/cards/nudges`, assertShipCardArray);
 }
 
 export async function swipeCard({
@@ -36,11 +37,11 @@ export async function syncSwipe({
   direction: SwipeEvent["direction"];
   comment?: string;
 }): Promise<{ ok: true; status: string }> {
-  return postJson(`${API_URL}/api/cards/${cardId}/swipe`, { direction, comment });
+  return postJson(`${API_URL}/api/cards/${cardId}/swipe`, { direction, comment }, assertOkStatus);
 }
 
 export async function undoSwipe(cardId: string): Promise<{ ok: true; status: string; undone: string }> {
-  return postJson(`${API_URL}/api/cards/${cardId}/undo`, {});
+  return postJson(`${API_URL}/api/cards/${cardId}/undo`, {}, assertOkStatusUndone);
 }
 
 export async function flushOfflineQueue(onProgress?: (remaining: number) => void, onError?: (err: unknown, item: QueuedSwipe) => void) {
