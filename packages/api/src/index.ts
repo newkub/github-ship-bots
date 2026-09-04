@@ -46,6 +46,11 @@ const app = new Elysia()
   })
   .get("/", () => "")
   .get("/health", () => ({ ok: true, service: "ship-feed-api" }))
+  .get("/health/detailed", ({ request }) => {
+    const env = getRequestEnv(request);
+    const missing = env ? validateRuntimeEnv(env, "/") : ["DB"];
+    return { ok: missing.length === 0, service: "ship-feed-api", missing };
+  })
   .use(auth)
   .use(cards)
   .use(repos)
