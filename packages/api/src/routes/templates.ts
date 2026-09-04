@@ -2,7 +2,10 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { getSession } from "../lib/session";
 import { generateId, now } from "@ship-feed/shared";
+import type { ShipCard } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
+import { requireCard } from "../services/card-service";
+import { createCommentContext, postCommentToGitHub } from "@ship-feed/orchestrator";
 
 const templates = withEnv(new Elysia({ prefix: "/api/templates" }));
 
@@ -60,13 +63,33 @@ templates.post("/:id/comment", async ({ request, set, env, params, body }) => {
     return { error: "template not found" };
   }
 
+  const card = await requireCard(env.DB, body.cardId, session.id);
+  if (!card) {
+    set.status = 404;
+    return { error: "card not found" };
+  }
+
+  const bodyText = template.body as string;
+  const postedToGitHub = await postTemplateCommentToGitHub(env, card, bodyText);
+
   const id = generateId();
   await env.DB
-    .prepare("INSERT INTO card_comments (id, card_id, user_id, template_id, body, posted_to_github, created_at) VALUES (?, ?, ?, ?, ?, 0, ?)")
-    .bind(id, body.cardId, session.id, templateId, template.body as string, now())
+    .prepare("INSERT INTO card_comments (id, card_id, user_id, template_id, body, posted_to_github, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    .bind(id, body.cardId, session.id, templateId, bodyText, postedToGitHub ? 1 : 0, now())
     .run();
 
-  return { id, ok: true };
+  return { id, ok: true, postedToGitHub };
 }, { params: z.object({ id: z.string() }), body: z.object({ cardId: z.string() }) });
+
+async function postTemplateCommentToGitHub(
+  env: { GITHUB_APP_ID?: string; GITHUB_APP_PRIVATE_KEY?: string; GITHUB_API_URL?: string; GITHUB_WEB_URL?: string },
+  card: ShipCard,
+  body: string
+): Promise<boolean> {
+  if (!env.GITHUB_APP_ID || !env.GITHUB_APP_PRIVATE_KEY) return false;
+  const ctx = createCommentContext(env);
+  const result = await postCommentToGitHub(ctx, card, body);
+  return result.ok;
+}
 
 export default templates;

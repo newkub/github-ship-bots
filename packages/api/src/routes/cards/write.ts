@@ -2,10 +2,11 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { getSession } from "../../lib/session";
 import { now, generateId } from "@ship-feed/shared";
+import type { ShipCard } from "@ship-feed/shared";
 import { updateLearningWeights } from "../../lib/learning";
 import { resolveApprovalStatus } from "../../lib/approval";
 import { notifyCardStatus } from "../../lib/notify";
-import { createContext, onApprove, onReject } from "@ship-feed/orchestrator";
+import { createContext, onApprove, onReject, createCommentContext, postCommentToGitHub } from "@ship-feed/orchestrator";
 import { unauthorized, notFound, ensureAuth } from "../../lib/card-auth";
 import { requireCard } from "../../services/card-service";
 import { withEnv } from "../../lib/env";
@@ -28,9 +29,11 @@ const write = withEnv(new Elysia())
       .run();
     if (body.comment && body.comment.trim().length > 0) {
       const commentId = generateId();
+      const trimmed = body.comment.trim();
+      const postedToGitHub = await postSwipeCommentToGitHub(env, card, trimmed);
       await env.DB
-        .prepare("INSERT INTO card_comments (id, card_id, user_id, body, posted_to_github, created_at) VALUES (?, ?, ?, ?, 0, ?)")
-        .bind(commentId, id, session.id, body.comment.trim(), now())
+        .prepare("INSERT INTO card_comments (id, card_id, user_id, body, posted_to_github, created_at) VALUES (?, ?, ?, ?, ?, ?)")
+        .bind(commentId, id, session.id, trimmed, postedToGitHub ? 1 : 0, now())
         .run();
     }
     const status = await resolveApprovalStatus(env.DB, card);
@@ -113,5 +116,16 @@ const write = withEnv(new Elysia())
     }
     return { ok: true };
   }, { params: paramsSchema, body: z.object({ status: statusSchema }) });
+
+async function postSwipeCommentToGitHub(
+  env: { GITHUB_APP_ID?: string; GITHUB_APP_PRIVATE_KEY?: string; GITHUB_API_URL?: string; GITHUB_WEB_URL?: string },
+  card: ShipCard,
+  body: string
+): Promise<boolean> {
+  if (!env.GITHUB_APP_ID || !env.GITHUB_APP_PRIVATE_KEY) return false;
+  const ctx = createCommentContext(env);
+  const result = await postCommentToGitHub(ctx, card, body);
+  return result.ok;
+}
 
 export default write;

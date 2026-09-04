@@ -1,6 +1,8 @@
 import type { ShipCard, Env } from "@ship-feed/shared";
 import { rowToCard } from "@ship-feed/shared";
 import { shipToGitHub } from "./lib/github/ship";
+export { postCommentToGitHub, createCommentContext } from "./lib/github/comment";
+export type { CommentContext } from "./lib/github/comment";
 import { logger } from "./lib/logger";
 
 import { getCorrelationId } from "@ship-feed/shared";
