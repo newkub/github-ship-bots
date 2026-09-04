@@ -97,7 +97,7 @@ This is a Bun + TypeScript monorepo. It contains a marketing landing site, a web
 - State: TanStack Query
 - Build output: `docs/` (landing), `docs/dashboard/` (web), `dist/` (mobile)
 - CLI binary: `updatedeps` in `packages/cli`
-- CI/CD: local `bun --filter '*' lint && bun --filter '*' test && bun run build && bun --filter @ship-feed/worker deploy`
+- CI/CD: `.github/workflows/ci.yml` runs lint/test/build on PRs and deploys from `main` using `CLOUDFLARE_API_TOKEN`
 
 ### 4. Target User
 
