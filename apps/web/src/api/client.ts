@@ -16,9 +16,26 @@ export async function fetchWithTimeout(url: string, init?: RequestInit, timeoutM
   }
 }
 
+async function getErrorMessage(res: Response, fallback: string): Promise<string> {
+  try {
+    const data = await res.json() as Record<string, unknown>;
+    if (data && typeof data === "object") {
+      const message = data.message || data.error;
+      if (typeof message === "string" && message) return message;
+    }
+  } catch {
+    const text = await res.text().catch(() => "");
+    if (text) return text;
+  }
+  return fallback;
+}
+
 export async function fetchJson<T>(url: string, init?: RequestInit, timeoutMs = DEFAULT_TIMEOUT): Promise<T> {
   const res = await fetchWithTimeout(url, init, timeoutMs);
-  if (!res.ok) throw new Error(`Failed to fetch ${url}`);
+  if (!res.ok) {
+    const message = await getErrorMessage(res, `Failed to fetch ${url}`);
+    throw new Error(message);
+  }
   return res.json() as Promise<T>;
 }
 
@@ -29,6 +46,9 @@ export async function postJson<T>(url: string, body: unknown, init?: RequestInit
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   }, timeoutMs);
-  if (!res.ok) throw new Error(`Failed to post ${url}`);
+  if (!res.ok) {
+    const message = await getErrorMessage(res, `Failed to post ${url}`);
+    throw new Error(message);
+  }
   return res.json() as Promise<T>;
 }
