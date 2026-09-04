@@ -12,27 +12,9 @@ function redirectUrl(env: { WORKOS_REDIRECT_URI?: string; PUBLIC_APP_URL: string
   return env.WORKOS_REDIRECT_URI || `${env.PUBLIC_APP_URL}/auth/callback`;
 }
 
-const GITHUB_LOGIN_RE = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
-
-function isValidGitHubLogin(value: string): boolean {
-  return GITHUB_LOGIN_RE.test(value);
-}
-
-function normalizeFallback(profile: { email?: string | null; firstName?: string | null }): string | undefined {
-  const candidate = profile.firstName?.trim() || profile.email?.split("@")[0]?.trim();
-  if (candidate && isValidGitHubLogin(candidate)) return candidate;
-  return undefined;
-}
-
-async function githubLoginFromProfile(
-  profile: { email?: string | null; firstName?: string | null },
-  token?: string
-): Promise<string | undefined> {
-  if (token) {
-    const login = await getGitHubLoginFromToken(token);
-    if (login) return login;
-  }
-  return normalizeFallback(profile);
+async function githubLoginFromProfile(token?: string): Promise<string | undefined> {
+  if (!token) return undefined;
+  return getGitHubLoginFromToken(token);
 }
 
 const callbackQuery = t.Object({
@@ -89,10 +71,21 @@ callback.get(
     const oauthTokens = (resp as { oauthTokens?: { accessToken?: string; providerAccessToken?: string } }).oauthTokens;
     const providerToken = oauthTokens?.providerAccessToken;
 
-    const githubLogin = await githubLoginFromProfile(profile, providerToken);
+    if (!providerToken) {
+      set.status = 400;
+      return { error: "missing GitHub access token from WorkOS" };
+    }
+
+    let githubLogin: string | undefined;
+    try {
+      githubLogin = await githubLoginFromProfile(providerToken);
+    } catch (err) {
+      set.status = 400;
+      return { error: `GitHub login lookup failed: ${err instanceof Error ? err.message : String(err)}` };
+    }
     if (!githubLogin) {
       set.status = 400;
-      return { error: "unable to determine a valid GitHub login; connect your GitHub account in WorkOS" };
+      return { error: "GitHub login not found in token response" };
     }
 
     const row = await env.DB.prepare(

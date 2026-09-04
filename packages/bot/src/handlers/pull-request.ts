@@ -6,6 +6,7 @@ import {
 import { parseCommand, renderCard } from "../domain/actions";
 import { createCardFromWebhook, uploadEvidence } from "../lib/api";
 import { generateReviewComment } from "../lib/review";
+import { getCorrelationId } from "@ship-feed/shared";
 
 function isApprove(command: "approve" | "reject" | "ship"): boolean {
   return command === "approve";
@@ -39,8 +40,8 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
           data: encoded,
         });
       }
-    } catch {
-      // diff not available in test / private repos
+    } catch (err) {
+      console.error(JSON.stringify({ type: "evidence_diff_failed", correlationId: getCorrelationId(), repo: payload.repository.name, pull: pull_request.number, error: err instanceof Error ? err.message : String(err) }));
     }
 
     const body = renderCard({
@@ -76,8 +77,8 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
           body: reviewBody,
         });
       }
-    } catch {
-      // review not available in test / private repos
+    } catch (err) {
+      console.error(JSON.stringify({ type: "review_diff_failed", correlationId: getCorrelationId(), repo: payload.repository.name, pull: pull_request.number, error: err instanceof Error ? err.message : String(err) }));
     }
   });
 

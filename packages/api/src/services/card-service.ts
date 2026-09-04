@@ -21,9 +21,13 @@ export async function requireCard(db: Env["DB"], id: string, userId: string): Pr
 
 export async function canAccessCard(db: Env["DB"], card: ShipCard, userId: string): Promise<boolean> {
   if (card.creatorId === userId) return true;
+  return canAccessRepo(db, userId, card.repoFullName);
+}
+
+export async function canAccessRepo(db: Env["DB"], userId: string, repoFullName: string): Promise<boolean> {
   const row = await db
     .prepare("SELECT 1 FROM user_repos WHERE user_id = ? AND repo_full_name = ?")
-    .bind(userId, card.repoFullName)
+    .bind(userId, repoFullName)
     .first();
   return Boolean(row);
 }

@@ -4,7 +4,7 @@ import { getSession } from "../lib/session";
 import { withEnv } from "../lib/env";
 import { wasWebhookProcessed, recordWebhookEvent, findUserByStripeCustomer, findUserById, syncSubscription, cancelSubscription } from "../lib/stripe-service";
 
-const plans = [
+const PLANS = [
   {
     id: "free",
     name: "Free",
@@ -15,15 +15,23 @@ const plans = [
     id: "pro",
     name: "Pro",
     price: "$19",
+    priceIdEnv: "STRIPE_PRICE_PRO",
     features: ["Unlimited cards", "Private repos", "Evidence vault", "Priority support"],
   },
   {
     id: "team",
     name: "Team",
     price: "$49",
+    priceIdEnv: "STRIPE_PRICE_TEAM",
     features: ["Everything in Pro", "Multiple seats", "Custom CI", "SLA"],
   },
 ];
+
+function availablePlans(env: { STRIPE_PRICE_PRO?: string; STRIPE_PRICE_TEAM?: string }) {
+  const hasPro = !!env.STRIPE_PRICE_PRO;
+  const hasTeam = !!env.STRIPE_PRICE_TEAM;
+  return PLANS.filter((p) => p.id === "free" || (p.id === "pro" && hasPro) || (p.id === "team" && hasTeam));
+}
 
 const stripe = withEnv(new Elysia({ prefix: "/api/stripe" }));
 
@@ -33,7 +41,7 @@ stripe.get("/plans", async ({ request, set, env }) => {
     set.status = 401;
     return { error: "unauthorized" };
   }
-  return { plans };
+  return { plans: availablePlans(env) };
 });
 
 stripe.post("/checkout", async ({ request, set, env, body }) => {

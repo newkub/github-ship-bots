@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { getRequestEnv } from "./lib/env";
 import { validateRuntimeEnv } from "./lib/validate-env";
+import { getCorrelationId } from "@ship-feed/shared";
 import auth from "./routes/auth";
 import cards from "./routes/cards";
 import repos from "./routes/repos";
@@ -19,18 +20,20 @@ import { createMiddleware } from "./middleware";
 export function createApp(): Elysia<any, any, any, any, any, any, any> {
   return new Elysia()
     .use(createMiddleware())
-    .onError(({ code, error, set }) => {
-      const message = error instanceof Error ? error.message : typeof error === "string" ? error : "Internal error";
+    .onError(({ code, error, set, request }) => {
+      const detail = error instanceof Error ? error.message : typeof error === "string" ? error : "Internal error";
       if (code === "VALIDATION") {
         set.status = 400;
-        return { error: "validation error", message };
+        return { error: "validation error", message: detail };
       }
       if (code === "NOT_FOUND") {
         set.status = 404;
-        return { error: "not found", message };
+        return { error: "not found" };
       }
+      const correlationId = getCorrelationId(request.headers);
+      console.error(JSON.stringify({ type: "unhandled_error", path: request.url, method: request.method, correlationId, detail }));
       set.status = 500;
-      return { error: "internal error", message };
+      return { error: "internal error" };
     })
     .get("/", () => "")
     .get("/health", () => ({ ok: true, service: "ship-feed-api" }))

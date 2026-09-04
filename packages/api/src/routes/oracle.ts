@@ -4,6 +4,7 @@ import { getSession } from "../lib/session";
 import { diffImages } from "../lib/oracle";
 import { generateId, now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
+import { canAccessRepo } from "../services/card-service";
 
 const oracle = withEnv(new Elysia({ prefix: "/api/oracle" }));
 
@@ -31,12 +32,16 @@ oracle.post("/run", async ({ request, set, env, body }) => {
   }
 
   const baseline = await env.DB
-    .prepare("SELECT r2_key FROM test_oracle_baselines WHERE id = ?")
+    .prepare("SELECT r2_key, repo_full_name FROM test_oracle_baselines WHERE id = ?")
     .bind(body.baselineId)
-    .first<{ r2_key: string }>();
+    .first<{ r2_key: string; repo_full_name: string }>();
   if (!baseline) {
     set.status = 404;
     return { error: "baseline not found" };
+  }
+  if (!(await canAccessRepo(env.DB, session.id, baseline.repo_full_name))) {
+    set.status = 403;
+    return { error: "forbidden" };
   }
 
   const baselineObject = await env.BASELINE_BUCKET.get(baseline.r2_key);
@@ -68,7 +73,14 @@ oracle.get("/baselines", async ({ request, set, env }) => {
     set.status = 401;
     return { error: "unauthorized" };
   }
-  const { results } = await env.DB.prepare("SELECT * FROM test_oracle_baselines LIMIT 100").all<Record<string, unknown>>();
+  const { results } = await env.DB
+    .prepare(
+      `SELECT * FROM test_oracle_baselines
+       WHERE repo_full_name IN (SELECT repo_full_name FROM user_repos WHERE user_id = ?)
+       ORDER BY created_at DESC LIMIT 100`
+    )
+    .bind(session.id)
+    .all<Record<string, unknown>>();
   return results ?? [];
 });
 

@@ -5,6 +5,7 @@ import { getSession } from "../lib/session";
 import { generateId, now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
 import { checkRateLimit } from "../lib/rate-limit";
+import { fetchCardById, canAccessRepo } from "../services/card-service";
 
 const evidence = withEnv(new Elysia({ prefix: "/api/evidence" }));
 
@@ -70,6 +71,13 @@ evidence.post("/", async ({ request, set, env, body }) => {
   if (!session) {
     set.status = 401;
     return { error: "unauthorized" };
+  }
+  if (body.cardId) {
+    const card = await fetchCardById(env.DB, body.cardId);
+    if (!card || (card.creatorId !== session.id && !(await canAccessRepo(env.DB, session.id, card.repoFullName)))) {
+      set.status = 403;
+      return { error: "forbidden" };
+    }
   }
   const result = await storeEvidence(env, body);
   return result;

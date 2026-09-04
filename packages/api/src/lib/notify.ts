@@ -25,7 +25,19 @@ export async function notifyCardStatus(env: Env, card: ShipCard, event: "created
   }
 
   const tasks = [notifySlack(env, title, body, correlationId, url), notifyTelegram(env, title, body, correlationId, url), notifyPush(env, card, title, body, url)];
-  await Promise.all(tasks.map((p) => p.catch(() => undefined)));
+  const results = await Promise.allSettled(tasks);
+  const failures: string[] = [];
+  const names = ["slack", "telegram", "push"] as const;
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result && result.status === "rejected") {
+      const reason = (result as PromiseRejectedResult).reason instanceof Error ? (result as PromiseRejectedResult).reason.message : String((result as PromiseRejectedResult).reason);
+      failures.push(`${names[i]}: ${reason}`);
+    }
+  }
+  if (failures.length > 0) {
+    console.error(JSON.stringify({ type: "notification_failed", correlationId, cardId: card.id, event, failures }));
+  }
 }
 
 async function notifySlack(env: Env, title: string, body: string, correlationId: string, url?: string) {

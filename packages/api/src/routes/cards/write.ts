@@ -104,6 +104,10 @@ const write = withEnv(new Elysia())
       set.status = 404;
       return notFound();
     }
+    if (body.status === "shipped") {
+      set.status = 400;
+      return { error: "shipped must be set via /ship" };
+    }
     if (body.status === "approved" || body.status === "rejected") {
       const direction = body.status === "approved" ? "approve" : "reject";
       await updateLearningWeights(env.DB, existing, direction);

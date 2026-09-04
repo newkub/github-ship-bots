@@ -4,7 +4,8 @@ import { getSession } from "../lib/session";
 import { generateId, now } from "@ship-feed/shared";
 import type { ShipCard } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
-import { requireCard } from "../services/card-service";
+import { requireCard, canAccessRepo } from "../services/card-service";
+import { forbidden } from "../lib/card-auth";
 import { createCommentContext, postCommentToGitHub } from "@ship-feed/orchestrator";
 
 const templates = withEnv(new Elysia({ prefix: "/api/templates" }));
@@ -16,6 +17,10 @@ templates.get("/", async ({ request, set, env, query }) => {
     return { error: "unauthorized" };
   }
   const repo = query.repo;
+  if (repo && !(await canAccessRepo(env.DB, session.id, repo))) {
+    set.status = 403;
+    return forbidden();
+  }
   const { results } = repo
     ? await env.DB.prepare("SELECT * FROM comment_templates WHERE user_id = ? AND (repo_full_name = ? OR repo_full_name IS NULL) ORDER BY name")
         .bind(session.id, repo)
@@ -38,6 +43,10 @@ templates.post("/", async ({ request, set, env, body }) => {
   if (!session) {
     set.status = 401;
     return { error: "unauthorized" };
+  }
+  if (body.repoFullName && !(await canAccessRepo(env.DB, session.id, body.repoFullName))) {
+    set.status = 403;
+    return forbidden();
   }
   const id = generateId();
   await env.DB

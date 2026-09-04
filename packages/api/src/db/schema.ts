@@ -133,6 +133,7 @@ export const cardComments = sqliteTable("card_comments", {
   id: text("id").primaryKey(),
   cardId: text("card_id").notNull(),
   userId: text("user_id").notNull(),
+  swipeId: text("swipe_id"),
   templateId: text("template_id"),
   body: text("body").notNull(),
   postedToGitHub: integer("posted_to_github", { mode: "boolean" }).notNull().default(false),
