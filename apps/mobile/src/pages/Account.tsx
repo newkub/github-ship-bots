@@ -1,6 +1,6 @@
 import { Show, createSignal } from "solid-js";
 import { useQuery } from "@tanstack/solid-query";
-import { getSession, loginUrl, API_URL } from "../api";
+import { getSession, loginUrl, createCheckout } from "../api";
 import { enablePush, canPush } from "../lib/push";
 import BottomNav from "../components/BottomNav";
 import ThemeToggle from "../components/ThemeToggle";
@@ -12,10 +12,24 @@ export default function Account() {
   const [pushStatus, setPushStatus] = createSignal<string | null>(null);
   const [pushEnabled, setPushEnabled] = createSignal(false);
 
+  const [checkoutBusy, setCheckoutBusy] = createSignal(false);
+
   const handleEnablePush = async () => {
     const result = await enablePush();
     setPushStatus(result.ok ? "enabled" : result.reason ?? "failed");
     setPushEnabled(await canPush());
+  };
+
+  const handleUpgrade = async () => {
+    setCheckoutBusy(true);
+    try {
+      const { url } = await createCheckout();
+      if (url) window.location.href = url;
+    } catch (err) {
+      setPushStatus(err instanceof Error ? err.message : "checkout failed");
+    } finally {
+      setCheckoutBusy(false);
+    }
   };
 
   return (
@@ -81,12 +95,13 @@ export default function Account() {
               <p class="text-sm text-muted mt-1">Upgrade to ship more cards and unlock AI evidence vault.</p>
             </div>
           </div>
-          <a
-            href={`${API_URL}/api/stripe/checkout`}
-            class="block w-full text-center bg-success text-white font-semibold py-3 rounded-xl active:scale-95 transition shadow-lg"
+          <button
+            onClick={handleUpgrade}
+            disabled={checkoutBusy()}
+            class="block w-full text-center bg-success text-white font-semibold py-3 rounded-xl active:scale-95 transition shadow-lg disabled:opacity-60"
           >
-            Upgrade to Pro
-          </a>
+            {checkoutBusy() ? "Loading…" : user()?.plan === "pro" || user()?.plan === "team" ? "Manage subscription" : "Upgrade to Pro"}
+          </button>
         </div>
 
         <Show when={user()}>

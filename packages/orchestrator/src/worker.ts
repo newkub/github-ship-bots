@@ -1,5 +1,6 @@
 import { createContext, runShipLoop } from "./index";
 import type { Env } from "@ship-feed/shared";
+import { logger } from "./lib/logger";
 
 function validateShipEnv(env: Env): string[] {
   const missing: string[] = [];
@@ -31,12 +32,12 @@ export default {
   async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
     const missing = validateShipEnv(env);
     if (missing.length > 0) {
-      console.error(`[ship-feed] cron skipped, missing: ${missing.join(", ")}`);
+      logger.error("cron skipped, missing environment", { missing });
       return;
     }
     const ctx = createContext(env);
-    console.log("[ship-feed] cron running");
+    logger.info("cron running", { correlationId: ctx.correlationId });
     await runShipLoop(ctx);
-    console.log("[ship-feed] cron done");
+    logger.info("cron done", { correlationId: ctx.correlationId });
   },
 };

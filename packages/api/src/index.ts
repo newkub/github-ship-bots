@@ -17,6 +17,7 @@ import learning from "./routes/learning";
 import push from "./routes/push";
 import releases from "./routes/releases";
 import rules from "./routes/rules";
+import config from "./routes/config";
 
 const app = new Elysia()
   .onBeforeHandle(async ({ request, set }) => {
@@ -57,7 +58,8 @@ const app = new Elysia()
   .use(learning)
   .use(push)
   .use(releases)
-  .use(rules);
+  .use(rules)
+  .use(config);
 
 export default {
   async fetch(

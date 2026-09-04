@@ -4,7 +4,7 @@ import BottomNav from "../components/BottomNav";
 import EmptyState from "../components/EmptyState";
 import type { Component } from "solid-js";
 import type { ShipCard } from "@ship-feed/shared";
-import { fetchNudges, swipeCard } from "../api";
+import { fetchNudges, swipeCard, fetchConfig } from "../api";
 
 type NudgeAction = "approve" | "reject" | "skip";
 
@@ -15,19 +15,19 @@ interface Nudge {
   action: NudgeAction;
 }
 
-function cardToNudge(card: ShipCard): Nudge {
+function cardToNudge(card: ShipCard, threshold: number, allowedRisk: string): Nudge {
   return {
     id: card.id,
     title: card.title,
     repo: card.repoFullName,
-    action: card.score >= 8.5 && card.risk === "low" ? "approve" : "reject",
+    action: card.score >= threshold && card.risk === allowedRisk ? "approve" : "reject",
   };
 }
 
 export default function Alerts() {
   const [nudges, { refetch }] = createResource(async () => {
-    const cards = await fetchNudges();
-    return cards.map(cardToNudge);
+    const [cards, cfg] = await Promise.all([fetchNudges(), fetchConfig()]);
+    return cards.map((card) => cardToNudge(card, cfg.autoApproveThreshold, cfg.autoApproveRisk));
   });
 
   const handleAction = async (id: string, action: NudgeAction) => {

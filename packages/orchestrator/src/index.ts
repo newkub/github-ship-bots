@@ -1,6 +1,7 @@
 import type { ShipCard, Env } from "@ship-feed/shared";
 import { rowToCard } from "@ship-feed/shared";
 import { shipToGitHub } from "./lib/github";
+import { logger } from "./lib/logger";
 
 import { getCorrelationId } from "@ship-feed/shared";
 
@@ -65,14 +66,14 @@ export async function onApprove(ctx: OrchestratorContext, card: ShipCard) {
   });
 
   if (!gh.ok) {
-    console.error(`[ship-feed] failed to ship ${card.id}: ${gh.message}`);
+    logger.error(`failed to ship ${card.id}`, { cardId: card.id, reason: gh.message, correlationId: ctx.correlationId });
     return { ok: false, card, github: gh };
   }
 
   if (gh.skipped) {
-    console.log(`[ship-feed] skipped shipping ${card.id}: ${gh.message}`);
+    logger.info(`skipped shipping ${card.id}`, { cardId: card.id, reason: gh.message, correlationId: ctx.correlationId });
   } else {
-    console.log(`[ship-feed] shipped ${card.id}`);
+    logger.info(`shipped ${card.id}`, { cardId: card.id, correlationId: ctx.correlationId });
   }
 
   await updateCardStatus(ctx, card, "shipped");
@@ -93,14 +94,14 @@ export async function onReject(ctx: OrchestratorContext, card: ShipCard) {
   });
 
   if (!gh.ok) {
-    console.error(`[ship-feed] failed to reject ${card.id}: ${gh.message}`);
+    logger.error(`failed to reject ${card.id}`, { cardId: card.id, reason: gh.message, correlationId: ctx.correlationId });
     return { ok: false, card, github: gh };
   }
 
   if (gh.skipped) {
-    console.log(`[ship-feed] skipped rejecting ${card.id}: ${gh.message}`);
+    logger.info(`skipped rejecting ${card.id}`, { cardId: card.id, reason: gh.message, correlationId: ctx.correlationId });
   } else {
-    console.log(`[ship-feed] rejected ${card.id}`);
+    logger.info(`rejected ${card.id}`, { cardId: card.id, correlationId: ctx.correlationId });
   }
 
   await updateCardStatus(ctx, card, "rejected");

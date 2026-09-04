@@ -1,6 +1,6 @@
 import { createSignal, For, Show, onMount, onCleanup } from "solid-js";
 import type { ShipCard } from "@ship-feed/shared";
-import { fetchCards, swipeCard, flushOfflineQueue } from "../api";
+import { fetchCards, fetchNudges, swipeCard, flushOfflineQueue } from "../api";
 import BottomNav from "../components/BottomNav";
 import Card from "../components/Card";
 import PromptInput from "../components/PromptInput";
@@ -15,7 +15,7 @@ export default function Feed() {
   const [current, setCurrent] = createSignal(0);
   const [expanded, setExpanded] = createSignal(false);
   const [queued, setQueued] = createSignal(0);
-  const [nudgeCount, setNudgeCount] = createSignal(2);
+  const [nudgeCount, setNudgeCount] = createSignal(0);
   const [showPrompt, setShowPrompt] = createSignal(false);
   const [pendingPrompt, setPendingPrompt] = createSignal<string | undefined>(undefined);
   const [lastSwipe, setLastSwipe] = createSignal<{ direction: "approve" | "reject"; previous: number } | null>(null);
@@ -24,6 +24,7 @@ export default function Feed() {
 
   onMount(() => {
     flushOfflineQueue((remaining) => setQueued(remaining));
+    fetchNudges().then((nudges) => setNudgeCount(nudges.length)).catch(() => setNudgeCount(0));
     const onOnline = () => flushOfflineQueue((remaining) => setQueued(remaining));
     window.addEventListener("online", onOnline);
     onCleanup(() => window.removeEventListener("online", onOnline));

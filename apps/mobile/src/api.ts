@@ -69,6 +69,21 @@ export async function getSession(): Promise<{ user?: unknown }> {
   if (!res.ok) throw new Error("Failed to fetch session");
   return res.json();
 }
+export async function createCheckout(plan: "pro" | "team" = "pro"): Promise<{ url: string }> {
+  const res = await fetch(`${API_URL}/api/stripe/checkout`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ plan }),
+  });
+  if (!res.ok) throw new Error("Failed to start checkout");
+  return res.json();
+}
+export async function fetchConfig(): Promise<{ appUrl: string; githubAppName: string; autoApproveThreshold: number; autoApproveRisk: string }> {
+  const res = await fetch(`${API_URL}/api/config`);
+  if (!res.ok) throw new Error("Failed to fetch config");
+  return res.json();
+}
 export function loginUrl() {
   return `${API_URL}/auth/login`;
 }

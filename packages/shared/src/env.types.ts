@@ -23,6 +23,7 @@ export interface Env {
   CRON_SECRET?: string;
   ADMIN_LOGINS?: string;
   CORS_ALLOWED_ORIGINS?: string;
+  GITHUB_APP_NAME?: string;
   AUTO_APPROVE_THRESHOLD?: string;
   AUTO_APPROVE_RISK?: string;
   SLACK_WEBHOOK_URL?: string;
