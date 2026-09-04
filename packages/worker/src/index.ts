@@ -10,7 +10,14 @@ export default {
     const url = new URL(request.url);
 
     if (request.method === "POST" && url.pathname === "/webhook") {
-      return botWorker.fetch(request, toBotEnv(env));
+      const botEnv = toBotEnv(env);
+      if (!botEnv.ok) {
+        return new Response(JSON.stringify({ error: "service unavailable", missing: botEnv.missing }), {
+          status: 503,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      return botWorker.fetch(request, botEnv.env);
     }
 
     if (url.pathname === "/dashboard") {

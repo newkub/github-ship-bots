@@ -5,18 +5,30 @@ import { generateId, now } from "../lib/db";
 import { withEnv } from "../lib/env";
 import { assertEnumValue } from "@ship-feed/shared";
 import type { User, PlanTier } from "@ship-feed/shared";
+import { getGitHubLoginFromToken } from "../lib/github-user";
 
 const PLAN_TIERS: readonly PlanTier[] = ["free", "pro", "team"];
 
 const auth = withEnv(new Elysia({ prefix: "/auth" }));
 
-function githubLoginFromProfile(profile: { email?: string | null; firstName?: string | null }): string {
+function fallbackGitHubLogin(profile: { email?: string | null; firstName?: string | null }): string | undefined {
+  if (profile.firstName) return profile.firstName;
   if (profile.email) {
     const local = profile.email.split("@")[0];
     if (local) return local;
   }
-  if (profile.firstName) return profile.firstName;
-  throw new Error("Unable to determine GitHub login from WorkOS profile");
+  return undefined;
+}
+
+async function githubLoginFromProfile(
+  profile: { email?: string | null; firstName?: string | null },
+  token?: string
+): Promise<string | undefined> {
+  if (token) {
+    const login = await getGitHubLoginFromToken(token);
+    if (login) return login;
+  }
+  return fallbackGitHubLogin(profile);
 }
 
 function redirectUrl(env: { WORKOS_REDIRECT_URI?: string; PUBLIC_APP_URL: string }): string {
@@ -96,7 +108,14 @@ auth.get(
       return { error: "incomplete user profile" };
     }
 
-    const githubLogin = githubLoginFromProfile(profile);
+    const oauthTokens = (resp as { oauthTokens?: { accessToken?: string; providerAccessToken?: string } }).oauthTokens;
+    const providerToken = oauthTokens?.providerAccessToken || oauthTokens?.accessToken;
+
+    const githubLogin = await githubLoginFromProfile(profile, providerToken);
+    if (!githubLogin) {
+      set.status = 400;
+      return { error: "unable to determine GitHub login" };
+    }
 
     const row = await env.DB.prepare(
       "SELECT id, github_login, email, workos_user_id, plan, created_at FROM users WHERE github_login = ?"

@@ -10,11 +10,11 @@ export default function Billing() {
   const [busy, setBusy] = createSignal(false);
   const [error, setError] = createSignal<string | null>(null);
 
-  const startCheckout = async () => {
+  const startCheckout = async (plan: "pro" | "team") => {
     setBusy(true);
     setError(null);
     try {
-      const { url } = await createCheckout();
+      const { url } = await createCheckout(plan);
       if (!url) throw new Error("No checkout URL");
       window.location.href = url;
     } catch (e) {
@@ -77,7 +77,8 @@ export default function Billing() {
             <For each={plans()}>
               {(plan) => {
                 const current = currentPlan() === plan.id;
-                const cta = current ? "Current" : plan.id === "pro" ? "Upgrade" : "Contact";
+                const cta = current ? "Current" : plan.id === "free" ? "—" : "Upgrade";
+                const upgrade = plan.id === "pro" || plan.id === "team";
                 return (
                   <PlanCard
                     name={plan.name}
@@ -86,7 +87,7 @@ export default function Billing() {
                     current={current}
                     cta={cta}
                     busy={busy() && !current}
-                    onCta={current ? undefined : plan.id === "pro" ? startCheckout : undefined}
+                    onCta={current ? undefined : upgrade ? () => startCheckout(plan.id as "pro" | "team") : undefined}
                   />
                 );
               }}

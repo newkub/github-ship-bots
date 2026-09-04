@@ -11,6 +11,7 @@ export interface Env {
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
   STRIPE_PRICE_PRO: string;
+  STRIPE_PRICE_TEAM?: string;
   GITHUB_APP_ID: string;
   GITHUB_APP_PRIVATE_KEY: string;
   GITHUB_WEBHOOK_SECRET: string;

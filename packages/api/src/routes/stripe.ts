@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import Stripe from "stripe";
 import { getSession } from "../lib/session";
 import { withEnv } from "../lib/env";
@@ -36,25 +36,32 @@ stripe.get("/plans", async ({ request, set, env }) => {
   return { plans };
 });
 
-stripe.post("/checkout", async ({ request, set, env }) => {
+stripe.post("/checkout", async ({ request, set, env, body }) => {
   const session = await getSession({ request, set, env });
   if (!session) {
     set.status = 401;
     return { error: "unauthorized" };
   }
 
+  const plan = body.plan ?? "pro";
+  const priceId = plan === "team" ? env.STRIPE_PRICE_TEAM : env.STRIPE_PRICE_PRO;
+  if (!priceId) {
+    set.status = 503;
+    return { error: "service unavailable", missing: [plan === "team" ? "STRIPE_PRICE_TEAM" : "STRIPE_PRICE_PRO"] };
+  }
+
   const client = new Stripe(env.STRIPE_SECRET_KEY);
   const checkout = await client.checkout.sessions.create({
-    customer_email: session.email,
+    ...(session.email ? { customer_email: session.email } : {}),
     client_reference_id: session.id,
-    line_items: [{ price: env.STRIPE_PRICE_PRO, quantity: 1 }],
+    line_items: [{ price: priceId, quantity: 1 }],
     mode: "subscription",
     success_url: `${env.PUBLIC_APP_URL}/billing?success=1`,
     cancel_url: `${env.PUBLIC_APP_URL}/billing?canceled=1`,
   });
 
   return { url: checkout.url };
-});
+}, { body: t.Object({ plan: t.Optional(t.Union([t.Literal("pro"), t.Literal("team")])) }) });
 
 stripe.post("/webhook", async ({ request, set, env }) => {
   const sig = request.headers.get("stripe-signature");

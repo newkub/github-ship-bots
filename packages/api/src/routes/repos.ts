@@ -12,9 +12,12 @@ repos.get("/", async ({ request, set, env }) => {
   }
   const { results } = await env.DB
     .prepare(
-      `SELECT DISTINCT repo_full_name as name FROM cards
-       WHERE creator_id = ? OR repo_full_name IN (SELECT repo_full_name FROM user_repos WHERE user_id = ?)
-       ORDER BY repo_full_name`
+      `SELECT DISTINCT repo_full_name as name FROM user_repos
+       WHERE user_id = ?
+       UNION
+       SELECT DISTINCT repo_full_name as name FROM cards
+       WHERE creator_id = ?
+       ORDER BY name`
     )
     .bind(session.id, session.id)
     .all<{ name: string }>();

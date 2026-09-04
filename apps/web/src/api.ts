@@ -77,8 +77,13 @@ export async function logout(): Promise<void> {
   const res = await fetch(`${API_URL}/auth/logout`, { method: "POST", credentials: "include" });
   if (!res.ok) throw new Error("Failed to log out");
 }
-export async function createCheckout(): Promise<{ url: string }> {
-  const res = await fetch(`${API_URL}/api/stripe/checkout`, { method: "POST", credentials: "include" });
+export async function createCheckout(plan: "pro" | "team" = "pro"): Promise<{ url: string }> {
+  const res = await fetch(`${API_URL}/api/stripe/checkout`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan }),
+  });
   if (!res.ok) throw new Error("Failed to start checkout");
   return res.json();
 }
