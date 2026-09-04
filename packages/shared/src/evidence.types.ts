@@ -1,6 +1,6 @@
 export interface EvidenceRecord {
   id: string;
-  cardId: string;
+  cardId?: string;
   kind: "image" | "video" | "log" | "diff";
   r2Key: string;
   sha256: string;

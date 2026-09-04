@@ -1,4 +1,5 @@
 import type { ShipCard, SwipeEvent } from "@ship-feed/shared";
+import type { QueuedSwipe } from "../lib/offline";
 import { API_URL, fetchJson, postJson } from "./client";
 import { isOnline, queueSwipe, getQueue, setQueue } from "../lib/offline";
 
@@ -42,7 +43,7 @@ export async function undoSwipe(cardId: string): Promise<{ ok: true; status: str
   return postJson(`${API_URL}/api/cards/${cardId}/undo`, {});
 }
 
-export async function flushOfflineQueue(onProgress?: (remaining: number) => void) {
+export async function flushOfflineQueue(onProgress?: (remaining: number) => void, onError?: (err: unknown, item: QueuedSwipe) => void) {
   let queue = getQueue();
   while (queue.length > 0) {
     const item = queue[0];
@@ -52,7 +53,8 @@ export async function flushOfflineQueue(onProgress?: (remaining: number) => void
       queue = queue.slice(1);
       setQueue(queue);
       onProgress?.(queue.length);
-    } catch {
+    } catch (err) {
+      onError?.(err, item);
       break;
     }
   }

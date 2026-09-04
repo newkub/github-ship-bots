@@ -1,5 +1,6 @@
 import { createSignal, For, Show, onMount, onCleanup } from "solid-js";
 import type { ShipCard } from "@ship-feed/shared";
+import type { QueuedSwipe } from "../lib/offline";
 import { fetchCards, fetchNudges, swipeCard, undoSwipe, flushOfflineQueue } from "../api";
 import BottomNav from "../components/BottomNav";
 import Card from "../components/Card";
@@ -23,10 +24,15 @@ export default function Feed() {
 
   const cards = () => query.data ?? [];
 
+  const onOfflineError = (_err: unknown, item: QueuedSwipe) => setSwipeError(`Offline swipe for ${item.cardId} failed`);
+
   onMount(() => {
-    flushOfflineQueue((remaining) => setQueued(remaining));
-    fetchNudges().then((nudges) => setNudgeCount(nudges.length)).catch(() => setNudgeCount(0));
-    const onOnline = () => flushOfflineQueue((remaining) => setQueued(remaining));
+    flushOfflineQueue((remaining) => setQueued(remaining), onOfflineError);
+    fetchNudges().then((nudges) => setNudgeCount(nudges.length)).catch((err) => {
+      console.error("failed to fetch nudges", err instanceof Error ? err.message : String(err));
+      setNudgeCount(0);
+    });
+    const onOnline = () => flushOfflineQueue((remaining) => setQueued(remaining), onOfflineError);
     window.addEventListener("online", onOnline);
     onCleanup(() => window.removeEventListener("online", onOnline));
   });

@@ -18,7 +18,13 @@ export function getQueue(): QueuedSwipe[] {
   try {
     const raw = localStorage.getItem(QUEUE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw) as QueuedSwipe[];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is QueuedSwipe => {
+      if (!item || typeof item !== "object") return false;
+      const candidate = item as Record<string, unknown>;
+      return typeof candidate.cardId === "string" && (candidate.direction === "approve" || candidate.direction === "reject") && typeof candidate.createdAt === "number";
+    });
   } catch {
     return [];
   }
