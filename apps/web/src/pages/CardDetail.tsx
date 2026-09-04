@@ -137,30 +137,40 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
 
                 <div>
                   <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-3 flex items-center gap-2"><FileCode size={16} /> Evidence</h3>
-                  <Show when={evidence() && evidence()!.length > 0} fallback={<p class="text-sm text-gray-500 dark:text-zinc-400">No evidence yet.</p>}>
-                    <ul class="space-y-2">
-                      <For each={evidence() ?? []}>
-                        {(item) => {
-                          const Icon = item.kind === "image" ? Image : item.kind === "video" ? Video : FileCode;
-                          return (
-                            <li>
-                              <button
-                                onClick={() => selectEvidence(item.id, item.kind)}
-                                class={`w-full flex items-center gap-2 text-left px-3 py-2 rounded-lg text-sm transition ${
-                                  activeEvidence() === item.id
-                                    ? "bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800"
-                                    : "bg-gray-50 dark:bg-zinc-900/60 hover:bg-gray-100 dark:hover:bg-zinc-800"
-                                }`}
-                              >
-                                <Icon size={14} class="text-gray-400" />
-                                <span class="capitalize font-medium">{item.kind}</span>
-                                <span class="text-gray-400 dark:text-zinc-500 ml-2 font-mono text-xs">{(item.sha256 ?? "").slice(0, 12)}</span>
-                              </button>
-                            </li>
-                          );
-                        }}
-                      </For>
-                    </ul>
+                  <Show when={evidence.loading}>
+                    <p class="text-sm text-gray-500 dark:text-zinc-400">Loading evidence…</p>
+                  </Show>
+                  <Show when={evidence.error}>
+                    <div class="rounded-xl bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 p-3 text-sm text-rose-700 dark:text-rose-300">
+                      Failed to load evidence: {(evidence.error as Error).message}
+                    </div>
+                  </Show>
+                  <Show when={!evidence.loading && !evidence.error}>
+                    <Show when={evidence() && evidence()!.length > 0} fallback={<p class="text-sm text-gray-500 dark:text-zinc-400">No evidence yet.</p>}>
+                      <ul class="space-y-2">
+                        <For each={evidence() ?? []}>
+                          {(item) => {
+                            const Icon = item.kind === "image" ? Image : item.kind === "video" ? Video : FileCode;
+                            return (
+                              <li>
+                                <button
+                                  onClick={() => selectEvidence(item.id, item.kind)}
+                                  class={`w-full flex items-center gap-2 text-left px-3 py-2 rounded-lg text-sm transition ${
+                                    activeEvidence() === item.id
+                                      ? "bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800"
+                                      : "bg-gray-50 dark:bg-zinc-900/60 hover:bg-gray-100 dark:hover:bg-zinc-800"
+                                  }`}
+                                >
+                                  <Icon size={14} class="text-gray-400" />
+                                  <span class="capitalize font-medium">{item.kind}</span>
+                                  <span class="text-gray-400 dark:text-zinc-500 ml-2 font-mono text-xs">{(item.sha256 ?? "").slice(0, 12)}</span>
+                                </button>
+                              </li>
+                            );
+                          }}
+                        </For>
+                      </ul>
+                    </Show>
                   </Show>
 
                   <Show when={activeEvidence()}>
@@ -180,7 +190,15 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                         />
                       </Show>
                       <Show when={activeKind() !== "image" && activeKind() !== "video"}>
-                        <pre class="text-xs whitespace-pre-wrap">{content() || "Loading..."}</pre>
+                        <Show when={content.error}>
+                          <p class="text-sm text-rose-300">Failed to load content: {(content.error as Error).message}</p>
+                        </Show>
+                        <Show when={content.loading}>
+                          <p class="text-sm text-zinc-400">Loading content…</p>
+                        </Show>
+                        <Show when={!content.loading && !content.error}>
+                          <pre class="text-xs whitespace-pre-wrap">{content()}</pre>
+                        </Show>
                       </Show>
                     </div>
                   </Show>
