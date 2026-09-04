@@ -6,11 +6,15 @@ import type { ShipCard } from "@ship-feed/shared";
 export default function CardDetail(props: { cardId: string; onClose: () => void }) {
   const [card] = createResource(() => props.cardId, fetchCard);
   const [tagFilter, setTagFilter] = createSignal("");
-  const [evidence] = createResource(
-    () => ({ cardId: props.cardId, tags: tagFilter().split(",").map((t) => t.trim()).filter(Boolean) }),
-    ({ cardId, tags }) => fetchEvidence(cardId, tags)
-  );
+  const [evidence] = createResource(() => props.cardId, fetchEvidence);
   const [explain] = createResource(() => props.cardId, fetchExplain);
+
+  const filteredEvidence = () => {
+    const tags = tagFilter().split(",").map((t) => t.trim()).filter(Boolean);
+    const items = evidence() ?? [];
+    if (tags.length === 0) return items;
+    return items.filter((item) => tags.some((tag) => item.tags.includes(tag)));
+  };
   const [votes] = createResource(() => props.cardId, fetchVotes);
   const [comments, { refetch: refetchComments }] = createResource(() => props.cardId, fetchComments);
   const [templates] = createResource(() => card()?.repoFullName, fetchTemplates);
@@ -162,9 +166,9 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                     </div>
                   </Show>
                   <Show when={!evidence.loading && !evidence.error}>
-                    <Show when={evidence() && evidence()!.length > 0} fallback={<p class="text-sm text-gray-500 dark:text-zinc-400">No evidence yet.</p>}>
+                    <Show when={filteredEvidence().length > 0} fallback={<p class="text-sm text-gray-500 dark:text-zinc-400">No evidence yet.</p>}>
                       <ul class="space-y-2">
-                        <For each={evidence() ?? []}>
+                        <For each={filteredEvidence()}>
                           {(item) => {
                             const Icon = item.kind === "image" ? Image : item.kind === "video" ? Video : FileCode;
                             return (
