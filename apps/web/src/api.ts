@@ -1,4 +1,4 @@
-import type { ShipCard, User, EvidenceRecord, CommentTemplate, CardComment } from "@ship-feed/shared";
+import type { ShipCard, User, EvidenceRecord, CommentTemplate, CardComment, ApprovalRule } from "@ship-feed/shared";
 
 const envUrl = import.meta.env.VITE_API_URL as string | undefined;
 export const API_URL = envUrl && envUrl !== "undefined" ? envUrl : (typeof window !== "undefined" ? window.location.origin : "");
@@ -165,6 +165,23 @@ export async function applyTemplate(templateId: string, cardId: string) {
 export async function fetchComments(cardId: string): Promise<CardComment[]> {
   const res = await fetch(`${API_URL}/api/cards/${cardId}/comments`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch comments");
+  return res.json();
+}
+
+export async function fetchRule(repo: string): Promise<ApprovalRule> {
+  const res = await fetch(`${API_URL}/api/rules?repo=${encodeURIComponent(repo)}`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch rule");
+  return res.json();
+}
+
+export async function setRule(rule: ApprovalRule): Promise<ApprovalRule> {
+  const res = await fetch(`${API_URL}/api/rules`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(rule),
+  });
+  if (!res.ok) throw new Error("Failed to update rule");
   return res.json();
 }
 

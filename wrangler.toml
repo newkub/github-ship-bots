@@ -9,6 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 binding = "DB"
 database_name = "ship-feed-db"
 database_id = "7da4a45d-039f-48a1-ab99-316d636568a3"
+migrations_dir = "packages/api/migrations"
 
 [[r2_buckets]]
 binding = "EVIDENCE_BUCKET"

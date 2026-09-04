@@ -1,0 +1,2 @@
+ALTER TABLE approval_rules ADD COLUMN vote_weight INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE approval_rules ADD COLUMN veto_enabled INTEGER NOT NULL DEFAULT 0;

@@ -7,6 +7,7 @@ import {
   MousePointer,
   Moon,
   Puzzle,
+  Scale,
   Settings,
   Sun,
   LogOut,
@@ -66,6 +67,7 @@ export default function Layout(props: { children?: JSX.Element }) {
               {nav("/", LayoutDashboard, "Dashboard")}
               {nav("/repos", GitBranch, "Repositories")}
               {nav("/releases", FileText, "Releases")}
+              {nav("/rules", Scale, "Rules")}
               {nav("/billing", CreditCard, "Billing")}
               {nav("/inspector", MousePointer, "Inspector")}
               {nav("/marketplace", Puzzle, "Marketplace")}

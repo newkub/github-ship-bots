@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { getSession } from "../../lib/session";
 import { explainScore } from "../../lib/score";
 import { unauthorized, notFound, ensureAuth } from "../../lib/card-auth";
+import { getApprovalRule } from "../../lib/approval";
 import { requireCard } from "../../services/card-service";
 import { rowToCard } from "../../lib/card-mapper";
 import { withEnv } from "../../lib/env";
@@ -47,17 +48,16 @@ const read = withEnv(new Elysia())
       set.status = 404;
       return notFound();
     }
-    const rule = await env.DB
-      .prepare("SELECT min_approvers, min_rejectors FROM approval_rules WHERE repo_full_name = ?")
-      .bind(card.repoFullName)
-      .first<{ min_approvers: number; min_rejectors: number }>();
+    const rule = await getApprovalRule(env.DB, card.repoFullName);
     const { results } = await env.DB
       .prepare("SELECT s.direction, u.github_login as user FROM swipes s LEFT JOIN users u ON s.user_id = u.id WHERE s.card_id = ? ORDER BY s.created_at DESC")
       .bind(id)
       .all<{ direction: string; user: string }>();
     return {
-      minApprovers: rule?.min_approvers ?? 1,
-      minRejectors: rule?.min_rejectors ?? 1,
+      minApprovers: rule.minApprovers,
+      minRejectors: rule.minRejectors,
+      voteWeight: rule.voteWeight,
+      vetoEnabled: rule.vetoEnabled,
       votes: results ?? [],
     };
   }, { params: paramsSchema })

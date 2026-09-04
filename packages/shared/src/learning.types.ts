@@ -9,5 +9,7 @@ export interface ApprovalRule {
   repoFullName: string;
   minApprovers: number;
   minRejectors: number;
+  voteWeight: number;
+  vetoEnabled: boolean;
   updatedAt: string;
 }

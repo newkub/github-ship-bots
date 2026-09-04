@@ -7,6 +7,7 @@ import Billing from "./pages/Billing";
 import Inspector from "./pages/Inspector";
 import Marketplace from "./pages/Marketplace";
 import Releases from "./pages/Releases";
+import Rules from "./pages/Rules";
 import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/inspector" component={Inspector} />
           <Route path="/marketplace" component={Marketplace} />
           <Route path="/releases" component={Releases} />
+          <Route path="/rules" component={Rules} />
           <Route path="/settings" component={Settings} />
         </Route>
       </Router>

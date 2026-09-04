@@ -16,6 +16,7 @@ import stripe from "./routes/stripe";
 import learning from "./routes/learning";
 import push from "./routes/push";
 import releases from "./routes/releases";
+import rules from "./routes/rules";
 
 const app = new Elysia()
   .onBeforeHandle(async ({ request, set }) => {
@@ -52,7 +53,8 @@ const app = new Elysia()
   .use(stripe)
   .use(learning)
   .use(push)
-  .use(releases);
+  .use(releases)
+  .use(rules);
 
 export default {
   async fetch(

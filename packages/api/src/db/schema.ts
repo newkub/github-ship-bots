@@ -131,6 +131,8 @@ export const approvalRules = sqliteTable("approval_rules", {
   repoFullName: text("repo_full_name").primaryKey(),
   minApprovers: integer("min_approvers").notNull().default(1),
   minRejectors: integer("min_rejectors").notNull().default(1),
+  voteWeight: integer("vote_weight").notNull().default(1),
+  vetoEnabled: integer("veto_enabled", { mode: "boolean" }).notNull().default(false),
   updatedAt: text("updated_at").notNull(),
 });
 
