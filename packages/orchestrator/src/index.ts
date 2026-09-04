@@ -69,14 +69,13 @@ export async function onApprove(ctx: OrchestratorContext, card: ShipCard) {
     return { ok: false, card, github: gh };
   }
 
-  await updateCardStatus(ctx, card, "shipped");
-
   if (gh.skipped) {
-    console.log(`[ship-feed] shipped ${card.id} (GitHub: ${gh.message})`);
+    console.log(`[ship-feed] skipped shipping ${card.id}: ${gh.message}`);
   } else {
     console.log(`[ship-feed] shipped ${card.id}`);
   }
 
+  await updateCardStatus(ctx, card, "shipped");
   return { ok: true, card: { ...card, status: "shipped" as const }, github: gh };
 }
 
@@ -98,21 +97,22 @@ export async function onReject(ctx: OrchestratorContext, card: ShipCard) {
     return { ok: false, card, github: gh };
   }
 
-  await updateCardStatus(ctx, card, "rejected");
-
   if (gh.skipped) {
-    console.log(`[ship-feed] rejected ${card.id} (GitHub: ${gh.message})`);
+    console.log(`[ship-feed] skipped rejecting ${card.id}: ${gh.message}`);
   } else {
     console.log(`[ship-feed] rejected ${card.id}`);
   }
 
+  await updateCardStatus(ctx, card, "rejected");
   return { ok: true, card: { ...card, status: "rejected" as const }, github: gh };
 }
 
 export async function runShipLoop(ctx: OrchestratorContext) {
   const cards = await fetchApprovedCards(ctx);
+  let shipped = 0;
   for (const card of cards) {
-    await onApprove(ctx, card);
+    const res = await onApprove(ctx, card);
+    if (res.ok) shipped++;
   }
-  return { shipped: cards.length };
+  return { shipped };
 }

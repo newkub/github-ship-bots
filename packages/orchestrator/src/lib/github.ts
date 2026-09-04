@@ -110,18 +110,18 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
     ctx.correlationId = getCorrelationId();
   }
   if (!ctx.appId || !ctx.privateKey) {
-    return { ok: true, skipped: true, message: "GitHub App credentials not configured" };
+    return { ok: false, message: "GitHub App credentials not configured" };
   }
 
   const parsed = parseRepo(ctx.repoFullName);
   if (!parsed) {
-    return { ok: true, skipped: true, message: "Invalid repoFullName" };
+    return { ok: false, message: "Invalid repoFullName" };
   }
   const { owner, repo } = parsed;
 
   const token = await getInstallationToken(ctx);
   if (!token) {
-    return { ok: true, skipped: true, message: `GitHub App not installed on ${ctx.repoFullName}` };
+    return { ok: false, message: `GitHub App not installed on ${ctx.repoFullName}` };
   }
 
   try {
@@ -186,7 +186,7 @@ export async function shipToGitHub(ctx: ShipActionContext): Promise<GitHubAction
         });
       }
     } else {
-      return { ok: true, skipped: true, message: "No issueNumber or pullNumber to act on" };
+      return { ok: false, message: "No issueNumber or pullNumber to act on" };
     }
 
     return { ok: true };

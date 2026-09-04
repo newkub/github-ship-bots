@@ -24,9 +24,12 @@ const app = new Elysia()
     if (url.pathname === "/" || url.pathname === "/health") return;
 
     const env = getRequestEnv(request);
-    if (!env?.DB) return;
+    if (!env?.DB) {
+      set.status = 503;
+      return { error: "service unavailable", missing: ["DB"] };
+    }
 
-    const missing = validateRuntimeEnv(env);
+    const missing = validateRuntimeEnv(env, url.pathname);
     if (missing.length > 0) {
       set.status = 503;
       return { error: "service unavailable", missing };

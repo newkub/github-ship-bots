@@ -90,29 +90,28 @@ describe("orchestrator", () => {
     expect(cards[0].status).toBe("pending");
   });
 
-  test("onApprove ships card", async () => {
+  test("onApprove fails when GitHub App is not configured", async () => {
     const { db, calls } = createMockDb();
     const ctx = createContext({ DB: db, PUBLIC_APP_URL: "https://example.com" } as Env);
     const res = await onApprove(ctx, baseCard);
-    expect(res.ok).toBe(true);
-    expect(res.card.status).toBe("shipped");
-    expect(calls[0].sql).toContain("UPDATE cards SET status");
-    expect(calls[0].args).toContain("shipped");
+    expect(res.ok).toBe(false);
+    expect(res.github?.message).toBe("GitHub App credentials not configured");
+    expect(calls).toHaveLength(0);
   });
 
-  test("onReject rejects card", async () => {
+  test("onReject fails when GitHub App is not configured", async () => {
     const { db, calls } = createMockDb();
     const ctx = createContext({ DB: db, PUBLIC_APP_URL: "https://example.com" } as Env);
     const res = await onReject(ctx, baseCard);
-    expect(res.ok).toBe(true);
-    expect(res.card.status).toBe("rejected");
-    expect(calls[0].args).toContain("rejected");
+    expect(res.ok).toBe(false);
+    expect(res.github?.message).toBe("GitHub App credentials not configured");
+    expect(calls).toHaveLength(0);
   });
 
-  test("runShipLoop ships all approved cards", async () => {
+  test("runShipLoop does not ship without GitHub credentials", async () => {
     const { db } = createMockDb([dbRow(baseCard)]);
     const ctx = createContext({ DB: db, PUBLIC_APP_URL: "https://example.com" } as Env);
     const res = await runShipLoop(ctx);
-    expect(res.shipped).toBe(1);
+    expect(res.shipped).toBe(0);
   });
 });
