@@ -8,14 +8,16 @@ const HEALTH_TIMEOUT = 5_000;
 
 export default function StatusPanel() {
   const queryClient = useQueryClient();
-  const queue = useQuery(() => ({ queryKey: ["queue"], queryFn: fetchQueue }));
+  const queue = useQuery(() => ({ queryKey: ["queue"], queryFn: fetchQueue, retry: 1, staleTime: 30_000, gcTime: 300_000 }));
   const health = useQuery(() => ({
     queryKey: ["health"],
     queryFn: async () => {
       const res = await fetchWithTimeout(`${API_URL}/health`, { credentials: "include" }, HEALTH_TIMEOUT);
       return res.ok;
     },
+    retry: 1,
     refetchInterval: 30_000,
+    staleTime: 30_000,
   }));
   const pending = () => queue.data?.filter((c) => c.status === "pending").length ?? 0;
   const [actionError, setActionError] = createSignal<string | null>(null);

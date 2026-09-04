@@ -21,7 +21,7 @@ import { Show, type JSX } from "solid-js";
 
 export default function Layout(props: { children?: JSX.Element }) {
   const queryClient = useQueryClient();
-  const session = useQuery(() => ({ queryKey: ["session"], queryFn: fetchSession }));
+  const session = useQuery(() => ({ queryKey: ["session"], queryFn: fetchSession, retry: 1, staleTime: 60_000, gcTime: 300_000 }));
   const user = () => session.data?.user;
   const theme = createTheme();
 
