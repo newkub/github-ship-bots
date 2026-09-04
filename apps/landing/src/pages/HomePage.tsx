@@ -1,7 +1,9 @@
+import CTA from "../components/CTA";
 import DashboardPreview from "../components/DashboardPreview";
 import FeatureGrid from "../components/FeatureGrid";
 import Hero from "../components/Hero";
 import HowItWorks from "../components/HowItWorks";
+import Integrations from "../components/Integrations";
 import PageFooter from "../components/PageFooter";
 
 export default function HomePage() {
@@ -11,6 +13,8 @@ export default function HomePage() {
       <DashboardPreview />
       <FeatureGrid />
       <HowItWorks />
+      <Integrations />
+      <CTA />
       <PageFooter current="/" />
     </>
   );

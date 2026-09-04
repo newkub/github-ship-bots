@@ -8,8 +8,10 @@ import {
   Settings,
   LogOut,
   LayoutDashboard,
+  AlertCircle,
 } from "lucide-solid";
 import { fetchSession, loginUrl, logout } from "../api";
+import Skeleton from "./Skeleton";
 import { Show, createEffect, type JSX } from "solid-js";
 
 export default function Layout(props: { children?: JSX.Element }) {
@@ -54,9 +56,13 @@ export default function Layout(props: { children?: JSX.Element }) {
         </A>
 
         <Show when={session.isPending}>
-          <div class="flex-1 flex items-center justify-center text-gray-500 text-sm">
-            <div class="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mr-2" />
-            Checking session…
+          <div class="flex-1 flex flex-col gap-4 px-2">
+            <Skeleton class="h-10 w-full" />
+            <Skeleton class="h-10 w-full" />
+            <Skeleton class="h-10 w-full" />
+            <Skeleton class="h-10 w-full" />
+            <Skeleton class="h-10 w-full" />
+            <Skeleton class="h-10 w-full" />
           </div>
         </Show>
 
@@ -90,8 +96,15 @@ export default function Layout(props: { children?: JSX.Element }) {
 
       <main class="flex-1 overflow-auto p-8">
         <Show when={session.error}>
-          <div class="rounded-2xl bg-rose-50 border border-rose-100 p-6 text-rose-700 mb-6">
-            Failed to verify your session. <a href={loginUrl()} class="underline">Sign in again</a>.
+          <div class="rounded-2xl bg-rose-50 border border-rose-100 p-6 text-rose-700 mb-6 flex items-start gap-3">
+            <AlertCircle size={20} class="shrink-0 mt-0.5" />
+            <div>
+              <p class="font-medium">Failed to verify your session</p>
+              <p class="text-sm mt-1">{(session.error as Error).message}</p>
+              <a href={loginUrl()} class="inline-flex items-center gap-2 mt-3 text-sm font-medium underline hover:no-underline">
+                Sign in again
+              </a>
+            </div>
           </div>
         </Show>
         <Show when={user()}>{props.children}</Show>

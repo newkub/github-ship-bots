@@ -1,13 +1,11 @@
 import { createResource, Show, createSignal } from "solid-js";
 import { Loader, AlertCircle, Copy, Check, LogOut } from "lucide-solid";
-import { fetchSession, logout } from "../api";
+import { fetchSession, logout, API_URL } from "../api";
 
 export default function Settings() {
   const [session] = createResource(() => fetchSession());
   const [copied, setCopied] = createSignal(false);
-  const apiUrl = import.meta.env.VITE_API_URL;
-  if (!apiUrl) throw new Error("Missing VITE_API_URL");
-  const webhookUrl = `${apiUrl}/webhook`;
+  const webhookUrl = `${API_URL}/webhook`;
 
   const copyWebhook = async () => {
     await navigator.clipboard.writeText(webhookUrl);

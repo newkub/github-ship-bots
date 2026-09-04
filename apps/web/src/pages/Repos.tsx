@@ -2,7 +2,7 @@ import { For, Show, createResource } from "solid-js";
 import { GitPullRequest, Loader, AlertCircle, Plus } from "lucide-solid";
 import { fetchRepos } from "../api";
 
-const GITHUB_APP_INSTALL_URL = import.meta.env.VITE_GITHUB_APP_INSTALL_URL;
+const GITHUB_APP_INSTALL_URL = (import.meta.env.VITE_GITHUB_APP_INSTALL_URL as string | undefined) || "https://github.com/apps/wrikka-ship-bot/installations/new";
 
 export default function Repos() {
   const [repos, { refetch }] = createResource(fetchRepos);

@@ -7,6 +7,7 @@ import { fetchCards, fetchRepos, updateCardStatus } from "../api";
 import CardDetail from "./CardDetail";
 import CardTile from "../components/CardTile";
 import Kanban from "../components/Kanban";
+import Skeleton from "../components/Skeleton";
 import StatusPanel from "../components/StatusPanel";
 
 export default function Cards() {
@@ -143,7 +144,20 @@ export default function Cards() {
 
       <StatusPanel />
 
-      <Show when={!query.isLoading} fallback={<p class="text-gray-500">Loading cards...</p>}>
+      <Show when={!query.isLoading} fallback={
+        <div class="space-y-5">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Skeleton class="h-24 w-full" />
+            <Skeleton class="h-24 w-full" />
+            <Skeleton class="h-24 w-full" />
+            <Skeleton class="h-24 w-full" />
+          </div>
+          <Skeleton class="h-40 w-full" />
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <For each={[1, 2, 3, 4]}>{() => <Skeleton class="h-40 w-full" />}</For>
+          </div>
+        </div>
+      }>
         <Show
           when={query.error}
           fallback={

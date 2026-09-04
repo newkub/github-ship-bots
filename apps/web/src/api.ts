@@ -1,5 +1,8 @@
 import type { ShipCard, User, EvidenceRecord, CommentTemplate, CardComment } from "@ship-feed/shared";
-export const API_URL = import.meta.env.VITE_API_URL;
+
+const envUrl = import.meta.env.VITE_API_URL as string | undefined;
+export const API_URL = envUrl && envUrl !== "undefined" ? envUrl : (typeof window !== "undefined" ? window.location.origin : "");
+
 if (!API_URL) throw new Error("Missing VITE_API_URL");
 export async function fetchCards(): Promise<ShipCard[]> {
   const res = await fetch(`${API_URL}/api/cards`, { credentials: "include" });
