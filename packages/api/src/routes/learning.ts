@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
 import { getSession } from "../lib/session";
-import { now } from "../lib/db";
+import { now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
 
 const learning = withEnv(new Elysia({ prefix: "/api/learning" }));

@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 import type { Env } from "@ship-feed/shared";
-import { generateId, now } from "./db";
+import { generateId, now } from "@ship-feed/shared";
 
 export async function wasWebhookProcessed(db: Env["DB"], stripeEventId: string): Promise<boolean> {
   const row = await db

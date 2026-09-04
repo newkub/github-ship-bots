@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { getSession } from "../lib/session";
 import { diffImages } from "../lib/oracle";
-import { generateId, now } from "../lib/db";
+import { generateId, now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
 
 const oracle = withEnv(new Elysia({ prefix: "/api/oracle" }));

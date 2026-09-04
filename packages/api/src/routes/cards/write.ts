@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
 import { getSession } from "../../lib/session";
-import { now, generateId } from "../../lib/db";
+import { now, generateId } from "@ship-feed/shared";
 import { updateLearningWeights } from "../../lib/learning";
 import { resolveApprovalStatus } from "../../lib/approval";
 import { notifyCardStatus } from "../../lib/notify";

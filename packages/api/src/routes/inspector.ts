@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import type { Env } from "@ship-feed/shared";
 import { getSession } from "../lib/session";
-import { generateId, now } from "../lib/db";
+import { generateId, now } from "@ship-feed/shared";
 import { insertCard } from "../services/card-service";
 import { withEnv } from "../lib/env";
 import { inspectUrl } from "../lib/inspector-fetch";

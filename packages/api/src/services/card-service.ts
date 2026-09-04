@@ -1,5 +1,5 @@
 import type { Env, ShipCard } from "@ship-feed/shared";
-import { generateId, now } from "../lib/db";
+import { generateId, now } from "@ship-feed/shared";
 import { autoScore } from "../lib/score";
 import { updateLearningWeights } from "../lib/learning";
 import { notifyCardStatus } from "../lib/notify";

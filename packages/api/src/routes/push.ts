@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
 import { getSession } from "../lib/session";
-import { generateId, now } from "../lib/db";
+import { generateId, now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
 import { sendPushBatch } from "@mmmike/web-push/send";
 import type { VapidConfig, PushSubscriptionData, PushPayload } from "@mmmike/web-push/send";

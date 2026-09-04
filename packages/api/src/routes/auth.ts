@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { WorkOS } from "@workos-inc/node";
 import { setSession, getSession, deleteSession } from "../lib/session";
-import { generateId, now } from "../lib/db";
+import { generateId, now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
 import { assertEnumValue } from "@ship-feed/shared";
 import type { User, PlanTier } from "@ship-feed/shared";

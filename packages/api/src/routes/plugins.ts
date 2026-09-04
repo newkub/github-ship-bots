@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { getSession } from "../lib/session";
-import { now } from "../lib/db";
+import { now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
 
 const plugins = withEnv(new Elysia({ prefix: "/api/plugins" }));

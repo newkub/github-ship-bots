@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { constantTimeCompare, parseEvidenceIds } from "@ship-feed/shared";
 import { getSession } from "../lib/session";
-import { generateId, now } from "../lib/db";
+import { generateId, now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
 import { checkRateLimit } from "../lib/rate-limit";
 

@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 import { getSession } from "../lib/session";
 import { ensureAuth, unauthorized } from "../lib/card-auth";
 import { getApprovalRule, setApprovalRule } from "../lib/approval";
-import { now } from "../lib/db";
+import { now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
 
 const bodySchema = t.Object({

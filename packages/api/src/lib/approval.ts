@@ -1,4 +1,4 @@
-import { now } from "./db";
+import { now } from "@ship-feed/shared";
 import type { D1Database } from "@cloudflare/workers-types";
 import type { ShipCard } from "@ship-feed/shared";
 
