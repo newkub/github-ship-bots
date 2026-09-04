@@ -51,7 +51,6 @@ export async function insertCard(
     inserted.status = "approved";
     await updateLearningWeights(env.DB, inserted, "approve");
   }
-  await notifyCardStatus(env, inserted, inserted.status === "approved" ? "approved" : "created");
   await env.DB
     .prepare(
       `INSERT INTO cards (id, creator_id, kind, title, description, status, repo_full_name, issue_number, pull_number, impact, risk, effect, phase, score, evidence_ids, created_at, updated_at)
@@ -77,5 +76,6 @@ export async function insertCard(
       now()
     )
     .run();
+  await notifyCardStatus(env, inserted, inserted.status === "approved" ? "approved" : "created");
   return inserted;
 }

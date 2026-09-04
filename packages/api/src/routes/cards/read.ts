@@ -7,6 +7,7 @@ import { requireCard } from "../../services/card-service";
 import { rowToCard } from "../../lib/card-mapper";
 import { withEnv } from "../../lib/env";
 import { paramsSchema } from "./schemas";
+import type { CardComment, EvidenceRecord } from "@ship-feed/shared";
 
 const read = withEnv(new Elysia())
   .get("/:id", async ({ request, set, env, params }) => {
@@ -74,14 +75,14 @@ const read = withEnv(new Elysia())
     const { results } = await env.DB
       .prepare("SELECT c.*, u.github_login as user FROM card_comments c LEFT JOIN users u ON c.user_id = u.id WHERE c.card_id = ? ORDER BY c.created_at DESC")
       .bind(id)
-      .all<Record<string, unknown>>();
+      .all<CardComment>();
     return (results ?? []).map((row) => ({
       id: row.id,
-      cardId: row.card_id,
+      cardId: row.cardId,
       user: row.user,
       body: row.body,
-      postedToGitHub: Boolean(row.posted_to_github),
-      createdAt: row.created_at,
+      postedToGitHub: Boolean(row.postedToGitHub),
+      createdAt: row.createdAt,
     }));
   }, { params: paramsSchema })
 
@@ -97,7 +98,15 @@ const read = withEnv(new Elysia())
     const { results } = await env.DB.prepare("SELECT * FROM evidence WHERE card_id = ? ORDER BY created_at DESC")
       .bind(id)
       .all<Record<string, unknown>>();
-    return results ?? [];
+    return (results ?? []).map((row) => ({
+      id: String(row.id),
+      cardId: row.card_id ? String(row.card_id) : undefined,
+      kind: row.kind,
+      r2Key: String(row.r2_key),
+      sha256: String(row.sha256),
+      ciRunUrl: row.ci_run_url ? String(row.ci_run_url) : undefined,
+      createdAt: String(row.created_at),
+    } as EvidenceRecord));
   }, { params: paramsSchema })
 
   .get("/", async ({ request, set, env }) => {

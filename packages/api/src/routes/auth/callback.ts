@@ -89,7 +89,7 @@ callback.get(
     }
 
     const row = await env.DB.prepare(
-      "SELECT id, github_login, email, workos_user_id, plan, created_at FROM users WHERE github_login = ?"
+      "SELECT id, github_login, email, workos_user_id, plan, stripe_customer_id, created_at FROM users WHERE github_login = ?"
     )
       .bind(githubLogin)
       .first<Record<string, unknown>>();
@@ -102,6 +102,7 @@ callback.get(
         githubLogin: String(row.github_login),
         email: row.email ? String(row.email) : undefined,
         workosUserId: row.workos_user_id ? String(row.workos_user_id) : undefined,
+        stripeCustomerId: row.stripe_customer_id ? String(row.stripe_customer_id) : undefined,
         plan: assertEnumValue(row.plan, PLAN_TIERS, "plan"),
         createdAt: String(row.created_at),
       };
@@ -118,6 +119,7 @@ callback.get(
         githubLogin,
         email: profile.email ?? undefined,
         workosUserId: profile.id,
+        stripeCustomerId: undefined,
         plan: "free",
         createdAt,
       };

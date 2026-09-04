@@ -32,3 +32,15 @@ export interface SwipeEvent {
   direction: "approve" | "reject";
   createdAt: string;
 }
+
+export interface CardComment {
+  id: string;
+  cardId: string;
+  userId?: string;
+  swipeId?: string;
+  templateId?: string;
+  body: string;
+  user?: string;
+  postedToGitHub: boolean;
+  createdAt: string;
+}

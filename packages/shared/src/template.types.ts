@@ -6,14 +6,3 @@ export interface CommentTemplate {
   body: string;
   createdAt: string;
 }
-
-export interface CardComment {
-  id: string;
-  cardId: string;
-  userId: string;
-  templateId?: string;
-  user?: string;
-  body: string;
-  postedToGitHub: boolean;
-  createdAt: string;
-}

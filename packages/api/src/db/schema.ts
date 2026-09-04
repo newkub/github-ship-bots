@@ -147,3 +147,9 @@ export const userRepos = sqliteTable("user_repos", {
 }, (t) => ({
   pk: primaryKey({ columns: [t.userId, t.repoFullName] }),
 }));
+
+export const rateLimits = sqliteTable("rate_limits", {
+  id: text("id").primaryKey(),
+  count: integer("count").notNull().default(0),
+  expiresAt: integer("expires_at").notNull(),
+});
