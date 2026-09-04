@@ -1,4 +1,4 @@
-import { For, Show, createSignal } from "solid-js";
+import { Show, createSignal } from "solid-js";
 import { Eye, Send } from "lucide-solid";
 import { submitInspector } from "../api";
 
@@ -10,7 +10,6 @@ export default function Inspector() {
   const [result, setResult] = createSignal<string | null>(null);
   const [error, setError] = createSignal<string | null>(null);
   const [loading, setLoading] = createSignal(false);
-  const [selectedElement, setSelectedElement] = createSignal(".hero > h1");
 
   const onSubmit = async () => {
     setLoading(true);
@@ -31,16 +30,12 @@ export default function Inspector() {
     }
   };
 
-  const elements = [
-    { label: "Hero headline", selector: ".hero > h1" },
-    { label: "Login button", selector: "button.login" },
-    { label: "Pricing card", selector: ".pricing-card" },
-  ];
-
   return (
     <div>
       <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Web Inspector</h1>
-      <p class="text-sm text-gray-500 dark:text-zinc-400 mb-6">Capture a UI element, describe the change, and create a card from it.</p>
+      <p class="text-sm text-gray-500 dark:text-zinc-400 mb-6">
+        Fetch a public page, extract the title and element text, and create a ship-feed card.
+      </p>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 shadow-sm">
@@ -62,8 +57,11 @@ export default function Inspector() {
                 value={selector()}
                 onInput={(e) => setSelector(e.currentTarget.value)}
                 class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm dark:text-white"
-                placeholder=".hero > h1"
+                placeholder="h1, .hero, #headline"
               />
+              <p class="mt-1 text-xs text-gray-500 dark:text-zinc-500">
+                Supports simple selectors: tag, .class, #id, and basic descendant chains.
+              </p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Prompt</label>
@@ -72,7 +70,7 @@ export default function Inspector() {
                 onInput={(e) => setPrompt(e.currentTarget.value)}
                 rows={4}
                 class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm dark:text-white"
-                placeholder="Make the headline more compelling and run CI."
+                placeholder="Describe the change you want to track."
               />
             </div>
             <div>
@@ -92,7 +90,7 @@ export default function Inspector() {
             >
               <Show when={!loading()} fallback={<span class="animate-pulse">Submitting...</span>}>
                 <Send size={16} />
-                Create issue
+                Create card
               </Show>
             </button>
           </div>
@@ -107,29 +105,18 @@ export default function Inspector() {
         <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 shadow-sm">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Eye size={16} />
-            Page preview
+            How it works
           </h2>
-          <div class="rounded-xl bg-gray-50 dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-800 h-64 p-4 relative">
-            <div class="text-xs text-gray-400 dark:text-zinc-500 mb-3">{url() || "Enter a page URL and click Create issue"}</div>
-            <div class="space-y-2">
-              <For each={elements}>
-                {(el) => (
-                  <button
-                    onClick={() => {
-                      setSelectedElement(el.selector);
-                      setSelector(el.selector);
-                    }}
-                    class={`text-left text-sm w-full rounded-lg px-3 py-2 border transition ${
-                      selectedElement() === el.selector
-                        ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300"
-                        : "bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800"
-                    }`}
-                  >
-                    {el.label} — <code class="text-xs">{el.selector}</code>
-                  </button>
-                )}
-              </For>
-            </div>
+          <div class="rounded-xl bg-gray-50 dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-800 p-4 text-sm text-gray-600 dark:text-zinc-400 space-y-2">
+            <p>
+              The inspector fetches the page at the URL, reads the HTML, and extracts the page title and the text content of the first element matching the selector.
+            </p>
+            <p>
+              It does not execute JavaScript, take screenshots, or run CI. Use it for static landing pages and documentation where the target element is present in the initial HTML.
+            </p>
+            <Show when={url()}>
+              <p class="text-xs text-gray-400 dark:text-zinc-500 break-all">Target: {url()}</p>
+            </Show>
           </div>
         </div>
       </div>
