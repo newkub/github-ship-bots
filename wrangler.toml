@@ -1,6 +1,6 @@
 name = "github-ship-bots"
 main = "packages/worker/src/index.ts"
-compatibility_date = "2025-01-01"
+compatibility_date = "2026-09-02"
 compatibility_flags = ["nodejs_compat"]
 
 # Set account_id via `wrangler deploy` or add it to your local wrangler.toml
