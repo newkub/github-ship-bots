@@ -61,8 +61,8 @@ export default function About() {
                 const isLast = i() === steps.length - 1;
                 return (
                   <>
-                    <div class="relative rounded-2xl bg-zinc-950/50 p-5 border border-zinc-800 text-center hover:border-indigo-500/30 hover:bg-zinc-900/60 hover:-translate-y-1 transition duration-300 group">
-                      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-500 mb-3 group-hover:scale-110 group-hover:bg-indigo-500/20 transition duration-300">
+                    <div class="relative rounded-2xl bg-zinc-950/50 p-5 border border-zinc-800 text-center hover:border-indigo-500/30 hover:bg-zinc-900/60 transition group">
+                      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-500 mb-3 group-hover:bg-indigo-500/20 transition">
                         <Icon size={24} />
                       </div>
                       <p class="text-zinc-200 text-sm font-medium">{step.text}</p>
@@ -81,7 +81,7 @@ export default function About() {
           <div class="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6">
             <For each={concepts}>
               {(concept) => (
-                <div class="rounded-2xl bg-zinc-950/50 p-6 border border-zinc-800 hover:border-indigo-500/30 hover:-translate-y-1 hover:bg-zinc-900/40 transition duration-300 group">
+                <div class="rounded-2xl bg-zinc-950/50 p-6 border border-zinc-800 hover:border-indigo-500/30 hover:bg-zinc-900/40 transition group">
                   <div class="text-2xl font-bold text-white mb-2 group-hover:text-indigo-400 transition">
                     {concept.title}
                   </div>

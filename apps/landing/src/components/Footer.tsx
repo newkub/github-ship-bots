@@ -21,7 +21,7 @@ export default function Footer() {
               to="/"
               class="inline-flex items-center gap-2 text-lg font-bold text-white hover:text-indigo-400 transition"
             >
-              <img src="/assets/bot-logo.png" alt={`${appName} logo`} class="h-8 w-8 rounded-lg" />
+              <img src="/assets/bot-logo.png" alt={`${appName} logo`} class="h-8 w-8 rounded-lg" width="32" height="32" loading="lazy" decoding="async" />
               {appName}
             </Link>
             <p class="mt-2 text-sm text-zinc-500 max-w-sm">

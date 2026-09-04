@@ -10,21 +10,18 @@ const iconMap: Record<string, typeof CheckCircle2> = {
   "/ship": Rocket,
 };
 
-const styleMap: Record<string, { light: string; border: string; glow: string }> = {
+const styleMap: Record<string, { light: string; border: string }> = {
   "/approve": {
     light: "bg-emerald-500/10 text-emerald-400",
-    border: "border-emerald-500/30 hover:border-emerald-500/50 hover:shadow-emerald-500/10",
-    glow: "group-hover:shadow-emerald-500/10",
+    border: "border-emerald-500/30 hover:border-emerald-500/50",
   },
   "/reject": {
     light: "bg-rose-500/10 text-rose-400",
-    border: "border-rose-500/30 hover:border-rose-500/50 hover:shadow-rose-500/10",
-    glow: "group-hover:shadow-rose-500/10",
+    border: "border-rose-500/30 hover:border-rose-500/50",
   },
   "/ship": {
     light: "bg-indigo-500/10 text-indigo-400",
-    border: "border-indigo-500/30 hover:border-indigo-500/50 hover:shadow-indigo-500/10",
-    glow: "group-hover:shadow-indigo-500/10",
+    border: "border-indigo-500/30 hover:border-indigo-500/50",
   },
 };
 
@@ -40,7 +37,7 @@ export default function CommandCards() {
           subtitle="Vote with a comment. The bot reads the command and advances the card through the pipeline."
         />
 
-        <div class="max-w-xl mx-auto mb-12">
+        <div class="max-w-2xl mx-auto mb-12">
           <VisualBlock variant="commands" />
         </div>
 
@@ -50,16 +47,15 @@ export default function CommandCards() {
               const Icon = iconMap[cmd.cmd] ?? Terminal;
               const style = styleMap[cmd.cmd] ?? {
                 light: "bg-indigo-500/10 text-indigo-400",
-                border: "border-indigo-500/30 hover:border-indigo-500/50 hover:shadow-indigo-500/10",
-                glow: "group-hover:shadow-indigo-500/10",
+                border: "border-indigo-500/30 hover:border-indigo-500/50",
               };
               return (
                 <div
-                  class={`rounded-2xl bg-zinc-900/60 p-8 border border-zinc-800 hover:-translate-y-1 hover:bg-zinc-900/80 hover:shadow-lg transition duration-300 group ${style.border} ${style.glow}`}
+                  class={`rounded-2xl bg-zinc-900/60 p-8 border border-zinc-800 hover:bg-zinc-900/80 hover:shadow-lg transition group ${style.border}`}
                 >
                   <div class="flex items-center gap-3 mb-6">
                     <div
-                      class={`flex h-12 w-12 items-center justify-center rounded-2xl ${style.light} group-hover:scale-110 transition duration-300`}
+                      class={`flex h-12 w-12 items-center justify-center rounded-2xl ${style.light} group-hover:scale-110 transition`}
                     >
                       <Icon size={24} />
                     </div>

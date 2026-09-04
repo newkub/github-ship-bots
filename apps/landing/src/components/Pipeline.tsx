@@ -59,12 +59,12 @@ export default function Pipeline() {
               const isLast = i() === stages.length - 1;
               return (
                 <>
-                  <div class="rounded-2xl bg-zinc-900/60 p-6 border border-zinc-800 hover:border-indigo-500/40 hover:-translate-y-1 hover:bg-zinc-900/80 hover:shadow-lg hover:shadow-indigo-500/5 transition duration-300 group relative">
-                    <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-600 text-xs font-bold group-hover:border-indigo-500/30 group-hover:text-indigo-400 group-hover:scale-110 transition duration-300">
+                  <div class="rounded-2xl bg-zinc-900/60 p-6 border border-zinc-800 hover:border-indigo-500/40 hover:bg-zinc-900/80 hover:shadow-lg hover:shadow-indigo-500/5 transition group relative">
+                    <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-600 text-xs font-bold group-hover:border-indigo-500/30 group-hover:text-indigo-400 transition">
                       {i() + 1}
                     </div>
                     <div
-                      class={`flex h-12 w-12 items-center justify-center rounded-xl mb-4 border ${colors[stage.color]} group-hover:scale-110 transition duration-300`}
+                      class={`flex h-12 w-12 items-center justify-center rounded-xl mb-4 border ${colors[stage.color]} group-hover:scale-110 transition`}
                     >
                       <Icon size={24} />
                     </div>
@@ -95,7 +95,7 @@ export default function Pipeline() {
                 return (
                 
                   <>
-                    <div class="flex-1 rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex items-center gap-3 shadow-lg hover:border-indigo-500/30 hover:-translate-y-0.5 hover:bg-zinc-900/50 transition duration-300 group">
+                    <div class="flex-1 rounded-xl bg-zinc-950 border border-zinc-800 p-4 flex items-center gap-3 shadow-lg hover:border-indigo-500/30 hover:bg-zinc-900/50 transition group">
                       <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-900 text-indigo-400 border border-zinc-800 group-hover:border-indigo-500/30 transition">
                         <Icon size={20} />
                       </div>

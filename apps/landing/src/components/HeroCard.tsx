@@ -12,7 +12,6 @@ export default function HeroCard(props: {
   bottom?: string;
   right?: string;
   color: "indigo" | "emerald" | "orange" | "purple";
-  delay?: string;
 }) {
   const colorMap = {
     indigo: "border-indigo-500/30 text-indigo-400 bg-indigo-500/10",
@@ -23,7 +22,6 @@ export default function HeroCard(props: {
 
   const style: any = {
     "--rotate": `${props.rotate}deg`,
-    "animation-delay": props.delay ?? "0s",
     zIndex: 1,
   };
   if (props.top !== undefined) style.top = `${props.top}rem`;
@@ -33,7 +31,7 @@ export default function HeroCard(props: {
 
   return (
     <div
-      class={`${props.class ?? ""} absolute w-64 sm:w-72 rounded-2xl bg-zinc-900/90 p-5 shadow-2xl border ${colorMap[props.color]} backdrop-blur animate-float hover:-translate-y-1 hover:shadow-indigo-500/10 transition duration-300`}
+      class={`${props.class ?? ""} absolute w-64 sm:w-72 rounded-2xl bg-zinc-900/90 p-5 shadow-2xl border ${colorMap[props.color]} backdrop-blur transition`}
       style={style}
     >
       <div class="flex items-start gap-3">

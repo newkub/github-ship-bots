@@ -1,6 +1,5 @@
 import { For } from "solid-js";
 import { Check, Layers, MessageSquare, Rocket, ShieldCheck, Zap } from "lucide-solid";
-import ScrollReveal from "./ScrollReveal";
 import SectionHeader from "./SectionHeader";
 
 const steps = [
@@ -44,59 +43,53 @@ export default function UseCases() {
       <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
       <div class="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <ScrollReveal>
-          <SectionHeader
-            title="A real shipping workflow"
-            subtitle="From a GitHub issue to a shipped release, fully automated and fully auditable."
-          />
-        </ScrollReveal>
+        <SectionHeader
+          title="A real shipping workflow"
+          subtitle="From a GitHub issue to a shipped release, fully automated and fully auditable."
+        />
 
         <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          <ScrollReveal selector=".workflow-step" stagger={120}>
-            <div class="space-y-4 relative">
-              <div class="absolute left-7 top-8 bottom-8 w-px bg-gradient-to-b from-zinc-700 via-indigo-500/30 to-zinc-700 hidden lg:block" />
-              <For each={steps}>
-                {(step, i) => {
-                  const Icon = step.icon;
-                  return (
-                    <div class="workflow-step group relative flex gap-4 p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800 hover:bg-zinc-900/60 hover:border-indigo-500/30 transition duration-300">
-                      <div class="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-700 text-indigo-400 group-hover:scale-110 group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition duration-300">
-                        <Icon size={22} />
-                      </div>
-                      <div>
-                        <div class="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">Step {i() + 1}</div>
-                        <h3 class="text-lg font-semibold text-white mb-1">{step.title}</h3>
-                        <p class="text-sm text-zinc-400 leading-relaxed">{step.desc}</p>
-                      </div>
+          <div class="space-y-4 relative">
+            <div class="absolute left-7 top-8 bottom-8 w-px bg-gradient-to-b from-zinc-700 via-indigo-500/30 to-zinc-700 hidden lg:block" />
+            <For each={steps}>
+              {(step, i) => {
+                const Icon = step.icon;
+                return (
+                  <div class="group relative flex gap-4 p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800 hover:bg-zinc-900/60 hover:border-indigo-500/30 transition">
+                    <div class="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-700 text-indigo-400 group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition">
+                      <Icon size={22} />
                     </div>
-                  );
-                }}
-              </For>
-            </div>
-          </ScrollReveal>
+                    <div>
+                      <div class="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">Step {i() + 1}</div>
+                      <h3 class="text-lg font-semibold text-white mb-1">{step.title}</h3>
+                      <p class="text-sm text-zinc-400 leading-relaxed">{step.desc}</p>
+                    </div>
+                  </div>
+                );
+              }}
+            </For>
+          </div>
 
-          <ScrollReveal>
-            <div class="rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 p-8 lg:sticky lg:top-8">
-              <h3 class="text-2xl font-bold text-white mb-4">What you get</h3>
-              <ul class="space-y-4">
-                <For each={outcomes}>
-                  {(outcome) => (
-                    <li class="flex items-start gap-3 text-zinc-300">
-                      <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 mt-0.5">
-                        <Check size={14} />
-                      </div>
-                      <span class="leading-relaxed">{outcome}</span>
-                    </li>
-                  )}
-                </For>
-              </ul>
-              <div class="mt-8 p-4 rounded-xl bg-zinc-950/50 border border-zinc-800">
-                <p class="text-sm text-zinc-400 italic">
-                  "The bot does the work. You just decide."
-                </p>
-              </div>
+          <div class="rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 p-8 lg:sticky lg:top-8">
+            <h3 class="text-2xl font-bold text-white mb-4">What you get</h3>
+            <ul class="space-y-4">
+              <For each={outcomes}>
+                {(outcome) => (
+                  <li class="flex items-start gap-3 text-zinc-300">
+                    <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 mt-0.5">
+                      <Check size={14} />
+                    </div>
+                    <span class="leading-relaxed">{outcome}</span>
+                  </li>
+                )}
+              </For>
+            </ul>
+            <div class="mt-8 p-4 rounded-xl bg-zinc-950/50 border border-zinc-800">
+              <p class="text-sm text-zinc-400 italic">
+                "The bot does the work. You just decide."
+              </p>
             </div>
-          </ScrollReveal>
+          </div>
         </div>
       </div>
     </section>

@@ -1,0 +1,12 @@
+{
+  "name": "ship-feed — Card-driven GitHub autopilot",
+  "short_name": "ship-feed",
+  "description": "Turn GitHub issues and pull requests into scored, approved, and shipped cards.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    { "src": "/favicon.png", "sizes": "256x256", "type": "image/png" }
+  ]
+}

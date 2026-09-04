@@ -1,6 +1,5 @@
 import { For } from "solid-js";
 import { MessageSquare, Image, Rocket } from "lucide-solid";
-import ScrollReveal from "./ScrollReveal";
 import SectionHeader from "./SectionHeader";
 
 const spotlights = [
@@ -34,55 +33,51 @@ export default function FeatureSpotlight() {
       <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
       <div class="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <ScrollReveal>
-          <SectionHeader
-            title="Three ideas that change how you ship"
-            subtitle="The fastest way from a GitHub issue to a merged, verified, and shipped pull request."
-          />
-        </ScrollReveal>
+        <SectionHeader
+          title="Three ideas that change how you ship"
+          subtitle="The fastest way from a GitHub issue to a merged, verified, and shipped pull request."
+        />
 
-        <ScrollReveal selector=".spotlight-card" stagger={150}>
-          <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <For each={spotlights}>
-              {(item) => {
-                const Icon = item.icon;
-                const gradients: Record<string, string> = {
-                  indigo: "from-indigo-500 to-purple-600",
-                  emerald: "from-emerald-500 to-cyan-600",
-                  orange: "from-orange-500 to-rose-600",
-                };
-                const text: Record<string, string> = {
-                  indigo: "text-indigo-400",
-                  emerald: "text-emerald-400",
-                  orange: "text-orange-400",
-                };
-                return (
-                  <div class="spotlight-card group rounded-2xl bg-zinc-900/60 border border-zinc-800 p-8 hover:-translate-y-1 hover:border-indigo-500/30 hover:bg-zinc-900/80 hover:shadow-xl hover:shadow-indigo-500/5 transition duration-300">
-                    <div class={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${gradients[item.color]} text-white shadow-lg shadow-${item.color}-500/20 mb-6 group-hover:scale-110 transition duration-300`}>
-                      <Icon size={28} />
-                    </div>
-                    <h3 class={`text-2xl font-bold text-white mb-3 group-hover:${text[item.color]} transition`}>
-                      {item.title}
-                    </h3>
-                    <p class="text-zinc-400 text-sm leading-relaxed mb-6">
-                      {item.body}
-                    </p>
-                    <ul class="space-y-2">
-                      <For each={item.points}>
-                        {(point) => (
-                          <li class="flex items-start gap-2 text-sm text-zinc-300">
-                            <span class={`mt-1.5 h-1.5 w-1.5 rounded-full ${item.color === "indigo" ? "bg-indigo-400" : item.color === "emerald" ? "bg-emerald-400" : "bg-orange-400"}`} />
-                            {point}
-                          </li>
-                        )}
-                      </For>
-                    </ul>
+        <div class="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <For each={spotlights}>
+            {(item) => {
+              const Icon = item.icon;
+              const gradients: Record<string, string> = {
+                indigo: "from-indigo-500 to-purple-600",
+                emerald: "from-emerald-500 to-cyan-600",
+                orange: "from-orange-500 to-rose-600",
+              };
+              const text: Record<string, string> = {
+                indigo: "text-indigo-400",
+                emerald: "text-emerald-400",
+                orange: "text-orange-400",
+              };
+              return (
+                <div class="group rounded-2xl bg-zinc-900/60 border border-zinc-800 p-8 hover:border-indigo-500/30 hover:bg-zinc-900/80 hover:shadow-xl hover:shadow-indigo-500/5 transition">
+                  <div class={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${gradients[item.color]} text-white shadow-lg shadow-${item.color}-500/20 mb-6 group-hover:scale-110 transition`}>
+                    <Icon size={28} />
                   </div>
-                );
-              }}
-            </For>
-          </div>
-        </ScrollReveal>
+                  <h3 class={`text-2xl font-bold text-white mb-3 group-hover:${text[item.color]} transition`}>
+                    {item.title}
+                  </h3>
+                  <p class="text-zinc-400 text-sm leading-relaxed mb-6">
+                    {item.body}
+                  </p>
+                  <ul class="space-y-2">
+                    <For each={item.points}>
+                      {(point) => (
+                        <li class="flex items-start gap-2 text-sm text-zinc-300">
+                          <span class={`mt-1.5 h-1.5 w-1.5 rounded-full ${item.color === "indigo" ? "bg-indigo-400" : item.color === "emerald" ? "bg-emerald-400" : "bg-orange-400"}`} />
+                          {point}
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                </div>
+              );
+            }}
+          </For>
+        </div>
       </div>
     </section>
   );

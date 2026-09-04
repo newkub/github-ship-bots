@@ -1,6 +1,5 @@
 import { For } from "solid-js";
 import { Cloud, CreditCard, GitPullRequest, ShieldCheck, Zap } from "lucide-solid";
-import ScrollReveal from "./ScrollReveal";
 import SectionHeader from "./SectionHeader";
 
 const integrations = [
@@ -43,33 +42,29 @@ export default function Integrations() {
       <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
 
       <div class="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <ScrollReveal>
-          <SectionHeader
-            title="Built on the stack you already use"
-            subtitle="ship-feed wires together GitHub, WorkOS, Stripe, and Cloudflare so you don't have to."
-          />
-        </ScrollReveal>
+        <SectionHeader
+          title="Built on the stack you already use"
+          subtitle="ship-feed wires together GitHub, WorkOS, Stripe, and Cloudflare so you don't have to."
+        />
 
-        <ScrollReveal selector=".integration-card" stagger={100}>
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-12">
-            <For each={integrations}>
-              {(item) => {
-                const Icon = item.icon;
-                return (
-                  <div class="integration-card group relative rounded-2xl bg-zinc-900/60 border border-zinc-800 p-6 hover:-translate-y-1 hover:border-indigo-500/30 hover:bg-zinc-900/80 hover:shadow-lg hover:shadow-indigo-500/5 transition duration-300">
-                    <div class={`flex h-12 w-12 items-center justify-center rounded-xl border mb-5 ${item.color} group-hover:scale-110 transition duration-300`}>
-                      <Icon size={24} />
-                    </div>
-                    <h3 class="text-lg font-semibold text-white mb-1">
-                      {item.name}
-                    </h3>
-                    <p class="text-sm text-zinc-400">{item.role}</p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-12">
+          <For each={integrations}>
+            {(item) => {
+              const Icon = item.icon;
+              return (
+                <div class="group relative rounded-2xl bg-zinc-900/60 border border-zinc-800 p-6 hover:border-indigo-500/30 hover:bg-zinc-900/80 hover:shadow-lg hover:shadow-indigo-500/5 transition">
+                  <div class={`flex h-12 w-12 items-center justify-center rounded-xl border mb-5 ${item.color} group-hover:scale-110 transition`}>
+                    <Icon size={24} />
                   </div>
-                );
-              }}
-            </For>
-          </div>
-        </ScrollReveal>
+                  <h3 class="text-lg font-semibold text-white mb-1">
+                    {item.name}
+                  </h3>
+                  <p class="text-sm text-zinc-400">{item.role}</p>
+                </div>
+              );
+            }}
+          </For>
+        </div>
       </div>
     </section>
   );

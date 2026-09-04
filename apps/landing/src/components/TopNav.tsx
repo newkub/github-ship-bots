@@ -14,15 +14,11 @@ import { Link } from "@tanstack/solid-router";
 import { appName, dashboardUrl } from "../data";
 
 const navItems = [
+  { to: "/", label: "Home", icon: Home },
   { to: "/about", label: "About", icon: HelpCircle },
   { to: "/features", label: "Features", icon: Zap },
   { to: "/how-it-works", label: "How it works", icon: ListOrdered },
   { to: "/commands", label: "Commands", icon: MessageSquare },
-];
-
-const mobileItems = [
-  { to: "/", label: "Home", icon: Home },
-  ...navItems,
 ];
 
 export default function TopNav() {
@@ -55,20 +51,36 @@ export default function TopNav() {
         }}
       >
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Row 1: brand + CTAs */}
-          <div class="flex h-16 items-center justify-between">
-            <Link to="/" class="flex items-center gap-2.5 group">
+          <div class="flex h-16 items-center justify-between gap-4">
+            <Link to="/" class="flex items-center gap-2.5 group shrink-0">
               <img
                 src="/assets/bot-logo.png"
                 alt={`${appName} logo`}
                 class="h-9 w-9 rounded-lg group-hover:scale-105 transition"
                 width="36"
                 height="36"
+                loading="eager"
+                decoding="async"
               />
-              <span class="text-lg font-bold text-white">{appName}</span>
+              <span class="text-lg font-bold text-white hidden sm:inline">{appName}</span>
             </Link>
 
-            <div class="hidden md:flex items-center gap-3">
+            <nav class="hidden md:flex items-center justify-center flex-1 gap-1">
+              <For each={navItems}>
+                {(item) => (
+                  <Link
+                    to={item.to}
+                    class={navLinkClass}
+                    activeProps={{ class: activeClass }}
+                    activeOptions={{ exact: item.to === "/" }}
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </For>
+            </nav>
+
+            <div class="hidden md:flex items-center gap-3 shrink-0">
               <a
                 href={dashboardUrl}
                 class="inline-flex items-center gap-1.5 rounded-lg bg-zinc-800 px-3.5 py-2 text-sm font-semibold text-white hover:bg-zinc-700 transition"
@@ -94,25 +106,6 @@ export default function TopNav() {
               {open() ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
-
-          {/* Row 2: desktop page navigation */}
-          <nav class="hidden md:flex items-center justify-between h-12 border-t border-zinc-800/50 -mx-4 px-4">
-            <div class="flex items-center gap-1">
-              <For each={navItems}>
-                {(item) => (
-                  <Link
-                    to={item.to}
-                    class={navLinkClass}
-                    activeProps={{ class: activeClass }}
-                    activeOptions={{ exact: false }}
-                  >
-                    {item.label}
-                  </Link>
-                )}
-              </For>
-            </div>
-            <div class="text-xs text-zinc-500">Card-driven autonomous shipping</div>
-          </nav>
         </div>
 
         <Show when={open()}>
@@ -151,28 +144,6 @@ export default function TopNav() {
           </div>
         </Show>
       </header>
-
-      {/* Mobile bottom bar */}
-      <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur border-t border-zinc-800/50 px-2 pb-safe">
-        <div class="flex items-center justify-around h-16">
-          <For each={mobileItems}>
-            {(item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  to={item.to}
-                  class="flex flex-col items-center justify-center gap-1 px-2 py-1 rounded-lg text-xs font-medium text-zinc-500 transition"
-                  activeProps={{ class: "text-indigo-400" }}
-                  activeOptions={{ exact: item.to === "/" }}
-                >
-                  <Icon size={18} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            }}
-          </For>
-        </div>
-      </nav>
     </>
   );
 }
