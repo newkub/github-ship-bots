@@ -1,6 +1,6 @@
 import type { ShipCard, Env } from "@ship-feed/shared";
 import { rowToCard } from "@ship-feed/shared";
-import { shipToGitHub } from "./lib/github";
+import { shipToGitHub } from "./lib/github/ship";
 import { logger } from "./lib/logger";
 
 import { getCorrelationId } from "@ship-feed/shared";
