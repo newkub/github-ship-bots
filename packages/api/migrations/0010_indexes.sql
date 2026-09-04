@@ -22,9 +22,6 @@ CREATE INDEX IF NOT EXISTS idx_oracle_baselines_repo ON test_oracle_baselines(re
 CREATE INDEX IF NOT EXISTS idx_oracle_results_card_id ON test_oracle_results(card_id);
 CREATE INDEX IF NOT EXISTS idx_oracle_results_baseline_id ON test_oracle_results(baseline_id);
 
-CREATE INDEX IF NOT EXISTS idx_user_plugins_user_id ON user_plugins(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_plugins_plugin_id ON user_plugins(plugin_id);
-
 CREATE INDEX IF NOT EXISTS idx_user_repos_user_id ON user_repos(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_repos_repo ON user_repos(repo_full_name);
 

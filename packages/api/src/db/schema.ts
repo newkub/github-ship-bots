@@ -111,22 +111,6 @@ export const testOracleResults = sqliteTable("test_oracle_results", {
   createdAt: text("created_at").notNull(),
 });
 
-export const plugins = sqliteTable("plugins", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull().unique(),
-  description: text("description").notNull(),
-  installs: integer("installs").notNull().default(0),
-  icon: text("icon").notNull().default("Puzzle"),
-});
-
-export const userPlugins = sqliteTable("user_plugins", {
-  userId: text("user_id").notNull(),
-  pluginId: text("plugin_id").notNull(),
-  createdAt: text("created_at").notNull(),
-}, (t) => ({
-  pk: primaryKey({ columns: [t.userId, t.pluginId] }),
-}));
-
 export const approvalRules = sqliteTable("approval_rules", {
   repoFullName: text("repo_full_name").primaryKey(),
   minApprovers: integer("min_approvers").notNull().default(1),

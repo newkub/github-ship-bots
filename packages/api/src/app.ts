@@ -4,7 +4,6 @@ import { validateRuntimeEnv } from "./lib/validate-env";
 import auth from "./routes/auth";
 import cards from "./routes/cards";
 import repos from "./routes/repos";
-import plugins from "./routes/plugins";
 import templates from "./routes/templates";
 import evidence from "./routes/evidence";
 import oracle from "./routes/oracle";
@@ -30,7 +29,6 @@ export function createApp(): Elysia<any, any, any, any, any, any, any> {
     .use(auth)
     .use(cards)
     .use(repos)
-    .use(plugins)
     .use(templates)
     .use(evidence)
     .use(oracle)

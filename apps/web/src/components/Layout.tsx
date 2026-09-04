@@ -6,7 +6,6 @@ import {
   FileText,
   MousePointer,
   Moon,
-  Puzzle,
   Scale,
   Settings,
   Sun,
@@ -70,7 +69,6 @@ export default function Layout(props: { children?: JSX.Element }) {
               {nav("/rules", Scale, "Rules")}
               {nav("/billing", CreditCard, "Billing")}
               {nav("/inspector", MousePointer, "Inspector")}
-              {nav("/marketplace", Puzzle, "Marketplace")}
               {nav("/settings", Settings, "Settings")}
             </nav>
 
