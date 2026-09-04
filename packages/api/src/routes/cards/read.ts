@@ -13,7 +13,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await requireCard(env.DB, session.id, id);
+    const card = await requireCard(env.DB, id, session.id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -25,7 +25,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await requireCard(env.DB, session.id, id);
+    const card = await requireCard(env.DB, id, session.id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -43,7 +43,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await requireCard(env.DB, session.id, id);
+    const card = await requireCard(env.DB, id, session.id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -66,7 +66,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await requireCard(env.DB, session.id, id);
+    const card = await requireCard(env.DB, id, session.id);
     if (!card) {
       set.status = 404;
       return notFound();
@@ -89,7 +89,7 @@ const read = withEnv(new Elysia())
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
-    const card = await requireCard(env.DB, session.id, id);
+    const card = await requireCard(env.DB, id, session.id);
     if (!card) {
       set.status = 404;
       return notFound();

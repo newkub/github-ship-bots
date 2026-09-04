@@ -52,10 +52,18 @@ const write = withEnv(new Elysia())
       set.status = 404;
       return notFound();
     }
+    if (!env.GITHUB_APP_ID || !env.GITHUB_APP_PRIVATE_KEY) {
+      set.status = 503;
+      return { error: "service unavailable", missing: ["GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY"] };
+    }
     const ctx = createContext(env);
     const result = await onApprove(ctx, card);
-    await updateLearningWeights(env.DB, card, "approve");
-    await notifyCardStatus(env, { ...card, status: "shipped" }, "shipped");
+    if (!result.ok) {
+      set.status = 502;
+      return { ok: false, error: result.github?.message ?? "github ship failed" };
+    }
+    await updateLearningWeights(env.DB, result.card, "approve");
+    await notifyCardStatus(env, result.card, "shipped");
     return result;
   }, { params: paramsSchema })
 
@@ -68,10 +76,18 @@ const write = withEnv(new Elysia())
       set.status = 404;
       return notFound();
     }
+    if (!env.GITHUB_APP_ID || !env.GITHUB_APP_PRIVATE_KEY) {
+      set.status = 503;
+      return { error: "service unavailable", missing: ["GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY"] };
+    }
     const ctx = createContext(env);
     const result = await onReject(ctx, card);
-    await updateLearningWeights(env.DB, card, "reject");
-    await notifyCardStatus(env, { ...card, status: "rejected" }, "rejected");
+    if (!result.ok) {
+      set.status = 502;
+      return { ok: false, error: result.github?.message ?? "github reject failed" };
+    }
+    await updateLearningWeights(env.DB, result.card, "reject");
+    await notifyCardStatus(env, result.card, "rejected");
     return result;
   }, { params: paramsSchema })
 

@@ -22,6 +22,7 @@ id = "cdbd999cc26c4ca2a48f9d2dec865104"
 
 [vars]
 PUBLIC_APP_URL = "https://github-ship-bots.newkubise.workers.dev"
+GITHUB_APP_NAME = "wrikka-ship-bot"
 VAPID_SUBJECT = "mailto:admin@newkubise.workers.dev"
 AUTO_APPROVE_THRESHOLD = "8.5"
 AUTO_APPROVE_RISK = "low"

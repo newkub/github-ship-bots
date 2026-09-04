@@ -106,10 +106,32 @@ evidence.get("/:id", async ({ request, set, env, params }) => {
     return { error: "unauthorized" };
   }
   const id = params.id;
-  const row = await env.DB.prepare("SELECT r2_key, kind FROM evidence WHERE id = ?").bind(id).first<{ r2_key: string; kind: string }>();
+  const row = await env.DB
+    .prepare(
+      `SELECT e.r2_key, e.kind, c.repo_full_name, c.creator_id
+       FROM evidence e
+       LEFT JOIN cards c ON c.id = e.card_id
+       WHERE e.id = ?`
+    )
+    .bind(id)
+    .first<{ r2_key: string; kind: string; repo_full_name: string | null; creator_id: string | null }>();
   if (!row) {
     set.status = 404;
     return "Not found";
+  }
+  if (!row.repo_full_name || !row.creator_id) {
+    set.status = 403;
+    return { error: "forbidden" };
+  }
+  if (row.creator_id !== session.id) {
+    const ok = await env.DB
+      .prepare("SELECT 1 FROM user_repos WHERE user_id = ? AND repo_full_name = ?")
+      .bind(session.id, row.repo_full_name)
+      .first();
+    if (!ok) {
+      set.status = 403;
+      return { error: "forbidden" };
+    }
   }
   const object = await env.EVIDENCE_BUCKET.get(row.r2_key);
   if (!object) {

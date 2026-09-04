@@ -29,6 +29,7 @@ binding = "ASSETS"
 
 [vars]
 PUBLIC_APP_URL = "https://github-ship-bots.newkubise.workers.dev"
+GITHUB_APP_NAME = "wrikka-ship-bot"
 VAPID_SUBJECT = "mailto:admin@newkubise.workers.dev"
 AUTO_APPROVE_THRESHOLD = "8.5"
 AUTO_APPROVE_RISK = "low"

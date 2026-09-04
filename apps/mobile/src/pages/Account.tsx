@@ -23,7 +23,9 @@ export default function Account() {
   const handleUpgrade = async () => {
     setCheckoutBusy(true);
     try {
-      const { url } = await createCheckout();
+      const currentPlan = user()?.plan ?? "free";
+      const plan = currentPlan === "pro" ? "team" : "pro";
+      const { url } = await createCheckout(plan);
       if (url) window.location.href = url;
     } catch (err) {
       setPushStatus(err instanceof Error ? err.message : "checkout failed");

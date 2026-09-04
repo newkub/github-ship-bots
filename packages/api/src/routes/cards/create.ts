@@ -49,6 +49,14 @@ const create = withEnv(new Elysia())
   .post("/", async ({ request, set, env, body }) => {
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
+    const hasAccess = await env.DB
+      .prepare("SELECT 1 FROM user_repos WHERE user_id = ? AND repo_full_name = ?")
+      .bind(session.id, body.repoFullName)
+      .first();
+    if (!hasAccess) {
+      set.status = 403;
+      return { error: "forbidden", message: "You do not have access to this repository" };
+    }
     const card = await insertCard(env, cardFromBody(body), session.id);
     return { ok: true, card };
   }, { body: cardInputSchema });

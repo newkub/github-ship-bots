@@ -12,12 +12,15 @@ function redirectUrl(env: { WORKOS_REDIRECT_URI?: string; PUBLIC_APP_URL: string
   return env.WORKOS_REDIRECT_URI || `${env.PUBLIC_APP_URL}/auth/callback`;
 }
 
-function fallbackGitHubLogin(profile: { email?: string | null; firstName?: string | null }): string | undefined {
-  if (profile.firstName) return profile.firstName;
-  if (profile.email) {
-    const local = profile.email.split("@")[0];
-    if (local) return local;
-  }
+const GITHUB_LOGIN_RE = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
+
+function isValidGitHubLogin(value: string): boolean {
+  return GITHUB_LOGIN_RE.test(value);
+}
+
+function normalizeFallback(profile: { email?: string | null; firstName?: string | null }): string | undefined {
+  const candidate = profile.firstName?.trim() || profile.email?.split("@")[0]?.trim();
+  if (candidate && isValidGitHubLogin(candidate)) return candidate;
   return undefined;
 }
 
@@ -29,7 +32,7 @@ async function githubLoginFromProfile(
     const login = await getGitHubLoginFromToken(token);
     if (login) return login;
   }
-  return fallbackGitHubLogin(profile);
+  return normalizeFallback(profile);
 }
 
 const callbackQuery = t.Object({
@@ -84,12 +87,12 @@ callback.get(
     }
 
     const oauthTokens = (resp as { oauthTokens?: { accessToken?: string; providerAccessToken?: string } }).oauthTokens;
-    const providerToken = oauthTokens?.providerAccessToken || oauthTokens?.accessToken;
+    const providerToken = oauthTokens?.providerAccessToken;
 
     const githubLogin = await githubLoginFromProfile(profile, providerToken);
     if (!githubLogin) {
       set.status = 400;
-      return { error: "unable to determine GitHub login" };
+      return { error: "unable to determine a valid GitHub login; connect your GitHub account in WorkOS" };
     }
 
     const row = await env.DB.prepare(
