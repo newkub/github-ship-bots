@@ -14,6 +14,7 @@ import {
 } from "lucide-solid";
 import { Link } from "@tanstack/solid-router";
 import { dashboardUrl, features } from "../data";
+import HeroCard from "./HeroCard";
 
 export default function Hero() {
   let sceneRef: HTMLDivElement | undefined;
@@ -60,6 +61,7 @@ export default function Hero() {
       <div class="absolute inset-0 hero-grid opacity-60" />
       <div class="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-indigo-500/10 blur-3xl animate-pulse-glow" />
       <div class="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-orange-500/10 blur-3xl animate-pulse-glow" style="animation-delay: -4s" />
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] rounded-full bg-purple-500/5 blur-3xl animate-pulse-glow" style="animation-delay: -2s" />
 
       <div class="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 md:py-20">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -137,7 +139,7 @@ export default function Hero() {
             <div class="absolute inset-0 rounded-full bg-indigo-500/10 blur-3xl" />
 
             <div ref={sceneRef} class="relative w-80 h-80 sm:w-96 sm:h-96">
-              <Card
+              <HeroCard
                 class="hero-card"
                 kind="idea"
                 title="Dark mode idea"
@@ -150,7 +152,7 @@ export default function Hero() {
                 delay="0s"
               />
 
-              <Card
+              <HeroCard
                 class="hero-card"
                 kind="work"
                 title="Implement login"
@@ -163,7 +165,7 @@ export default function Hero() {
                 delay="-2s"
               />
 
-              <Card
+              <HeroCard
                 class="hero-card"
                 kind="merge"
                 title="PR #42 ready"
@@ -176,7 +178,7 @@ export default function Hero() {
                 delay="-4s"
               />
 
-              <Card
+              <HeroCard
                 class="hero-card"
                 kind="release"
                 title="Ship v1.2.0"
@@ -212,64 +214,5 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function Card(props: {
-  class?: string;
-  kind: string;
-  title: string;
-  meta: string;
-  icon: any;
-  rotate: string;
-  top?: string;
-  left?: string;
-  bottom?: string;
-  right?: string;
-  color: "indigo" | "emerald" | "orange" | "purple";
-  delay?: string;
-}) {
-  const colorMap = {
-    indigo: "border-indigo-500/30 text-indigo-400 bg-indigo-500/10",
-    emerald: "border-emerald-500/30 text-emerald-400 bg-emerald-500/10",
-    orange: "border-orange-500/30 text-orange-400 bg-orange-500/10",
-    purple: "border-purple-500/30 text-purple-400 bg-purple-500/10",
-  };
-
-  const style: any = {
-    "--rotate": `${props.rotate}deg`,
-    "animation-delay": props.delay ?? "0s",
-    zIndex: 1,
-  };
-  if (props.top !== undefined) style.top = `${props.top}rem`;
-  if (props.bottom !== undefined) style.bottom = `${props.bottom}rem`;
-  if (props.left !== undefined) style.left = `${props.left}rem`;
-  if (props.right !== undefined) style.right = `${props.right}rem`;
-
-  return (
-    <div
-      class={`${props.class ?? ""} absolute w-64 sm:w-72 rounded-2xl bg-zinc-900/90 p-5 shadow-2xl border ${colorMap[props.color]} backdrop-blur animate-float hover:-translate-y-1 hover:shadow-indigo-500/10 transition duration-300`}
-      style={style}
-    >
-      <div class="flex items-start gap-3">
-        <div
-          class={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${colorMap[props.color].split(" ")[2]}`}
-        >
-          {props.icon}
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-              {props.kind}
-            </span>
-          </div>
-          <div class="h-3 w-36 mt-1 rounded bg-zinc-700" />
-          <div class="mt-2 text-sm font-medium text-white truncate">
-            {props.title}
-          </div>
-          <div class="mt-1 text-xs text-zinc-500">{props.meta}</div>
-        </div>
-      </div>
-    </div>
   );
 }

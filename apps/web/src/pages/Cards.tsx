@@ -10,11 +10,14 @@ import EmptyState from "../components/EmptyState";
 import Kanban from "../components/Kanban";
 import Skeleton from "../components/Skeleton";
 import StatusPanel from "../components/StatusPanel";
+import SummaryCard from "../components/SummaryCard";
+
+const statusFilters: CardStatus[] = ["pending", "approved", "rejected", "shipped"];
 
 export default function Cards() {
   const queryClient = useQueryClient();
-  const query = useQuery(() => ({ queryKey: ["cards"], queryFn: fetchCards }));
-  const reposQuery = useQuery(() => ({ queryKey: ["repos"], queryFn: fetchRepos }));
+  const query = useQuery(() => ({ queryKey: ["cards"], queryFn: fetchCards, retry: 1, staleTime: 5_000 }));
+  const reposQuery = useQuery(() => ({ queryKey: ["repos"], queryFn: fetchRepos, retry: 1, staleTime: 30_000 }));
   const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = createSignal<CardStatus | "all">("all");
   const [repoFilter, setRepoFilter] = createSignal<string>("all");
@@ -61,33 +64,18 @@ export default function Cards() {
     };
   });
 
+  const countsBy = (key: CardStatus) => counts()[key];
+
   return (
     <div>
       <div class="mb-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p class="text-sm text-gray-500 mt-1">Overview, queue, health, and actions for your ship loop.</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Dashboard</h1>
+            <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">Overview, queue, health, and actions for your ship loop.</p>
           </div>
           <div class="flex items-center gap-2">
-            <div class="flex bg-gray-100 p-1 rounded-lg">
-              <button
-                onClick={() => setView("board")}
-                class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition ${
-                  view() === "board" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <Grid3X3 size={14} /> Board
-              </button>
-              <button
-                onClick={() => setView("list")}
-                class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition ${
-                  view() === "list" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <List size={14} /> List
-              </button>
-            </div>
+            <ViewToggle view={view()} onChange={setView} />
           </div>
         </div>
 
@@ -99,45 +87,16 @@ export default function Cards() {
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setFilter("all")}
-            class={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-              filter() === "all" ? "bg-indigo-600 text-white shadow-sm" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-            }`}
-          >
-            All ({counts().total})
-          </button>
-          <For each={["pending", "approved", "rejected", "shipped"] as const}>
-            {(key) => (
-              <button
-                onClick={() => setFilter(key)}
-                class={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
-                  filter() === key
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                {key[0]!.toUpperCase() + key.slice(1)} ({counts()[key]})
-              </button>
-            )}
+          <FilterChip active={filter() === "all"} onClick={() => setFilter("all")} label={`All (${counts().total})`} />
+          <For each={statusFilters}>
+            {(key) => <FilterChip active={filter() === key} onClick={() => setFilter(key)} label={`${key[0]!.toUpperCase() + key.slice(1)} (${countsBy(key)})`} />}
           </For>
 
           <Show when={!reposQuery.isLoading && reposQuery.data && reposQuery.data.length > 0}>
-            <div class="h-5 w-px bg-gray-200 mx-1" />
-            <GitBranch size={14} class="text-gray-400" />
+            <div class="h-5 w-px bg-gray-200 dark:bg-zinc-700 mx-1" />
+            <GitBranch size={14} class="text-gray-400 dark:text-zinc-500" />
             <For each={["all", ...reposQuery.data!]}>
-              {(repo) => (
-                <button
-                  onClick={() => setRepoFilter(repo)}
-                  class={`px-3 py-1.5 rounded-full text-xs font-medium transition truncate max-w-[12rem] ${
-                    repoFilter() === repo
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-                  }`}
-                >
-                  {repo === "all" ? "All repos" : repo}
-                </button>
-              )}
+              {(repo) => <FilterChip active={repoFilter() === repo} onClick={() => setRepoFilter(repo)} label={repo === "all" ? "All repos" : repo} />}
             </For>
           </Show>
         </div>
@@ -211,32 +170,33 @@ export default function Cards() {
   );
 }
 
-function SummaryCard(props: {
-  label: string;
-  value: number;
-  icon: typeof Clock;
-  color: "gray" | "emerald" | "rose" | "indigo";
-  active: boolean;
-  onClick: () => void;
-}) {
-  const colors = {
-    gray: "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100",
-    emerald: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100",
-    rose: "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100",
-    indigo: "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100",
-  };
-  const Icon = props.icon;
+function ViewToggle(props: { view: "list" | "board"; onChange: (v: "list" | "board") => void }) {
+  const active = "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 shadow-sm";
+  const inactive = "text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100";
+  return (
+    <div class="flex bg-gray-100 dark:bg-zinc-800 p-1 rounded-lg">
+      <button onClick={() => props.onChange("board")} class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition ${props.view === "board" ? active : inactive}`}>
+        <Grid3X3 size={14} /> Board
+      </button>
+      <button onClick={() => props.onChange("list")} class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition ${props.view === "list" ? active : inactive}`}>
+        <List size={14} /> List
+      </button>
+    </div>
+  );
+}
 
+function FilterChip(props: { active: boolean; onClick: () => void; label: string }) {
   return (
     <button
       onClick={props.onClick}
-      class={`text-left rounded-2xl border p-4 transition ${colors[props.color]} ${props.active ? "ring-2 ring-offset-2 ring-indigo-500" : ""}`}
+      class={`px-3 py-1.5 rounded-full text-xs font-medium transition max-w-[14rem] truncate ${
+        props.active
+          ? "bg-indigo-600 text-white shadow-sm"
+          : "bg-white dark:bg-zinc-900 text-gray-600 dark:text-zinc-300 border border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-800"
+      }`}
+      title={props.label}
     >
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-semibold uppercase tracking-wide opacity-80">{props.label}</span>
-        <Icon size={16} class="opacity-60" />
-      </div>
-      <div class="text-2xl font-bold">{props.value}</div>
+      {props.label}
     </button>
   );
 }

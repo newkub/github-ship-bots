@@ -1,5 +1,14 @@
-import { defineConfig, presetUno, presetIcons } from "unocss";
+import { defineConfig, presetWind4, presetIcons } from "unocss";
 
 export default defineConfig({
-  presets: [presetUno(), presetIcons({})],
+  presets: [
+    presetWind4({
+      dark: "class",
+      preflights: {
+        reset: true,
+        theme: "on-demand",
+      },
+    }),
+    presetIcons(),
+  ],
 });
