@@ -8,6 +8,7 @@ import {
 } from "./cookie";
 
 const COOKIE = "ship_feed_session";
+const BEARER = "bearer ";
 
 function cookieOptions(maxAge: number) {
   return {
@@ -19,7 +20,42 @@ function cookieOptions(maxAge: number) {
   };
 }
 
+async function sha256Hex(input: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const buffer = await crypto.subtle.digest("SHA-256", encoder.encode(input));
+  return Array.from(new Uint8Array(buffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function getUserFromToken(db: D1Database, token: string): Promise<User | null> {
+  const hash = await sha256Hex(token);
+  const tokenRow = await db
+    .prepare("SELECT user_id, scopes FROM api_tokens WHERE token_hash = ?")
+    .bind(hash)
+    .first<{ user_id: string; scopes: string }>();
+  if (!tokenRow) return null;
+  const userRow = await db
+    .prepare("SELECT id, github_login, email, workos_user_id, plan, stripe_customer_id, created_at FROM users WHERE id = ?")
+    .bind(tokenRow.user_id)
+    .first<Record<string, unknown>>();
+  if (!userRow) return null;
+  await db.prepare("UPDATE api_tokens SET last_used_at = ? WHERE token_hash = ?").bind(new Date().toISOString(), hash).run();
+  return assertUser({
+    id: userRow.id,
+    githubLogin: userRow.github_login,
+    email: userRow.email,
+    workosUserId: userRow.workos_user_id,
+    plan: userRow.plan,
+    stripeCustomerId: userRow.stripe_customer_id,
+    createdAt: userRow.created_at,
+  });
+}
+
 export async function getSession(c: SessionContext): Promise<User | null> {
+  const auth = c.request.headers.get("Authorization");
+  if (auth?.toLowerCase().startsWith(BEARER)) {
+    const token = auth.slice(BEARER.length).trim();
+    if (token) return getUserFromToken(c.env.DB, token);
+  }
   if (!c.env.WORKOS_COOKIE_PASSWORD) return null;
   const cookieHeader = c.request.headers.get("Cookie");
   const sessionId = await getSignedCookie(

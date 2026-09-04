@@ -15,6 +15,7 @@ import push from "./routes/push";
 import releases from "./routes/releases";
 import rules from "./routes/rules";
 import config from "./routes/config";
+import integrations from "./routes/integrations";
 import { createMiddleware } from "./middleware";
 
 export function createApp(): Elysia<any, any, any, any, any, any, any> {
@@ -54,5 +55,6 @@ export function createApp(): Elysia<any, any, any, any, any, any, any> {
     .use(push)
     .use(releases)
     .use(rules)
-    .use(config);
+    .use(config)
+    .use(integrations);
 }

@@ -238,3 +238,34 @@ export const rateLimits = sqliteTable("rate_limits", {
   count: integer("count").notNull().default(0),
   expiresAt: integer("expires_at").notNull(),
 });
+
+export const apiTokens = sqliteTable(
+  "api_tokens",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    name: text("name").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    scopes: text("scopes").notNull().default("[\"read:cards\"]"),
+    lastUsedAt: text("last_used_at"),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => ({
+    idxUserId: index("idx_api_tokens_user_id").on(t.userId),
+  })
+);
+
+export const webhookSubscriptions = sqliteTable(
+  "webhook_subscriptions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    url: text("url").notNull(),
+    events: text("events").notNull().default("[\"card.status_changed\"]"),
+    secret: text("secret").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (t) => ({
+    idxUserId: index("idx_webhook_subscriptions_user_id").on(t.userId),
+  })
+);

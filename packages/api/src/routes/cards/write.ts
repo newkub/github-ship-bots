@@ -6,7 +6,9 @@ import type { ShipCard } from "@ship-feed/shared";
 import { updateLearningWeights } from "../../lib/learning";
 import { resolveApprovalStatus } from "../../lib/approval";
 import { notifyCardStatus } from "../../lib/notify";
+import { deliverCardStatusWebhook } from "../integrations";
 import { createContext, onApprove, onReject, createCommentContext, postCommentToGitHub } from "@ship-feed/orchestrator";
+import { getCorrelationId } from "@ship-feed/shared";
 import { unauthorized, notFound, ensureAuth } from "../../lib/card-auth";
 import { requireCard } from "../../services/card-service";
 import { withEnv } from "../../lib/env";
@@ -44,6 +46,7 @@ const write = withEnv(new Elysia())
         .run();
     }
     await notifyCardStatus(env, { ...card, status }, body.direction === "approve" ? "approved" : "rejected");
+    await deliverCardStatusWebhook(env, { event: "card.status_changed", cardId: card.id, status, repoFullName: card.repoFullName, title: card.title }, getCorrelationId());
     return { ok: true, status };
   }, { params: paramsSchema, body: swipeSchema })
 
@@ -68,6 +71,7 @@ const write = withEnv(new Elysia())
     }
     await updateLearningWeights(env.DB, result.card, "approve");
     await notifyCardStatus(env, result.card, "shipped");
+    await deliverCardStatusWebhook(env, { event: "card.status_changed", cardId: result.card.id, status: "shipped", repoFullName: result.card.repoFullName, title: result.card.title }, getCorrelationId());
     return result;
   }, { params: paramsSchema })
 
@@ -92,6 +96,7 @@ const write = withEnv(new Elysia())
     }
     await updateLearningWeights(env.DB, result.card, "reject");
     await notifyCardStatus(env, result.card, "rejected");
+    await deliverCardStatusWebhook(env, { event: "card.status_changed", cardId: result.card.id, status: "rejected", repoFullName: result.card.repoFullName, title: result.card.title }, getCorrelationId());
     return result;
   }, { params: paramsSchema })
 
@@ -118,6 +123,7 @@ const write = withEnv(new Elysia())
     const updated = await requireCard(env.DB, id, session.id);
     if (updated) {
       await notifyCardStatus(env, updated, body.status as "created" | "approved" | "rejected" | "shipped");
+      await deliverCardStatusWebhook(env, { event: "card.status_changed", cardId: updated.id, status: updated.status, repoFullName: updated.repoFullName, title: updated.title }, getCorrelationId());
     }
     return { ok: true };
   }, { params: paramsSchema, body: z.object({ status: statusSchema }) })
