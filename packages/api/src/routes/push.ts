@@ -4,7 +4,7 @@ import { getSession } from "../lib/session";
 import { generateId, now } from "@ship-feed/shared";
 import { withEnv } from "../lib/env";
 import { sendPushBatch } from "@mmmike/web-push/send";
-import type { VapidConfig, PushSubscriptionData, PushPayload } from "@mmmike/web-push/send";
+import type { VapidConfig, PushSubscriptionData } from "@mmmike/web-push/send";
 
 const push = withEnv(new Elysia({ prefix: "/api/push" }));
 
@@ -59,7 +59,7 @@ const pushPayloadSchema = z.object({
   body: z.string().optional(),
   url: z.string().optional(),
   tag: z.string().optional(),
-}) as z.ZodType<PushPayload>;
+});
 
 push.post("/notify", async ({ request, set, env, body }) => {
   const session = await getSession({ request, set, env });
