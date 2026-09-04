@@ -12,13 +12,21 @@ plugins.get("/", async ({ request, set, env }) => {
     return { error: "unauthorized" };
   }
 
-  const { results } = await env.DB.prepare("SELECT * FROM plugins ORDER BY installs DESC").all<{
-    id: string;
-    name: string;
-    description: string;
-    installs: number;
-    icon: string;
-  }>();
+  const { results } = await env.DB
+    .prepare(
+      `SELECT p.id, p.name, p.description, p.icon, COUNT(up.user_id) as installs
+       FROM plugins p
+       LEFT JOIN user_plugins up ON p.id = up.plugin_id
+       GROUP BY p.id
+       ORDER BY installs DESC`
+    )
+    .all<{
+      id: string;
+      name: string;
+      description: string;
+      installs: number;
+      icon: string;
+    }>();
 
   const list = results ?? [];
   if (list.length === 0) return [];
@@ -56,7 +64,6 @@ plugins.post("/:id/install", async ({ request, set, env, params }) => {
     await env.DB.prepare("INSERT INTO user_plugins (user_id, plugin_id, created_at) VALUES (?, ?, ?)")
       .bind(session.id, id, now())
       .run();
-    await env.DB.prepare("UPDATE plugins SET installs = installs + 1 WHERE id = ?").bind(id).run();
   }
 
   return { ok: true };
@@ -77,7 +84,6 @@ plugins.post("/:id/uninstall", async ({ request, set, env, params }) => {
 
   if (alreadyInstalled) {
     await env.DB.prepare("DELETE FROM user_plugins WHERE user_id = ? AND plugin_id = ?").bind(session.id, id).run();
-    await env.DB.prepare("UPDATE plugins SET installs = MAX(0, installs - 1) WHERE id = ?").bind(id).run();
   }
 
   return { ok: true };

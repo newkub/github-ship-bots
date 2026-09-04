@@ -109,7 +109,7 @@ export default function Inspector() {
             Page preview
           </h2>
           <div class="rounded-xl bg-gray-50 border border-gray-200 h-64 p-4 relative">
-            <div class="text-xs text-gray-400 mb-3">{url() || "https://example.com"}</div>
+            <div class="text-xs text-gray-400 mb-3">{url() || "Enter a page URL and click Create issue"}</div>
             <div class="space-y-2">
               <For each={elements}>
                 {(el) => (
