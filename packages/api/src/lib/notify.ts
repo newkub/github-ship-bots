@@ -1,5 +1,5 @@
 import type { Env, ShipCard } from "@ship-feed/shared";
-import { fetchExternal, getCorrelationId } from "@ship-feed/shared";
+import { fetchExternal, getCorrelationId, logError } from "@ship-feed/shared";
 import { sendPushBatch } from "@mmmike/web-push/send";
 import type { VapidConfig, PushSubscriptionData } from "@mmmike/web-push/send";
 
@@ -37,7 +37,7 @@ export async function notifyCardStatus(env: Env, card: ShipCard, event: "created
     }
   }
   if (failures.length > 0) {
-    console.error(JSON.stringify({ type: "notification_failed", correlationId, cardId: card.id, event, failures }));
+    logError({ type: "notification_failed", correlationId, cardId: card.id, event, failures });
   }
 }
 

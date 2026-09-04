@@ -39,6 +39,18 @@ export function getCorrelationId(headers?: Headers | Record<string, string> | nu
   return getHeaderValue(headers, "x-correlation-id") || generateId();
 }
 
+export function logError(ctx: Record<string, unknown>): void {
+  console.error(JSON.stringify({ type: "error", ...ctx }));
+}
+
+export function logWarn(ctx: Record<string, unknown>): void {
+  console.warn(JSON.stringify({ type: "warn", ...ctx }));
+}
+
+export function logInfo(ctx: Record<string, unknown>): void {
+  console.log(JSON.stringify({ type: "info", ...ctx }));
+}
+
 export function logExternalCall(ctx: ExternalCallLog): void {
   console.log(JSON.stringify({ type: "external_call", ...ctx }));
 }

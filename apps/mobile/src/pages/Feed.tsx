@@ -20,18 +20,20 @@ export default function Feed() {
   const [showPrompt, setShowPrompt] = createSignal(false);
   const [pendingPrompt, setPendingPrompt] = createSignal<string | undefined>(undefined);
   const [lastSwipe, setLastSwipe] = createSignal<{ direction: "approve" | "reject"; previous: number } | null>(null);
-  const [swipeError, setSwipeError] = createSignal<string | null>(null);
+  const [feedError, setFeedError] = createSignal<string | null>(null);
 
   const cards = () => query.data ?? [];
 
-  const onOfflineError = (_err: unknown, item: QueuedSwipe) => setSwipeError(`Offline swipe for ${item.cardId} failed`);
+  const onOfflineError = (_err: unknown, item: QueuedSwipe) => setFeedError(`Offline swipe for ${item.cardId} failed`);
 
   onMount(() => {
     flushOfflineQueue((remaining) => setQueued(remaining), onOfflineError);
-    fetchNudges().then((nudges) => setNudgeCount(nudges.length)).catch((err) => {
-      console.error("failed to fetch nudges", err instanceof Error ? err.message : String(err));
-      setNudgeCount(0);
-    });
+    fetchNudges()
+      .then((nudges) => setNudgeCount(nudges.length))
+      .catch((err) => {
+        setFeedError(err instanceof Error ? err.message : "Failed to load nudges");
+        setNudgeCount(0);
+      });
     const onOnline = () => flushOfflineQueue((remaining) => setQueued(remaining), onOfflineError);
     window.addEventListener("online", onOnline);
     onCleanup(() => window.removeEventListener("online", onOnline));
@@ -44,7 +46,7 @@ export default function Feed() {
   };
 
   const doSwipe = async (direction: "approve" | "reject", prompt?: string) => {
-    setSwipeError(null);
+    setFeedError(null);
     vibrate(direction === "approve" ? [20, 30, 20] : [40]);
     const list = cards();
     const i = current();
@@ -63,7 +65,7 @@ export default function Feed() {
       setCurrent((c) => c + 1);
       setNudgeCount((n) => Math.max(0, n - 1));
     } catch (err) {
-      setSwipeError(err instanceof Error ? err.message : "Swipe failed. Please try again.");
+      setFeedError(err instanceof Error ? err.message : "Swipe failed. Please try again.");
     }
   };
 
@@ -84,7 +86,7 @@ export default function Feed() {
     const last = lastSwipe();
     if (!last) return;
 
-    setSwipeError(null);
+    setFeedError(null);
     setCurrent(last.previous);
     setLastSwipe(null);
     const card = cards()[last.previous];
@@ -93,7 +95,7 @@ export default function Feed() {
         await undoSwipe(card.id);
         query.refetch();
       } catch (err) {
-        setSwipeError(err instanceof Error ? err.message : "Undo failed. Please try again.");
+        setFeedError(err instanceof Error ? err.message : "Undo failed. Please try again.");
       }
     }
   };
@@ -103,9 +105,9 @@ export default function Feed() {
 
   return (
     <div class="h-screen w-screen flex flex-col bg-app text-primary pt-safe">
-      <Show when={swipeError()}>
+      <Show when={feedError()}>
         <div class="px-4 py-2 bg-danger/10 text-danger text-xs font-semibold border-b border-danger/30 text-center">
-          {swipeError()}
+          {feedError()}
         </div>
       </Show>
 

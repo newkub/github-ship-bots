@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { getRequestEnv } from "./lib/env";
 import { validateRuntimeEnv } from "./lib/validate-env";
-import { getCorrelationId } from "@ship-feed/shared";
+import { getCorrelationId, logError } from "@ship-feed/shared";
 import auth from "./routes/auth";
 import cards from "./routes/cards";
 import repos from "./routes/repos";
@@ -31,7 +31,7 @@ export function createApp(): Elysia<any, any, any, any, any, any, any> {
         return { error: "not found" };
       }
       const correlationId = getCorrelationId(request.headers);
-      console.error(JSON.stringify({ type: "unhandled_error", path: request.url, method: request.method, correlationId, detail }));
+      logError({ type: "unhandled_error", path: request.url, method: request.method, correlationId, detail });
       set.status = 500;
       return { error: "internal error" };
     })
