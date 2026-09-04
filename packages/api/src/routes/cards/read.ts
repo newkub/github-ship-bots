@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { getSession } from "../../lib/session";
 import { explainScore } from "../../lib/score";
 import { unauthorized, notFound, ensureAuth } from "../../lib/card-auth";
@@ -86,7 +86,7 @@ const read = withEnv(new Elysia())
     }));
   }, { params: paramsSchema })
 
-  .get("/:id/evidence", async ({ request, set, env, params }) => {
+  .get("/:id/evidence", async ({ request, set, env, params, query }) => {
     const session = await getSession({ request, set, env });
     if (!ensureAuth(set, session)) return unauthorized();
     const id = params.id;
@@ -95,10 +95,11 @@ const read = withEnv(new Elysia())
       set.status = 404;
       return notFound();
     }
+    const tags = typeof query.tags === "string" ? query.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
     const { results } = await env.DB.prepare("SELECT * FROM evidence WHERE card_id = ? ORDER BY created_at DESC")
       .bind(id)
       .all<Record<string, unknown>>();
-    return (results ?? []).map((row) =>
+    const records = (results ?? []).map((row) =>
       assertEvidenceRecord({
         id: row.id,
         cardId: row.card_id,
@@ -106,10 +107,13 @@ const read = withEnv(new Elysia())
         r2Key: row.r2_key,
         sha256: row.sha256,
         ciRunUrl: row.ci_run_url,
+        tags: row.tags,
         createdAt: row.created_at,
       })
     );
-  }, { params: paramsSchema })
+    if (tags.length === 0) return records;
+    return records.filter((r) => tags.some((t) => r.tags.includes(t)));
+  }, { params: paramsSchema, query: t.Object({ tags: t.Optional(t.String()) }) })
 
   .get("/", async ({ request, set, env }) => {
     const session = await getSession({ request, set, env });

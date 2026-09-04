@@ -161,6 +161,20 @@ export function assertCardCommentArray(value: unknown): CardComment[] {
 
 const EVIDENCE_KINDS: readonly EvidenceRecord["kind"][] = ["image", "video", "log", "diff"];
 
+function parseTags(value: unknown): string[] {
+  if (value === undefined || value === null) return [];
+  if (Array.isArray(value)) return assertStringArray(value, "tags");
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return assertStringArray(parsed, "tags");
+    } catch {
+      return value.split(",").map((t) => t.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
 export function assertEvidenceRecord(value: unknown): EvidenceRecord {
   const record = assertRecord(value, "EvidenceRecord");
   return {
@@ -170,6 +184,7 @@ export function assertEvidenceRecord(value: unknown): EvidenceRecord {
     r2Key: assertString(record.r2Key, "r2Key"),
     sha256: assertString(record.sha256, "sha256"),
     ciRunUrl: assertOptionalString(record.ciRunUrl, "ciRunUrl"),
+    tags: parseTags(record.tags),
     createdAt: assertString(record.createdAt, "createdAt"),
   };
 }

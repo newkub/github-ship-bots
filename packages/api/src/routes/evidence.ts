@@ -14,6 +14,7 @@ const evidenceSchema = z.object({
   kind: z.enum(["image", "video", "log", "diff"]),
   data: z.string(),
   ciRunUrl: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 function base64ToBytes(base64: string) {
@@ -30,7 +31,7 @@ function extensionFor(kind: string) {
 
 async function storeEvidence(
   env: { EVIDENCE_BUCKET: R2Bucket; DB: D1Database },
-  body: { cardId?: string; kind: string; data: string; ciRunUrl?: string }
+  body: { cardId?: string; kind: string; data: string; ciRunUrl?: string; tags?: string[] }
 ): Promise<{ id: string; key: string; hash: string }> {
   const bytes = base64ToBytes(body.data);
   const key = `evidence/${generateId()}.${extensionFor(body.kind)}`;
@@ -42,10 +43,11 @@ async function storeEvidence(
   await env.EVIDENCE_BUCKET.put(key, bytes);
 
   const id = generateId();
+  const tags = body.tags && body.tags.length > 0 ? JSON.stringify(body.tags) : "[]";
   await env.DB.prepare(
-    "INSERT INTO evidence (id, card_id, kind, r2_key, sha256, ci_run_url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO evidence (id, card_id, kind, r2_key, sha256, ci_run_url, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
   )
-    .bind(id, body.cardId ?? null, body.kind, key, hash, body.ciRunUrl ?? null, now())
+    .bind(id, body.cardId ?? null, body.kind, key, hash, body.ciRunUrl ?? null, tags, now())
     .run();
 
   if (body.cardId) {

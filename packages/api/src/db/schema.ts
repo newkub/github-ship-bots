@@ -70,10 +70,12 @@ export const evidence = sqliteTable(
     r2Key: text("r2_key").notNull(),
     sha256: text("sha256").notNull(),
     ciRunUrl: text("ci_run_url"),
+    tags: text("tags").notNull().default("[]"),
     createdAt: text("created_at").notNull(),
   },
   (t) => ({
     idxCardId: index("idx_evidence_card_id").on(t.cardId),
+    idxTags: index("idx_evidence_tags").on(t.tags),
   })
 );
 

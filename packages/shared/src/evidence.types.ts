@@ -5,6 +5,7 @@ export interface EvidenceRecord {
   r2Key: string;
   sha256: string;
   ciRunUrl?: string;
+  tags: string[];
   createdAt: string;
 }
 

@@ -1,11 +1,15 @@
 import { Show, For, createSignal, createResource } from "solid-js";
-import { X, FileText, MessageSquare, Image, Video, FileCode } from "lucide-solid";
+import { X, FileText, MessageSquare, Image, Video, FileCode, Tag } from "lucide-solid";
 import { API_URL, fetchCard, fetchComments, fetchEvidence, fetchEvidenceContent, fetchExplain, fetchTemplates, fetchVotes, applyTemplate } from "../api";
 import type { ShipCard } from "@ship-feed/shared";
 
 export default function CardDetail(props: { cardId: string; onClose: () => void }) {
   const [card] = createResource(() => props.cardId, fetchCard);
-  const [evidence] = createResource(() => props.cardId, fetchEvidence);
+  const [tagFilter, setTagFilter] = createSignal("");
+  const [evidence] = createResource(
+    () => ({ cardId: props.cardId, tags: tagFilter().split(",").map((t) => t.trim()).filter(Boolean) }),
+    ({ cardId, tags }) => fetchEvidence(cardId, tags)
+  );
   const [explain] = createResource(() => props.cardId, fetchExplain);
   const [votes] = createResource(() => props.cardId, fetchVotes);
   const [comments, { refetch: refetchComments }] = createResource(() => props.cardId, fetchComments);
@@ -136,7 +140,19 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                 </Show>
 
                 <div>
-                  <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-3 flex items-center gap-2"><FileCode size={16} /> Evidence</h3>
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-semibold text-gray-900 dark:text-zinc-100 flex items-center gap-2"><FileCode size={16} /> Evidence</h3>
+                    <div class="flex items-center gap-2">
+                      <Tag size={14} class="text-gray-400" />
+                      <input
+                        type="text"
+                        value={tagFilter()}
+                        onInput={(e) => setTagFilter(e.currentTarget.value)}
+                        placeholder="Filter by tag"
+                        class="text-xs rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-2 py-1 dark:text-white"
+                      />
+                    </div>
+                  </div>
                   <Show when={evidence.loading}>
                     <p class="text-sm text-gray-500 dark:text-zinc-400">Loading evidence…</p>
                   </Show>
@@ -164,6 +180,17 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                                   <Icon size={14} class="text-gray-400" />
                                   <span class="capitalize font-medium">{item.kind}</span>
                                   <span class="text-gray-400 dark:text-zinc-500 ml-2 font-mono text-xs">{(item.sha256 ?? "").slice(0, 12)}</span>
+                                  <Show when={item.tags.length > 0}>
+                                    <span class="ml-auto flex items-center gap-1">
+                                      <For each={item.tags}>
+                                        {(tag) => (
+                                          <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+                                            {tag}
+                                          </span>
+                                        )}
+                                      </For>
+                                    </span>
+                                  </Show>
                                 </button>
                               </li>
                             );
