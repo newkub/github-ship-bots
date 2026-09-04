@@ -23,12 +23,12 @@ const parts = [
 ];
 
 const colors: Record<string, string> = {
-  indigo: "border-indigo-500/30 text-indigo-400 bg-indigo-500/10",
-  emerald: "border-emerald-500/30 text-emerald-400 bg-emerald-500/10",
-  orange: "border-orange-500/30 text-orange-400 bg-orange-500/10",
-  purple: "border-purple-500/30 text-purple-400 bg-purple-500/10",
-  cyan: "border-cyan-500/30 text-cyan-400 bg-cyan-500/10",
-  pink: "border-pink-500/30 text-pink-400 bg-pink-500/10",
+  indigo: "border-indigo-500/30 text-indigo-300 from-indigo-500/20 to-indigo-500/5",
+  emerald: "border-emerald-500/30 text-emerald-300 from-emerald-500/20 to-emerald-500/5",
+  orange: "border-orange-500/30 text-orange-300 from-orange-500/20 to-orange-500/5",
+  purple: "border-purple-500/30 text-purple-300 from-purple-500/20 to-purple-500/5",
+  cyan: "border-cyan-500/30 text-cyan-300 from-cyan-500/20 to-cyan-500/5",
+  pink: "border-pink-500/30 text-pink-300 from-pink-500/20 to-pink-500/5",
 };
 
 export default function Ecosystem() {
@@ -47,14 +47,19 @@ export default function Ecosystem() {
           <VisualBlock variant="ecosystem" />
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min grid-flow-dense">
           <For each={parts}>
-            {(part) => {
+            {(part, i) => {
               const Icon = part.icon;
+              const wide = i() === 0 || i() === 3 || i() === 4;
               return (
-                <div class="rounded-2xl bg-zinc-900/60 p-6 border border-zinc-800 hover:border-indigo-500/30 hover:-translate-y-1 hover:bg-zinc-900/80 hover:shadow-lg hover:shadow-indigo-500/5 transition duration-300 group">
+                <div
+                  class={`rounded-2xl bg-zinc-900/60 p-6 border border-zinc-800 hover:border-indigo-500/30 hover:-translate-y-1 hover:bg-zinc-900/80 hover:shadow-lg hover:shadow-indigo-500/5 transition duration-300 group ${
+                    wide ? "sm:col-span-2 lg:col-span-1" : ""
+                  }`}
+                >
                   <div
-                    class={`flex h-12 w-12 items-center justify-center rounded-xl mb-4 border ${colors[part.color]} group-hover:scale-110 transition duration-300`}
+                    class={`flex h-12 w-12 items-center justify-center rounded-2xl mb-4 border bg-gradient-to-br ${colors[part.color]} group-hover:scale-110 transition duration-300`}
                   >
                     <Icon size={24} />
                   </div>
@@ -66,10 +71,10 @@ export default function Ecosystem() {
           </For>
         </div>
 
-        <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="flex-1 rounded-3xl bg-zinc-900/40 border border-zinc-800/60 p-8 sm:p-12 hover:border-indigo-500/30 hover:-translate-y-1 hover:bg-zinc-900/60 transition duration-300 group">
+        <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="flex-1 rounded-3xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800/60 p-8 sm:p-12 hover:border-indigo-500/30 hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/5 transition duration-300 group">
             <div class="flex items-center gap-4 mb-6">
-              <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition duration-300">
+              <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/20 to-indigo-500/5 text-indigo-300 border border-indigo-500/30 group-hover:scale-110 transition duration-300">
                 <Rocket size={28} />
               </div>
               <div>
@@ -91,7 +96,7 @@ export default function Ecosystem() {
 
           <div class="flex-1 rounded-3xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 p-8 sm:p-12 hover:-translate-y-1 hover:from-indigo-500/15 hover:to-purple-500/15 transition duration-300 group">
             <div class="flex items-center gap-4 mb-6">
-              <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-400 group-hover:scale-110 transition duration-300">
+              <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/5 text-purple-300 border border-purple-500/30 group-hover:scale-110 transition duration-300">
                 <ShieldCheck size={28} />
               </div>
               <div>

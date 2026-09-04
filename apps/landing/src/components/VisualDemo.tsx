@@ -2,6 +2,7 @@ import { Rocket } from "lucide-solid";
 import { Link } from "@tanstack/solid-router";
 import GitHubCard from "./GitHubCard";
 import MarketingPreview from "./MarketingPreview";
+import Micro from "./Micro";
 import SectionHeader from "./SectionHeader";
 import { dashboardUrl } from "../data";
 
@@ -66,21 +67,25 @@ export default function VisualDemo() {
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
             <div class="order-2 sm:order-1">
-              <GitHubCard
-                title="Add a dark mode toggle"
-                type="issue"
-                number={42}
-                state="open"
-                labels={[
-                  { text: "idea", color: "orange" },
-                  { text: "impact medium", color: "emerald" },
-                ]}
-                comment="/approve"
-                botReply="Card approved and queued for implementation. Estimated score: 8.4"
-              />
+              <Micro float hover={false} floatY={3}>
+                <GitHubCard
+                  title="Add a dark mode toggle"
+                  type="issue"
+                  number={42}
+                  state="open"
+                  labels={[
+                    { text: "idea", color: "orange" },
+                    { text: "impact medium", color: "emerald" },
+                  ]}
+                  comment="/approve"
+                  botReply="Card approved and queued for implementation. Estimated score: 8.4"
+                />
+              </Micro>
             </div>
             <div class="order-1 sm:order-2 flex justify-center">
-              <MarketingPreview />
+              <Micro float hover={false} floatY={5}>
+                <MarketingPreview />
+              </Micro>
             </div>
           </div>
         </div>

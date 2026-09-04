@@ -12,7 +12,7 @@ export default function Repos() {
   return (
     <div>
       <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Repositories</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Repositories</h1>
         <a
           href={GITHUB_APP_INSTALL_URL}
           target="_blank"
@@ -25,14 +25,14 @@ export default function Repos() {
       </div>
 
       <Show when={repos.loading}>
-        <div class="flex items-center justify-center py-12 text-gray-500">
+        <div class="flex items-center justify-center py-12 text-gray-500 dark:text-zinc-400">
           <Loader size={24} class="animate-spin mr-2" />
-          Loading repositories...
+          Loading repositories…
         </div>
       </Show>
 
       <Show when={repos.error}>
-        <div class="rounded-2xl bg-rose-50 border border-rose-100 p-6 text-rose-700">
+        <div class="rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 p-6 text-rose-700 dark:text-rose-300">
           <div class="flex items-center gap-2 mb-2">
             <AlertCircle size={20} />
             <span class="font-medium">Failed to load repositories</span>
@@ -68,9 +68,9 @@ export default function Repos() {
       <div class="grid grid-cols-1 gap-3">
         <For each={repos() ?? []}>
           {(repo) => (
-            <div class="flex items-center gap-3 rounded-xl bg-white border border-gray-200 p-4 hover:shadow-sm transition">
-              <GitPullRequest size={20} class="text-gray-400" />
-              <span class="font-medium text-gray-900">{repo}</span>
+            <div class="flex items-center gap-3 rounded-xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-4 hover:shadow-sm dark:hover:shadow-zinc-900/40 transition">
+              <GitPullRequest size={20} class="text-gray-400 dark:text-zinc-500" />
+              <span class="font-medium text-gray-900 dark:text-zinc-100">{repo}</span>
             </div>
           )}
         </For>

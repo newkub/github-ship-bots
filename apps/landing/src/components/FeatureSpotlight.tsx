@@ -7,21 +7,30 @@ const spotlights = [
     title: "Vote with a comment",
     body: "Comment /approve, /reject, or /ship directly on GitHub. ship-feed listens to webhooks and updates the queue in real time.",
     icon: MessageSquare,
-    color: "indigo",
+    gradient: "from-indigo-500 to-purple-600",
+    shadow: "shadow-indigo-500/20",
+    titleHover: "group-hover:text-indigo-400",
+    dot: "bg-indigo-400",
     points: ["No context switching", "Works on issues and PRs", "Records who voted and when"],
   },
   {
     title: "Evidence that ships with the card",
     body: "Attach screenshots, logs, videos, and baselines. The oracle compares UI before and after so regressions don't reach production.",
     icon: Image,
-    color: "emerald",
+    gradient: "from-emerald-500 to-cyan-600",
+    shadow: "shadow-emerald-500/20",
+    titleHover: "group-hover:text-emerald-400",
+    dot: "bg-emerald-400",
     points: ["Image, video, and log evidence", "Baseline comparison", "Linked to every card"],
   },
   {
     title: "The ship loop",
     body: "Approved cards are picked up by the orchestrator, verified for mergeability, and shipped. Rejected cards are closed automatically.",
     icon: Rocket,
-    color: "orange",
+    gradient: "from-orange-500 to-rose-600",
+    shadow: "shadow-orange-500/20",
+    titleHover: "group-hover:text-orange-400",
+    dot: "bg-orange-400",
     points: ["Continuous merge pipeline", "Mergeability checks", "Audit trail by default"],
   },
 ];
@@ -42,32 +51,24 @@ export default function FeatureSpotlight() {
           <For each={spotlights}>
             {(item) => {
               const Icon = item.icon;
-              const gradients: Record<string, string> = {
-                indigo: "from-indigo-500 to-purple-600",
-                emerald: "from-emerald-500 to-cyan-600",
-                orange: "from-orange-500 to-rose-600",
-              };
-              const text: Record<string, string> = {
-                indigo: "text-indigo-400",
-                emerald: "text-emerald-400",
-                orange: "text-orange-400",
-              };
               return (
-                <div class="group rounded-2xl bg-zinc-900/60 border border-zinc-800 p-8 hover:border-indigo-500/30 hover:bg-zinc-900/80 hover:shadow-xl hover:shadow-indigo-500/5 transition">
-                  <div class={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${gradients[item.color]} text-white shadow-lg shadow-${item.color}-500/20 mb-6 group-hover:scale-110 transition`}>
+                <div class="group relative rounded-2xl bg-zinc-900/60 border border-zinc-800 p-8 hover:border-indigo-500/30 hover:bg-zinc-900/80 hover:shadow-xl hover:shadow-indigo-500/5 transition overflow-hidden">
+                  <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/10 to-transparent rounded-tr-2xl rounded-bl-[4rem] opacity-0 group-hover:opacity-100 transition" />
+
+                  <div class={`relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${item.gradient} text-white shadow-lg ${item.shadow} mb-6 group-hover:scale-110 transition`}>
                     <Icon size={28} />
                   </div>
-                  <h3 class={`text-2xl font-bold text-white mb-3 group-hover:${text[item.color]} transition`}>
+                  <h3 class={`relative text-2xl font-bold text-white mb-3 ${item.titleHover} transition`}>
                     {item.title}
                   </h3>
-                  <p class="text-zinc-400 text-sm leading-relaxed mb-6">
+                  <p class="relative text-zinc-400 text-sm leading-relaxed mb-6">
                     {item.body}
                   </p>
-                  <ul class="space-y-2">
+                  <ul class="relative space-y-2">
                     <For each={item.points}>
                       {(point) => (
                         <li class="flex items-start gap-2 text-sm text-zinc-300">
-                          <span class={`mt-1.5 h-1.5 w-1.5 rounded-full ${item.color === "indigo" ? "bg-indigo-400" : item.color === "emerald" ? "bg-emerald-400" : "bg-orange-400"}`} />
+                          <span class={`mt-1.5 h-1.5 w-1.5 rounded-full ${item.dot}`} />
                           {point}
                         </li>
                       )}

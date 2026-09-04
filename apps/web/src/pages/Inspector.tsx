@@ -39,48 +39,49 @@ export default function Inspector() {
 
   return (
     <div>
-      <h1 class="text-2xl font-bold mb-6">Web Inspector</h1>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Web Inspector</h1>
+      <p class="text-sm text-gray-500 dark:text-zinc-400 mb-6">Capture a UI element, describe the change, and create a card from it.</p>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div class="bg-white rounded-2xl border border-gray-200 p-6">
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 shadow-sm">
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Page URL</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Page URL</label>
               <input
                 type="url"
                 value={url()}
                 onInput={(e) => setUrl(e.currentTarget.value)}
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm dark:text-white"
                 placeholder="https://example.com"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">CSS Selector</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">CSS Selector</label>
               <input
                 type="text"
                 value={selector()}
                 onInput={(e) => setSelector(e.currentTarget.value)}
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm dark:text-white"
                 placeholder=".hero > h1"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Prompt</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Prompt</label>
               <textarea
                 value={prompt()}
                 onInput={(e) => setPrompt(e.currentTarget.value)}
                 rows={4}
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm dark:text-white"
                 placeholder="Make the headline more compelling and run CI."
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Repository</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Repository</label>
               <input
                 type="text"
                 value={repoFullName()}
                 onInput={(e) => setRepoFullName(e.currentTarget.value)}
-                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                class="w-full rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm dark:text-white"
                 placeholder="owner/repo"
               />
             </div>
@@ -96,20 +97,20 @@ export default function Inspector() {
             </button>
           </div>
           <Show when={result()}>
-            <div class="mt-4 p-3 bg-emerald-50 text-emerald-800 rounded text-sm">{result()}</div>
+            <div class="mt-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-lg text-sm">{result()}</div>
           </Show>
           <Show when={error()}>
-            <div class="mt-4 p-3 bg-rose-50 text-rose-700 rounded text-sm">{error()}</div>
+            <div class="mt-4 p-3 bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 text-rose-700 dark:text-rose-300 rounded-lg text-sm">{error()}</div>
           </Show>
         </div>
 
-        <div class="bg-white rounded-2xl border border-gray-200 p-6">
-          <h2 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-6 shadow-sm">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Eye size={16} />
             Page preview
           </h2>
-          <div class="rounded-xl bg-gray-50 border border-gray-200 h-64 p-4 relative">
-            <div class="text-xs text-gray-400 mb-3">{url() || "Enter a page URL and click Create issue"}</div>
+          <div class="rounded-xl bg-gray-50 dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-800 h-64 p-4 relative">
+            <div class="text-xs text-gray-400 dark:text-zinc-500 mb-3">{url() || "Enter a page URL and click Create issue"}</div>
             <div class="space-y-2">
               <For each={elements}>
                 {(el) => (
@@ -120,8 +121,8 @@ export default function Inspector() {
                     }}
                     class={`text-left text-sm w-full rounded-lg px-3 py-2 border transition ${
                       selectedElement() === el.selector
-                        ? "bg-indigo-50 border-indigo-300 text-indigo-700"
-                        : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                        ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300"
+                        : "bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800"
                     }`}
                   >
                     {el.label} — <code class="text-xs">{el.selector}</code>

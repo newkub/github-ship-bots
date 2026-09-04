@@ -14,6 +14,7 @@ import {
 import { Link } from "@tanstack/solid-router";
 import { dashboardUrl, features } from "../data";
 import HeroCard from "./HeroCard";
+import Micro from "./Micro";
 
 export default function Hero() {
   return (
@@ -101,7 +102,12 @@ export default function Hero() {
           <div class="relative flex justify-center items-center h-[28rem] lg:h-auto lg:min-h-[28rem]">
             <div class="absolute inset-0 rounded-full bg-indigo-500/10 blur-3xl" />
 
-            <div class="relative w-80 h-80 sm:w-96 sm:h-96">
+            <Micro
+              float
+              hover={false}
+              floatY={6}
+              class="relative w-80 h-80 sm:w-96 sm:h-96"
+            >
               <HeroCard
                 class="hero-card"
                 kind="idea"
@@ -172,7 +178,7 @@ export default function Hero() {
                 <MessageSquare size={14} class="text-indigo-400" />
                 <span class="text-xs font-medium text-zinc-300">/approve</span>
               </div>
-            </div>
+            </Micro>
           </div>
         </div>
       </div>

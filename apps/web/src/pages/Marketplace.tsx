@@ -36,32 +36,32 @@ export default function Marketplace() {
   return (
     <div>
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Skill Marketplace</h1>
-        <p class="text-sm text-gray-500 mt-1">Browse and install ship skills for your repositories.</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Skill Marketplace</h1>
+        <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">Browse and install ship skills for your repositories.</p>
       </div>
 
       <Show when={plugins.loading}>
-        <div class="flex items-center justify-center py-12 text-gray-500">
+        <div class="flex items-center justify-center py-12 text-gray-500 dark:text-zinc-400">
           <Loader size={24} class="animate-spin mr-2" />
-          Loading marketplace...
+          Loading marketplace…
         </div>
       </Show>
 
       <Show when={plugins.error}>
-        <div class="rounded-2xl bg-rose-50 border border-rose-100 p-6 text-rose-700">
+        <div class="rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 p-6 text-rose-700 dark:text-rose-300">
           Failed to load marketplace.
         </div>
       </Show>
 
       <Show when={error()}>
-        <div class="rounded-2xl bg-rose-50 border border-rose-100 p-4 mb-6 text-rose-700 flex items-center gap-2">
+        <div class="rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 p-4 mb-6 text-rose-700 dark:text-rose-300 flex items-center gap-2">
           <XCircle size={18} />
           {error()}
         </div>
       </Show>
 
       <Show when={!plugins.loading && !plugins.error && (plugins() ?? []).length === 0}>
-        <div class="rounded-2xl bg-gray-50 border border-gray-200 p-8 text-center text-gray-500">
+        <div class="rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-8 text-center text-gray-500 dark:text-zinc-400">
           No skills available in the marketplace yet.
         </div>
       </Show>
@@ -72,21 +72,21 @@ export default function Marketplace() {
             const Icon = iconMap[skill.icon] ?? Puzzle;
             const busy = () => pending()[skill.id] ?? false;
             return (
-              <div class="rounded-2xl bg-white border border-gray-200 p-5 hover:shadow-md transition">
+              <div class="rounded-2xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-5 hover:shadow-md dark:hover:shadow-zinc-900/40 transition">
                 <div class="flex items-start justify-between mb-3">
-                  <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-300">
                     <Icon size={20} />
                   </div>
-                  <span class="text-xs text-gray-500">{skill.installs.toLocaleString()} installs</span>
+                  <span class="text-xs text-gray-500 dark:text-zinc-400">{skill.installs.toLocaleString()} installs</span>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-1">{skill.name}</h3>
-                <p class="text-sm text-gray-500 mb-4">{skill.description}</p>
+                <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-1">{skill.name}</h3>
+                <p class="text-sm text-gray-500 dark:text-zinc-400 mb-4">{skill.description}</p>
                 <button
                   onClick={() => toggle(skill.id, skill.installed)}
                   disabled={busy()}
                   class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                     skill.installed
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                       : "bg-indigo-600 text-white hover:bg-indigo-700"
                   } disabled:opacity-60`}
                 >

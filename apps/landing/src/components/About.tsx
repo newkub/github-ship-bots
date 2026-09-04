@@ -23,15 +23,21 @@ const steps = [
 const concepts = [
   {
     title: "Card",
+    icon: Layers,
     body: "A single, scorable unit of work that humans approve or reject with one tap.",
+    color: "from-indigo-500/20 to-indigo-500/5 text-indigo-300 border-indigo-500/30",
   },
   {
     title: "Evidence",
+    icon: CheckCircle2,
     body: "Tests, screenshots, logs, and oracle results attached to every ship before it reaches production.",
+    color: "from-emerald-500/20 to-emerald-500/5 text-emerald-300 border-emerald-500/30",
   },
   {
     title: "Learning",
+    icon: Bot,
     body: "Weights update from each outcome so future cards are scored with better impact and risk estimates.",
+    color: "from-purple-500/20 to-purple-500/5 text-purple-300 border-purple-500/30",
   },
 ];
 
@@ -61,11 +67,12 @@ export default function About() {
                 const isLast = i() === steps.length - 1;
                 return (
                   <>
-                    <div class="relative rounded-2xl bg-zinc-950/50 p-5 border border-zinc-800 text-center hover:border-indigo-500/30 hover:bg-zinc-900/60 transition group">
-                      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-500 mb-3 group-hover:bg-indigo-500/20 transition">
+                    <div class="relative rounded-2xl bg-gradient-to-br from-zinc-950/80 to-zinc-900/50 p-5 border border-zinc-800 text-center hover:border-indigo-500/30 hover:bg-zinc-900/60 transition group overflow-hidden">
+                      <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-tr-2xl rounded-bl-[4rem] opacity-0 group-hover:opacity-100 transition" />
+                      <div class="relative mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/20 to-indigo-500/5 text-indigo-300 border border-indigo-500/30 mb-3 group-hover:scale-110 transition">
                         <Icon size={24} />
                       </div>
-                      <p class="text-zinc-200 text-sm font-medium">{step.text}</p>
+                      <p class="relative text-zinc-200 text-sm font-medium">{step.text}</p>
                     </div>
                     {!isLast && (
                       <div class="hidden lg:flex justify-center">
@@ -80,14 +87,21 @@ export default function About() {
 
           <div class="mt-14 grid grid-cols-1 md:grid-cols-3 gap-6">
             <For each={concepts}>
-              {(concept) => (
-                <div class="rounded-2xl bg-zinc-950/50 p-6 border border-zinc-800 hover:border-indigo-500/30 hover:bg-zinc-900/40 transition group">
-                  <div class="text-2xl font-bold text-white mb-2 group-hover:text-indigo-400 transition">
-                    {concept.title}
+              {(concept) => {
+                const Icon = concept.icon;
+                return (
+                  <div class="relative rounded-2xl bg-gradient-to-br from-zinc-950/80 to-zinc-900/50 p-6 border border-zinc-800 hover:border-indigo-500/30 hover:bg-zinc-900/60 transition group overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent rounded-tr-2xl rounded-bl-[4rem] opacity-0 group-hover:opacity-100 transition" />
+                    <div class={`relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${concept.color} mb-4 group-hover:scale-110 transition`}>
+                      <Icon size={24} />
+                    </div>
+                    <div class="relative text-2xl font-bold text-white mb-2 group-hover:text-indigo-400 transition">
+                      {concept.title}
+                    </div>
+                    <p class="relative text-sm text-zinc-400 leading-relaxed">{concept.body}</p>
                   </div>
-                  <p class="text-sm text-zinc-400 leading-relaxed">{concept.body}</p>
-                </div>
-              )}
+                );
+              }}
             </For>
           </div>
 

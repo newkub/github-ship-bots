@@ -6,6 +6,7 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/solid-router";
+import BottomNav from "./components/BottomNav";
 import Footer from "./components/Footer";
 import TopNav from "./components/TopNav";
 import HomePage from "./pages/HomePage";
@@ -23,6 +24,7 @@ const rootRoute = createRootRoute({
         <Outlet />
         <Footer />
       </main>
+      <BottomNav />
     </>
   ),
 });

@@ -31,7 +31,7 @@ export default function Kanban(props: {
           const Icon = col.icon;
           const items = byColumn()[col.status];
           return (
-            <div class="flex flex-col rounded-2xl bg-gray-50/80 border border-gray-200/60 p-3 min-h-[200px]">
+            <div class="flex flex-col rounded-2xl bg-gray-50/80 dark:bg-zinc-900/60 border border-gray-200/60 dark:border-zinc-800 p-3 min-h-[200px]">
               <div class="flex items-center justify-between mb-3 px-1">
                 <div class="flex items-center gap-2">
                   <div
@@ -39,9 +39,9 @@ export default function Kanban(props: {
                   >
                     <Icon size={14} />
                   </div>
-                  <span class="text-sm font-bold text-gray-800">{col.label}</span>
+                  <span class="text-sm font-bold text-gray-800 dark:text-zinc-100">{col.label}</span>
                 </div>
-                <span class="text-xs font-semibold text-gray-500 bg-white border border-gray-200 px-2 py-0.5 rounded-full">
+                <span class="text-xs font-semibold text-gray-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-2 py-0.5 rounded-full">
                   {items.length}
                 </span>
               </div>

@@ -28,31 +28,31 @@ export default function Billing() {
 
   return (
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">Billing</h1>
-      <p class="text-sm text-gray-500 mb-6">Manage your plan and billing details.</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Billing</h1>
+      <p class="text-sm text-gray-500 dark:text-zinc-400 mb-6">Manage your plan and billing details.</p>
 
       <Show when={searchParams.success}>
-        <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 text-emerald-700 mb-6 flex items-center gap-2">
+        <div class="rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 p-4 text-emerald-700 dark:text-emerald-300 mb-6 flex items-center gap-2">
           <CheckCircle2 size={20} />
           Welcome aboard — your subscription is being activated.
         </div>
       </Show>
 
       <Show when={searchParams.canceled}>
-        <div class="rounded-2xl bg-amber-50 border border-amber-100 p-4 text-amber-700 mb-6">
+        <div class="rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-4 text-amber-700 dark:text-amber-300 mb-6">
           Checkout canceled. You can upgrade any time.
         </div>
       </Show>
 
       <Show when={session.loading || plans.loading}>
-        <div class="flex items-center gap-2 text-gray-500">
+        <div class="flex items-center gap-2 text-gray-500 dark:text-zinc-400">
           <Loader size={20} class="animate-spin" />
-          Loading plans...
+          Loading plans…
         </div>
       </Show>
 
       <Show when={session.error || plans.error}>
-        <div class="rounded-2xl bg-rose-50 border border-rose-100 p-6 text-rose-700">
+        <div class="rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 p-6 text-rose-700 dark:text-rose-300">
           <div class="flex items-center gap-2 mb-2">
             <AlertCircle size={20} />
             <span class="font-medium">Failed to load billing</span>
@@ -62,14 +62,14 @@ export default function Billing() {
       </Show>
 
       <Show when={error()}>
-        <div class="rounded-2xl bg-rose-50 border border-rose-100 p-4 text-rose-700 mb-6">
+        <div class="rounded-2xl bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 p-4 text-rose-700 dark:text-rose-300 mb-6">
           {error()}
         </div>
       </Show>
 
       <Show when={!session.loading && !plans.loading && !session.error && !plans.error}>
         <Show when={plans() && plans()!.length > 0} fallback={
-          <div class="rounded-2xl bg-gray-50 border border-gray-200 p-8 text-center text-gray-500">
+          <div class="rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-8 text-center text-gray-500 dark:text-zinc-400">
             No plans available.
           </div>
         }>
@@ -109,12 +109,12 @@ function PlanCard(props: {
   onCta?: () => void;
 }) {
   return (
-    <div class={`bg-white rounded-xl border p-6 ${props.current ? "border-indigo-500 ring-1 ring-indigo-500" : "border-gray-200"}`}>
-      <h2 class="text-lg font-semibold text-gray-900">{props.name}</h2>
-      <div class="text-3xl font-bold my-2 text-gray-900">
-        {props.price}<span class="text-sm text-gray-500 font-normal">/mo</span>
+    <div class={`bg-white dark:bg-zinc-900 rounded-xl border p-6 ${props.current ? "border-indigo-500 ring-1 ring-indigo-500" : "border-gray-200 dark:border-zinc-800"}`}>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{props.name}</h2>
+      <div class="text-3xl font-bold my-2 text-gray-900 dark:text-white">
+        {props.price}<span class="text-sm text-gray-500 dark:text-zinc-400 font-normal">/mo</span>
       </div>
-      <ul class="text-sm text-gray-600 space-y-2 mb-6">
+      <ul class="text-sm text-gray-600 dark:text-zinc-400 space-y-2 mb-6">
         {props.features.map((f) => (
           <li class="flex items-center gap-2">
             <CheckCircle2 size={14} class="text-emerald-500" />
@@ -139,7 +139,7 @@ function PlanCard(props: {
           )}
         </button>
       ) : (
-        <div class="block text-center w-full py-2 rounded-lg bg-gray-100 text-gray-700 font-medium">
+        <div class="block text-center w-full py-2 rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-medium">
           {props.cta ?? "—"}
         </div>
       )}

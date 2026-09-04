@@ -6,6 +6,7 @@ import {
 } from "lucide-solid";
 import SectionHeader from "./SectionHeader";
 import { dashboardUrl } from "../data";
+import Micro from "./Micro";
 import Sidebar from "./dashboard/Sidebar";
 import Stats from "./dashboard/Stats";
 import Kanban from "./dashboard/Kanban";
@@ -32,7 +33,12 @@ export default function DashboardPreview() {
           </a>
         </SectionHeader>
 
-        <div class="relative max-w-6xl mx-auto">
+        <Micro
+          float
+          hover={false}
+          floatY={4}
+          class="relative max-w-6xl mx-auto"
+        >
           <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-3xl blur-2xl opacity-30" />
           <div class="relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/50">
             <div class="flex items-center gap-3 px-4 py-3 bg-zinc-950 border-b border-zinc-800">
@@ -79,7 +85,7 @@ export default function DashboardPreview() {
               </div>
             </div>
           </div>
-        </div>
+        </Micro>
       </div>
     </section>
   );

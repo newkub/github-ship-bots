@@ -1,4 +1,5 @@
 import CTA from "../components/CTA";
+import InstallSteps from "../components/InstallSteps";
 import PageFooter from "../components/PageFooter";
 import PageIntro from "../components/PageIntro";
 import VisualBlock from "../components/VisualBlock";
@@ -17,6 +18,7 @@ export default function InstallPage() {
       >
         <VisualBlock variant="install" />
       </PageIntro>
+      <InstallSteps />
       <CTA />
       <PageFooter current="/install" />
     </>

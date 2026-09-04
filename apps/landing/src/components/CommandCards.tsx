@@ -10,17 +10,17 @@ const iconMap: Record<string, typeof CheckCircle2> = {
   "/ship": Rocket,
 };
 
-const styleMap: Record<string, { light: string; border: string }> = {
+const styleMap: Record<string, { icon: string; border: string }> = {
   "/approve": {
-    light: "bg-emerald-500/10 text-emerald-400",
+    icon: "from-emerald-500/25 to-emerald-500/5 text-emerald-300 border-emerald-500/30",
     border: "border-emerald-500/30 hover:border-emerald-500/50",
   },
   "/reject": {
-    light: "bg-rose-500/10 text-rose-400",
+    icon: "from-rose-500/25 to-rose-500/5 text-rose-300 border-rose-500/30",
     border: "border-rose-500/30 hover:border-rose-500/50",
   },
   "/ship": {
-    light: "bg-indigo-500/10 text-indigo-400",
+    icon: "from-indigo-500/25 to-indigo-500/5 text-indigo-300 border-indigo-500/30",
     border: "border-indigo-500/30 hover:border-indigo-500/50",
   },
 };
@@ -46,16 +46,18 @@ export default function CommandCards() {
             {(cmd) => {
               const Icon = iconMap[cmd.cmd] ?? Terminal;
               const style = styleMap[cmd.cmd] ?? {
-                light: "bg-indigo-500/10 text-indigo-400",
+                icon: "from-indigo-500/25 to-indigo-500/5 text-indigo-300 border-indigo-500/30",
                 border: "border-indigo-500/30 hover:border-indigo-500/50",
               };
               return (
                 <div
-                  class={`rounded-2xl bg-zinc-900/60 p-8 border border-zinc-800 hover:bg-zinc-900/80 hover:shadow-lg transition group ${style.border}`}
+                  class={`relative rounded-2xl bg-zinc-900/60 p-8 border ${style.border} hover:bg-zinc-900/80 hover:shadow-lg hover:shadow-indigo-500/10 transition group overflow-hidden`}
                 >
-                  <div class="flex items-center gap-3 mb-6">
+                  <div class="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-white/10 to-transparent rounded-tr-2xl rounded-bl-[5rem] opacity-0 group-hover:opacity-100 transition" />
+
+                  <div class="relative flex items-center gap-3 mb-6">
                     <div
-                      class={`flex h-12 w-12 items-center justify-center rounded-2xl ${style.light} group-hover:scale-110 transition`}
+                      class={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${style.icon} group-hover:scale-110 transition`}
                     >
                       <Icon size={24} />
                     </div>
@@ -64,7 +66,7 @@ export default function CommandCards() {
                     </code>
                   </div>
 
-                  <div class="space-y-3 text-zinc-400 text-sm">
+                  <div class="relative space-y-3 text-zinc-400 text-sm">
                     <p>
                       <span class="text-zinc-500">Issue:</span> {cmd.issue}
                     </p>

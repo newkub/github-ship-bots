@@ -3,31 +3,19 @@ import { Check, Layers, MessageSquare, Rocket, ShieldCheck, Zap } from "lucide-s
 import SectionHeader from "./SectionHeader";
 
 const steps = [
-  {
-    icon: Layers,
-    title: "Open an idea issue",
-    desc: "Describe the feature in a GitHub issue. ship-feed turns it into a scored card with impact, risk, and effect.",
-  },
-  {
-    icon: MessageSquare,
-    title: "The team votes",
-    desc: "Reviewers comment /approve or /reject. Votes, thresholds, and guardrails are recorded automatically.",
-  },
-  {
-    icon: Zap,
-    title: "Bot writes the code",
-    desc: "Once approved, the bot generates a branch, commits, opens a PR, and attaches evidence for review.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Verify with evidence",
-    desc: "Screenshots, baselines, and logs are checked before the PR is merged. Regressions are caught early.",
-  },
-  {
-    icon: Rocket,
-    title: "Auto ship",
-    desc: "The orchestrator merges when safe and ships the release. No manual follow-up needed.",
-  },
+  { icon: Layers, title: "Open an idea issue", desc: "Describe the feature in a GitHub issue. ship-feed turns it into a scored card with impact, risk, and effect." },
+  { icon: MessageSquare, title: "The team votes", desc: "Reviewers comment /approve or /reject. Votes, thresholds, and guardrails are recorded automatically." },
+  { icon: Zap, title: "Bot writes the code", desc: "Once approved, the bot generates a branch, commits, opens a PR, and attaches evidence for review." },
+  { icon: ShieldCheck, title: "Verify with evidence", desc: "Screenshots, baselines, and logs are checked before the PR is merged. Regressions are caught early." },
+  { icon: Rocket, title: "Auto ship", desc: "The orchestrator merges when safe and ships the release. No manual follow-up needed." },
+];
+
+const stepStyles = [
+  "from-indigo-500/20 to-indigo-500/5 text-indigo-300 border-indigo-500/30",
+  "from-emerald-500/20 to-emerald-500/5 text-emerald-300 border-emerald-500/30",
+  "from-purple-500/20 to-purple-500/5 text-purple-300 border-purple-500/30",
+  "from-amber-500/20 to-amber-500/5 text-amber-300 border-amber-500/30",
+  "from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-cyan-500/30",
 ];
 
 const outcomes = [
@@ -55,11 +43,12 @@ export default function UseCases() {
               {(step, i) => {
                 const Icon = step.icon;
                 return (
-                  <div class="group relative flex gap-4 p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800 hover:bg-zinc-900/60 hover:border-indigo-500/30 transition">
-                    <div class="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-zinc-900 border border-zinc-700 text-indigo-400 group-hover:border-indigo-500/50 group-hover:bg-indigo-500/10 transition">
+                  <div class="group relative flex gap-4 p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800 hover:bg-zinc-900/60 hover:border-indigo-500/30 transition overflow-hidden">
+                    <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-white/5 to-transparent rounded-tr-2xl rounded-bl-[4rem] opacity-0 group-hover:opacity-100 transition" />
+                    <div class={`relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${stepStyles[i() % stepStyles.length]} group-hover:scale-110 transition`}>
                       <Icon size={22} />
                     </div>
-                    <div>
+                    <div class="relative">
                       <div class="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">Step {i() + 1}</div>
                       <h3 class="text-lg font-semibold text-white mb-1">{step.title}</h3>
                       <p class="text-sm text-zinc-400 leading-relaxed">{step.desc}</p>

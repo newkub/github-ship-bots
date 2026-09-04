@@ -1,13 +1,21 @@
 import { For } from "solid-js";
-import { Bot, CheckCircle2, ChevronRight, Layers, MessageSquare, Rocket } from "lucide-solid";
+import {
+  Bot,
+  CheckCircle2,
+  ChevronRight,
+  Gauge,
+  Layers,
+  MessageSquare,
+  Rocket,
+} from "lucide-solid";
 import { WindowChrome } from "../VisualBlock";
 
 const steps = [
-  { label: "Idea", icon: Layers, color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20" },
-  { label: "Vote", icon: MessageSquare, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
-  { label: "Implement", icon: Bot, color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
-  { label: "Verify", icon: CheckCircle2, color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
-  { label: "Ship", icon: Rocket, color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" },
+  { label: "Idea", icon: Layers, color: "from-indigo-500/20 to-indigo-500/5 text-indigo-300" },
+  { label: "Vote", icon: MessageSquare, color: "from-emerald-500/20 to-emerald-500/5 text-emerald-300" },
+  { label: "Implement", icon: Bot, color: "from-purple-500/20 to-purple-500/5 text-purple-300" },
+  { label: "Verify", icon: CheckCircle2, color: "from-amber-500/20 to-amber-500/5 text-amber-300" },
+  { label: "Ship", icon: Rocket, color: "from-cyan-500/20 to-cyan-500/5 text-cyan-300" },
 ];
 
 const metrics = [
@@ -18,7 +26,7 @@ const metrics = [
 
 export default function AboutVisual() {
   return (
-    <WindowChrome title="ship-feed">
+    <WindowChrome title="ship-feed / pipeline">
       <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr_auto_1fr] gap-2 items-center">
         <For each={steps}>
           {(step, i) => {
@@ -26,7 +34,9 @@ export default function AboutVisual() {
             const isLast = i() === steps.length - 1;
             return (
               <>
-                <div class={`rounded-xl border p-3 ${step.color} bg-zinc-950 flex flex-col items-center text-center gap-2`}>
+                <div
+                  class={`rounded-xl bg-gradient-to-br ${step.color} border border-white/10 p-3 bg-zinc-950 flex flex-col items-center text-center gap-2`}
+                >
                   <Icon size={18} />
                   <div class="text-xs font-semibold">{step.label}</div>
                 </div>
@@ -40,11 +50,15 @@ export default function AboutVisual() {
           }}
         </For>
       </div>
+
       <div class="mt-4 grid grid-cols-3 gap-2">
         <For each={metrics}>
           {(m) => (
-            <div class="rounded-lg bg-zinc-950 border border-zinc-800 p-2.5 text-center">
-              <div class="text-[10px] text-zinc-500 uppercase">{m.label}</div>
+            <div class="rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 p-2.5 text-center">
+              <div class="text-[10px] text-zinc-500 uppercase flex items-center justify-center gap-1">
+                <Gauge size={10} />
+                {m.label}
+              </div>
               <div class={`text-sm font-semibold ${m.color}`}>{m.value}</div>
             </div>
           )}

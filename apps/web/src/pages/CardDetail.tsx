@@ -1,4 +1,5 @@
 import { Show, For, createSignal, createResource } from "solid-js";
+import { X, FileText, MessageSquare, Image, Video, FileCode } from "lucide-solid";
 import { API_URL, fetchCard, fetchComments, fetchEvidence, fetchEvidenceContent, fetchExplain, fetchTemplates, fetchVotes, applyTemplate } from "../api";
 import type { ShipCard } from "@ship-feed/shared";
 
@@ -20,12 +21,12 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
 
   return (
     <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4">
-      <div class="w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
+      <div class="w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200 dark:border-zinc-800">
         <Show when={card.loading}>
-          <div class="p-6 text-gray-500 flex items-center gap-2"><span class="animate-pulse">Loading...</span></div>
+          <div class="p-6 text-gray-500 dark:text-zinc-400 flex items-center gap-2"><span class="animate-pulse">Loading...</span></div>
         </Show>
         <Show when={card.error}>
-          <div class="p-6 rounded-xl bg-rose-50 text-rose-700">
+          <div class="p-6 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300">
             <div class="font-semibold">Failed to load card</div>
             <div class="text-sm mt-1">{(card.error as Error).message}</div>
           </div>
@@ -33,18 +34,18 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
         <Show when={card()} fallback={<></>} keyed>
           {(c: ShipCard) => (
             <div>
-              <div class="p-6 border-b border-gray-100 flex items-start justify-between">
-                <div>
-                  <h2 class="text-xl font-bold text-gray-900">{c.title}</h2>
-                  <p class="text-sm text-gray-500 mt-1">{c.repoFullName}</p>
+              <div class="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-start justify-between sticky top-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur z-10">
+                <div class="min-w-0">
+                  <h2 class="text-xl font-bold text-gray-900 dark:text-zinc-100">{c.title}</h2>
+                  <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">{c.repoFullName}</p>
                 </div>
-                <button onClick={props.onClose} class="text-gray-400 hover:text-gray-600">
-                  Close
+                <button onClick={props.onClose} class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition shrink-0">
+                  <X size={20} />
                 </button>
               </div>
 
               <div class="p-6 space-y-6">
-                <p class="text-gray-700 text-sm leading-relaxed">{c.description}</p>
+                <p class="text-gray-700 dark:text-zinc-300 text-sm leading-relaxed">{c.description}</p>
 
                 <div class="grid grid-cols-4 gap-2 text-center text-xs">
                   <Metric label="score" value={c.score.toFixed(2)} />
@@ -54,16 +55,16 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                 </div>
 
                 <Show when={explain()}>
-                  <div class="rounded-xl bg-indigo-50 border border-indigo-100 p-4">
-                    <h3 class="font-semibold text-indigo-900 mb-2">Why this score?</h3>
-                    <p class="text-sm text-indigo-800 mb-3">
+                  <div class="rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 p-4">
+                    <h3 class="font-semibold text-indigo-900 dark:text-indigo-300 mb-2 flex items-center gap-2"><FileText size={16} /> Why this score?</h3>
+                    <p class="text-sm text-indigo-800 dark:text-indigo-200 mb-3">
                       Base <strong>{explain()!.base}</strong> + adjustment <strong>{explain()!.adjustment}</strong> = <strong>{explain()!.final}</strong>
                     </p>
-                    <ul class="space-y-1 text-sm text-indigo-900">
+                    <ul class="space-y-1 text-sm text-indigo-900 dark:text-indigo-200">
                       <For each={explain()!.features}>
                         {(f) => (
-                          <li class="flex items-center justify-between bg-white/60 rounded-lg px-3 py-2">
-                            <span class="capitalize">{f.feature}: <span class="text-gray-600">{f.value}</span></span>
+                          <li class="flex items-center justify-between bg-white/60 dark:bg-zinc-900/40 rounded-lg px-3 py-2">
+                            <span class="capitalize">{f.feature}: <span class="text-gray-600 dark:text-zinc-400">{f.value}</span></span>
                             <span class={f.adjustment >= 0 ? "text-emerald-600" : "text-rose-600"}>
                               {f.adjustment >= 0 ? "+" : ""}{f.adjustment}
                             </span>
@@ -75,15 +76,15 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                 </Show>
 
                 <Show when={votes()}>
-                  <div class="rounded-xl bg-zinc-50 border border-zinc-200 p-4">
-                    <h3 class="font-semibold text-zinc-900 mb-2">
+                  <div class="rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 p-4">
+                    <h3 class="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
                       Approval chain {votes()!.votes.filter((v) => v.direction === "approve").length}/{votes()!.minApprovers}
                     </h3>
-                    <ul class="space-y-1 text-sm text-zinc-700">
+                    <ul class="space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
                       <For each={votes()!.votes}>
                         {(v) => (
-                          <li class="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-zinc-100">
-                            <span class="text-zinc-500">{v.user ?? "Unknown"}</span>
+                          <li class="flex items-center justify-between bg-white dark:bg-zinc-900 rounded-lg px-3 py-2 border border-zinc-100 dark:border-zinc-800">
+                            <span class="text-zinc-500 dark:text-zinc-400">{v.user ?? "Unknown"}</span>
                             <span class={v.direction === "approve" ? "text-emerald-600 font-medium" : "text-rose-600 font-medium"}>
                               {v.direction}
                             </span>
@@ -96,7 +97,7 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
 
                 <Show when={templates() && templates()!.length > 0}>
                   <div>
-                    <h3 class="font-semibold text-gray-900 mb-2">Quick comment</h3>
+                    <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2 flex items-center gap-2"><MessageSquare size={16} /> Quick comment</h3>
                     <div class="flex flex-wrap gap-2">
                       <For each={templates()}>
                         {(t) => (
@@ -105,7 +106,7 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                               await applyTemplate(t.id, props.cardId);
                               await refetchComments();
                             }}
-                            class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-medium hover:bg-indigo-100 transition"
+                            class="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 text-xs font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition"
                           >
                             {t.name}
                           </button>
@@ -117,16 +118,16 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
 
                 <Show when={comments() && comments()!.length > 0}>
                   <div>
-                    <h3 class="font-semibold text-gray-900 mb-2">Comments</h3>
+                    <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-2 flex items-center gap-2"><MessageSquare size={16} /> Comments</h3>
                     <ul class="space-y-2">
                       <For each={comments() ?? []}>
                         {(comment) => (
-                          <li class="rounded-lg bg-gray-50 border border-gray-100 p-3 text-sm">
-                            <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
+                          <li class="rounded-lg bg-gray-50 dark:bg-zinc-900/60 border border-gray-100 dark:border-zinc-800 p-3 text-sm">
+                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400 mb-1">
                               <span>{comment.user ?? "You"}</span>
                               {comment.postedToGitHub && <span class="text-emerald-600">GitHub</span>}
                             </div>
-                            <p class="text-gray-700 whitespace-pre-line">{comment.body}</p>
+                            <p class="text-gray-700 dark:text-zinc-300 whitespace-pre-line">{comment.body}</p>
                           </li>
                         )}
                       </For>
@@ -135,23 +136,29 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
                 </Show>
 
                 <div>
-                  <h3 class="font-semibold text-gray-900 mb-3">Evidence</h3>
-                  <Show when={evidence() && evidence()!.length > 0} fallback={<p class="text-sm text-gray-500">No evidence yet.</p>}>
+                  <h3 class="font-semibold text-gray-900 dark:text-zinc-100 mb-3 flex items-center gap-2"><FileCode size={16} /> Evidence</h3>
+                  <Show when={evidence() && evidence()!.length > 0} fallback={<p class="text-sm text-gray-500 dark:text-zinc-400">No evidence yet.</p>}>
                     <ul class="space-y-2">
                       <For each={evidence() ?? []}>
-                        {(item) => (
-                          <li>
-                            <button
-                              onClick={() => selectEvidence(item.id, item.kind)}
-                              class={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
-                                activeEvidence() === item.id ? "bg-indigo-50 border border-indigo-200" : "bg-gray-50 hover:bg-gray-100"
-                              }`}
-                            >
-                              <span class="capitalize font-medium">{item.kind}</span>
-                              <span class="text-gray-400 ml-2 font-mono text-xs">{(item.sha256 ?? "").slice(0, 12)}</span>
-                            </button>
-                          </li>
-                        )}
+                        {(item) => {
+                          const Icon = item.kind === "image" ? Image : item.kind === "video" ? Video : FileCode;
+                          return (
+                            <li>
+                              <button
+                                onClick={() => selectEvidence(item.id, item.kind)}
+                                class={`w-full flex items-center gap-2 text-left px-3 py-2 rounded-lg text-sm transition ${
+                                  activeEvidence() === item.id
+                                    ? "bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800"
+                                    : "bg-gray-50 dark:bg-zinc-900/60 hover:bg-gray-100 dark:hover:bg-zinc-800"
+                                }`}
+                              >
+                                <Icon size={14} class="text-gray-400" />
+                                <span class="capitalize font-medium">{item.kind}</span>
+                                <span class="text-gray-400 dark:text-zinc-500 ml-2 font-mono text-xs">{(item.sha256 ?? "").slice(0, 12)}</span>
+                              </button>
+                            </li>
+                          );
+                        }}
                       </For>
                     </ul>
                   </Show>
@@ -189,9 +196,9 @@ export default function CardDetail(props: { cardId: string; onClose: () => void 
 
 function Metric(props: { label: string; value: string }) {
   return (
-    <div class="bg-gray-100 rounded-lg p-2">
-      <div class="uppercase tracking-wider text-gray-500 text-[10px] mb-1">{props.label}</div>
-      <div class="font-semibold capitalize text-gray-900">{props.value}</div>
+    <div class="bg-gray-100 dark:bg-zinc-900/60 rounded-lg p-2 border border-gray-200 dark:border-zinc-800">
+      <div class="uppercase tracking-wider text-gray-500 dark:text-zinc-400 text-[10px] mb-1">{props.label}</div>
+      <div class="font-semibold capitalize text-gray-900 dark:text-zinc-100">{props.value}</div>
     </div>
   );
 }
