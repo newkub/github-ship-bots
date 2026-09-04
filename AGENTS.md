@@ -166,6 +166,13 @@ All `AGENTS.md` files are written in English only.
 - Workspaces must not duplicate root conventions; reference the root file instead.
 - `packages/worker` is the only entry that assembles `api`, `bot`, and `orchestrator`.
 
+## Rollback Plan
+
+- Cloudflare Worker: `wrangler rollback --name github-ship-bots --version-id <previous-version>`
+- D1 database: migrations are forward-only; restore from Wrangler backup/export before re-applying
+- Git: force reset to previous tag `git reset --hard <previous-tag>` only for unmerged hotfixes
+- R2/KV: data changes are additive; rollback by deleting bad objects/keys via `wrangler r2 object delete` or KV delete
+
 ## Expected Outcome
 
 - Root `AGENTS.md` is the single source of truth for the project.
