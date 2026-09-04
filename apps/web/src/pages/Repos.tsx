@@ -1,6 +1,7 @@
 import { For, Show, createResource } from "solid-js";
 import { GitPullRequest, Loader, AlertCircle, Plus } from "lucide-solid";
 import { fetchRepos } from "../api";
+import EmptyState from "../components/EmptyState";
 
 const GITHUB_APP_INSTALL_URL = (import.meta.env.VITE_GITHUB_APP_INSTALL_URL as string | undefined) || "https://github.com/apps/wrikka-ship-bot/installations/new";
 
@@ -45,18 +46,22 @@ export default function Repos() {
       </Show>
 
       <Show when={!repos.loading && !repos.error && (repos() ?? []).length === 0}>
-        <div class="rounded-2xl bg-gray-50 border border-gray-200 p-8 text-center">
-          <p class="text-gray-600 mb-4">Install the GitHub App on repositories you want ship-feed to watch.</p>
-          <a
-            href={GITHUB_APP_INSTALL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
-          >
-            <GitPullRequest size={18} />
-            Install GitHub App
-          </a>
-        </div>
+        <EmptyState
+          icon={GitPullRequest}
+          title="No repositories yet"
+          description="Install the GitHub App on the repositories you want ship-feed to watch."
+          action={
+            <a
+              href={GITHUB_APP_INSTALL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700"
+            >
+              <GitPullRequest size={18} />
+              Install GitHub App
+            </a>
+          }
+        />
       </Show>
 
       <div class="grid grid-cols-1 gap-3">

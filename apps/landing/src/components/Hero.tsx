@@ -17,6 +17,7 @@ import { dashboardUrl, features } from "../data";
 
 export default function Hero() {
   let sceneRef: HTMLDivElement | undefined;
+  let textRef: HTMLDivElement | undefined;
 
   onMount(() => {
     if (!sceneRef) return;
@@ -36,6 +37,19 @@ export default function Hero() {
       duration: 900,
       delay: stagger(120, { start: 200 }),
     });
+
+    if (!textRef) return;
+    const elements = Array.from(textRef.querySelectorAll(".hero-animate"));
+    elements.forEach((el) => {
+      (el as HTMLElement).style.opacity = "0";
+    });
+    animate(elements, {
+      opacity: [0, 1],
+      translateY: [24, 0],
+      easing: "easeOutExpo",
+      duration: 800,
+      delay: stagger(80, { start: 0 }),
+    });
   });
 
   return (
@@ -49,24 +63,24 @@ export default function Hero() {
 
       <div class="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-16 md:py-20">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <div class="text-center lg:text-left animate-fade-in-up">
-            <div class="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-4 py-1.5 text-sm font-medium text-indigo-400 mb-6 animate-ring-pulse">
+          <div ref={textRef} class="text-center lg:text-left">
+            <div class="hero-animate inline-flex items-center gap-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-4 py-1.5 text-sm font-medium text-indigo-400 mb-6">
               <Sparkles size={16} />
               <span>Card-driven autonomous development</span>
             </div>
 
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white text-balance">
+            <h1 class="hero-animate text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white text-balance">
               Ship GitHub projects{" "}
               <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
                 on autopilot
               </span>
             </h1>
 
-            <p class="mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto lg:mx-0 leading-relaxed text-balance">
+            <p class="hero-animate mt-6 text-lg sm:text-xl text-zinc-400 max-w-xl mx-auto lg:mx-0 leading-relaxed text-balance">
               Approve, swipe, comment — your AI bot implements, tests, and ships the rest.
             </p>
 
-            <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto lg:mx-0">
+            <div class="hero-animate mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto lg:mx-0">
               <For each={features}>
                 {(feature, i) => {
                   const Icon = feature.icon;
@@ -90,7 +104,7 @@ export default function Hero() {
               </For>
             </div>
 
-            <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <div class="hero-animate mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <a
                 href={dashboardUrl}
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-500/25 hover:bg-indigo-600 hover:shadow-indigo-500/40 hover:-translate-y-0.5 active:scale-95 transition"
@@ -109,7 +123,7 @@ export default function Hero() {
 
             <Link
               to="/how-it-works"
-              class="mt-6 inline-flex items-center justify-center gap-2 text-sm font-medium text-zinc-400 hover:text-indigo-400 transition group"
+              class="hero-animate mt-6 inline-flex items-center justify-center gap-2 text-sm font-medium text-zinc-400 hover:text-indigo-400 transition group"
             >
               <span class="h-8 w-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-indigo-500/30 group-hover:bg-zinc-800 transition">
                 <Play size={14} />

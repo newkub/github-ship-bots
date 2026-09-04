@@ -9,6 +9,7 @@ import {
   LogOut,
   LayoutDashboard,
   AlertCircle,
+  User,
 } from "lucide-solid";
 import { fetchSession, loginUrl, logout } from "../api";
 import Skeleton from "./Skeleton";
@@ -77,10 +78,15 @@ export default function Layout(props: { children?: JSX.Element }) {
               {nav("/settings", Settings, "Settings")}
             </nav>
 
-            <div class="border-t border-gray-200 pt-4 space-y-2">
-              <div class="px-4 py-2">
-                <div class="text-sm font-medium">{user()?.githubLogin ?? "User"}</div>
-                <div class="text-xs text-gray-500 capitalize">{user()?.plan ?? "free"} plan</div>
+            <div class="border-t border-gray-200 pt-4">
+              <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 mb-2">
+                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 shrink-0">
+                  <User size={18} />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-medium truncate text-gray-900">{user()?.githubLogin ?? "User"}</div>
+                  <div class="text-[10px] uppercase tracking-wide font-semibold text-indigo-600">{user()?.plan ?? "free"}</div>
+                </div>
               </div>
               <button
                 onClick={handleLogout}

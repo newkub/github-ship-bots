@@ -6,6 +6,7 @@ import type { ShipCard, CardStatus } from "@ship-feed/shared";
 import { fetchCards, fetchRepos, updateCardStatus } from "../api";
 import CardDetail from "./CardDetail";
 import CardTile from "../components/CardTile";
+import EmptyState from "../components/EmptyState";
 import Kanban from "../components/Kanban";
 import Skeleton from "../components/Skeleton";
 import StatusPanel from "../components/StatusPanel";
@@ -182,13 +183,11 @@ export default function Cards() {
               </Show>
 
               <Show when={!query.isLoading && cards().length === 0}>
-                <div class="rounded-2xl bg-white border border-gray-200 p-10 text-center">
-                  <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-500 mb-4">
-                    <Rocket size={24} />
-                  </div>
-                  <h3 class="text-lg font-medium text-gray-900">No cards yet</h3>
-                  <p class="text-sm text-gray-500 mt-1">Open an issue or pull request to see it here.</p>
-                </div>
+                <EmptyState
+                  icon={Rocket}
+                  title="No cards yet"
+                  description="Open an issue or pull request in a connected repository to see it turn into a ship-feed card."
+                />
               </Show>
             </>
           }
