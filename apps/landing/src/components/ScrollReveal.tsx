@@ -1,5 +1,5 @@
 import { onMount, type JSX } from "solid-js";
-import { animate } from "animejs";
+import { animate, stagger } from "animejs";
 
 interface ScrollRevealProps {
   children: JSX.Element;
@@ -16,20 +16,23 @@ export default function ScrollReveal(props: ScrollRevealProps) {
     if (!ref) return;
 
     const selector = props.selector ?? ".reveal-item";
-    const targets = Array.from(ref.querySelectorAll(selector));
-    if (targets.length === 0) {
+    const targets = Array.from(ref.querySelectorAll(selector)) as HTMLElement[];
+    if (targets.length === 0 && ref) {
       targets.push(ref);
     }
 
     targets.forEach((el) => {
-      const html = el as HTMLElement;
-      html.style.opacity = "0";
-      html.style.transform = "translateY(28px)";
+      el.style.opacity = "0";
+      el.style.transform = "translateY(28px)";
     });
+
+    const baseDelay = typeof props.stagger === "number" ? props.stagger : 80;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting).map((e) => e.target as HTMLElement);
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .map((e) => e.target as HTMLElement);
         if (visible.length === 0) return;
 
         animate(visible, {
@@ -37,7 +40,7 @@ export default function ScrollReveal(props: ScrollRevealProps) {
           translateY: [28, 0],
           easing: "easeOutExpo",
           duration: 900,
-          delay: props.stagger ?? 80,
+          delay: stagger(baseDelay, { start: props.delay ?? 0 }),
         });
 
         visible.forEach((el) => observer.unobserve(el));

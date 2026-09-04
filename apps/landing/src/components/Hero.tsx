@@ -1,4 +1,5 @@
-import { For } from "solid-js";
+import { For, onMount } from "solid-js";
+import { animate, stagger } from "animejs";
 import {
   ArrowRight,
   ExternalLink,
@@ -15,6 +16,28 @@ import { Link } from "@tanstack/solid-router";
 import { dashboardUrl, features } from "../data";
 
 export default function Hero() {
+  let sceneRef: HTMLDivElement | undefined;
+
+  onMount(() => {
+    if (!sceneRef) return;
+
+    const cards = Array.from(sceneRef.querySelectorAll(".hero-card"));
+    const floaters = Array.from(sceneRef.querySelectorAll(".hero-floater"));
+    const all = [...cards, ...floaters];
+
+    all.forEach((el) => {
+      const html = el as HTMLElement;
+      html.style.opacity = "0";
+    });
+
+    animate(all, {
+      opacity: [0, 1],
+      easing: "easeOutExpo",
+      duration: 900,
+      delay: stagger(120, { start: 200 }),
+    });
+  });
+
   return (
     <section class="relative min-h-screen flex items-center overflow-hidden pt-8 md:pt-0">
       <div class="absolute inset-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 animate-gradient" />
@@ -99,8 +122,9 @@ export default function Hero() {
           <div class="relative flex justify-center items-center h-[28rem] lg:h-auto lg:min-h-[28rem] animate-fade-in-up" style="animation-delay: 0.15s">
             <div class="absolute inset-0 rounded-full bg-indigo-500/10 blur-3xl" />
 
-            <div class="relative w-80 h-80 sm:w-96 sm:h-96">
+            <div ref={sceneRef} class="relative w-80 h-80 sm:w-96 sm:h-96">
               <Card
+                class="hero-card"
                 kind="idea"
                 title="Dark mode idea"
                 meta="impact medium · risk low"
@@ -113,6 +137,7 @@ export default function Hero() {
               />
 
               <Card
+                class="hero-card"
                 kind="work"
                 title="Implement login"
                 meta="effect high · phase mvp"
@@ -125,6 +150,7 @@ export default function Hero() {
               />
 
               <Card
+                class="hero-card"
                 kind="merge"
                 title="PR #42 ready"
                 meta="approved · score 8.4"
@@ -137,6 +163,7 @@ export default function Hero() {
               />
 
               <Card
+                class="hero-card"
                 kind="release"
                 title="Ship v1.2.0"
                 meta="evidence ready"
@@ -156,13 +183,13 @@ export default function Hero() {
                 />
               </div>
 
-              <div class="absolute -bottom-2 -right-2 z-20 flex items-center gap-2 rounded-full bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 shadow-lg animate-float-delayed">
+              <div class="hero-floater absolute -bottom-2 -right-2 z-20 flex items-center gap-2 rounded-full bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 shadow-lg animate-float-delayed">
                 <ThumbsUp size={14} class="text-emerald-400" />
                 <ThumbsDown size={14} class="text-rose-400" />
                 <span class="text-xs font-medium text-zinc-300">Vote</span>
               </div>
 
-              <div class="absolute top-4 -left-8 z-20 flex items-center gap-2 rounded-full bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 shadow-lg animate-float-delayed" style="animation-delay: -3s">
+              <div class="hero-floater absolute top-4 -left-8 z-20 flex items-center gap-2 rounded-full bg-zinc-900/90 border border-zinc-800 px-3 py-1.5 shadow-lg animate-float-delayed" style="animation-delay: -3s">
                 <MessageSquare size={14} class="text-indigo-400" />
                 <span class="text-xs font-medium text-zinc-300">/approve</span>
               </div>
@@ -175,6 +202,7 @@ export default function Hero() {
 }
 
 function Card(props: {
+  class?: string;
   kind: string;
   title: string;
   meta: string;
@@ -206,7 +234,7 @@ function Card(props: {
 
   return (
     <div
-      class={`absolute w-64 sm:w-72 rounded-2xl bg-zinc-900/90 p-5 shadow-2xl border ${colorMap[props.color]} backdrop-blur animate-float hover:-translate-y-1 hover:shadow-indigo-500/10 transition duration-300`}
+      class={`${props.class ?? ""} absolute w-64 sm:w-72 rounded-2xl bg-zinc-900/90 p-5 shadow-2xl border ${colorMap[props.color]} backdrop-blur animate-float hover:-translate-y-1 hover:shadow-indigo-500/10 transition duration-300`}
       style={style}
     >
       <div class="flex items-start gap-3">
