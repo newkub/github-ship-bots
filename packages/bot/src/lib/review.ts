@@ -73,15 +73,18 @@ async function openaiReview(diff: string, apiKey: string, baseUrl: string, model
 
 export async function generateReviewComment(diff: string): Promise<string> {
   const env = getBotEnv();
-  if (!env.OPENAI_API_KEY) {
-    return heuristicReview(diff);
-  }
   const baseUrl = env.OPENAI_API_URL || "https://api.openai.com/v1";
   const model = env.OPENAI_MODEL || "gpt-4o-mini";
   const correlationId = getCorrelationId();
+
+  if (!env.OPENAI_API_KEY) {
+    return `[AI review skipped: OPENAI_API_KEY not configured]\n\n${await heuristicReview(diff)}`;
+  }
+
   try {
     return await openaiReview(diff, env.OPENAI_API_KEY, baseUrl, model, correlationId);
-  } catch {
-    return heuristicReview(diff);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return `[AI review failed: ${message}]\n\n${await heuristicReview(diff)}`;
   }
 }

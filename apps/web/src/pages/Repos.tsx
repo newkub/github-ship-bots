@@ -3,7 +3,8 @@ import { GitPullRequest, Loader, AlertCircle, Plus } from "lucide-solid";
 import { fetchRepos } from "../api";
 import EmptyState from "../components/EmptyState";
 
-const GITHUB_APP_INSTALL_URL = (import.meta.env.VITE_GITHUB_APP_INSTALL_URL as string | undefined) || "https://github.com/apps/wrikka-ship-bot/installations/new";
+const githubAppName = (import.meta.env.VITE_GITHUB_APP_NAME as string | undefined) || "wrikka-ship-bot";
+const GITHUB_APP_INSTALL_URL = (import.meta.env.VITE_GITHUB_APP_INSTALL_URL as string | undefined) || `https://github.com/apps/${githubAppName}/installations/new`;
 
 export default function Repos() {
   const [repos, { refetch }] = createResource(fetchRepos);

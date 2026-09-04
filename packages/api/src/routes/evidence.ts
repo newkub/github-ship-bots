@@ -4,6 +4,7 @@ import { constantTimeCompare, parseEvidenceIds } from "@ship-feed/shared";
 import { getSession } from "../lib/session";
 import { generateId, now } from "../lib/db";
 import { withEnv } from "../lib/env";
+import { checkRateLimit } from "../lib/rate-limit";
 
 const evidence = withEnv(new Elysia({ prefix: "/api/evidence" }));
 
@@ -79,6 +80,12 @@ evidence.post("/webhook", async ({ request, set, env, body }) => {
   if (!env.BOT_TOKEN || env.BOT_TOKEN.length < 32 || !(await constantTimeCompare(token, env.BOT_TOKEN))) {
     set.status = 401;
     return { error: "unauthorized" };
+  }
+  const rate = await checkRateLimit(env, request, 60);
+  if (!rate.allowed) {
+    set.status = 429;
+    set.headers["retry-after"] = String(rate.retryAfter);
+    return { error: "rate limit exceeded", retryAfter: rate.retryAfter };
   }
   const result = await storeEvidence(env, body);
   return result;
