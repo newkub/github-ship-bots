@@ -56,13 +56,13 @@ This is a Bun + TypeScript monorepo. It contains a marketing landing site, a web
 ```
 
 - `apps/landing`: SolidJS + TanStack Router + UnoCSS marketing site
-- `apps/web`: SolidJS + `@solidjs/router` + TanStack Query dashboard
-- `apps/mobile`: SolidJS + `@solidjs/router` + TanStack Query PWA
-- `packages/api`: Elysia + Drizzle ORM + Zod + D1/R2/KV/WorkOS/Stripe
+- `apps/web`: SolidJS + `@solidjs/router` + TanStack Query dashboard; API clients split by domain in `src/api/`
+- `apps/mobile`: SolidJS + `@solidjs/router` + TanStack Query PWA; API clients split by domain in `src/api/`
+- `packages/api`: Elysia + Drizzle ORM + Zod + D1/R2/KV/WorkOS/Stripe; `src/app.ts` composes routes, `src/middleware.ts` holds env/rate-limit/CORS, `src/routes/auth/` is split by endpoint
 - `packages/bot`: Probot + Octokit for GitHub App webhooks
 - `packages/cli`: Bun CLI `updatedeps` for dependency updates and conversions
-- `packages/orchestrator`: Continuous ship loop for approved cards
-- `packages/shared`: Domain types, crypto, and card mapping utilities
+- `packages/orchestrator`: Continuous ship loop for approved cards; `src/lib/github/` split into `client.ts` and `ship.ts`
+- `packages/shared`: Domain types, crypto, id/time helpers, and card mapping utilities
 - `packages/worker`: Cloudflare Worker entry that mounts api, bot, and orchestrator
 
 #### Tech Mapping
@@ -97,6 +97,7 @@ This is a Bun + TypeScript monorepo. It contains a marketing landing site, a web
 - State: TanStack Query
 - Build output: `docs/` (landing), `docs/dashboard/` (web), `dist/` (mobile)
 - CLI binary: `updatedeps` in `packages/cli`
+- CI/CD: local `bun --filter '*' lint && bun --filter '*' test && bun run build && bun --filter @ship-feed/worker deploy`
 
 ### 4. Target User
 
@@ -107,9 +108,12 @@ Development teams and open-source maintainers who want an AI-assisted, approval-
 - ship: /ship
 - realize-implementation: /realize-implementation
 - refactor-codebase: /refactor-codebase
+- restructure: /restructure
 - run-verify: /run-verify
 - review-uxui: /review-uxui
+- review-quality: /review-quality
 - report-what-you-do: /report-what-you-do
+- report-session-status: /report-session-status
 - deploy-to-cloudflare: /deploy-to-cloudflare
 - follow-create-bun-cli: /follow-create-bun-cli
 - update-devin-global-rules: /update-devin-global-rules
