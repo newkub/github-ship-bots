@@ -6,7 +6,7 @@ import {
 import { parseCommand, renderCard } from "../domain/actions";
 import { createCardFromWebhook, uploadEvidence } from "../lib/api";
 import { generateReviewComment } from "../lib/review";
-import { getCorrelationId } from "@ship-feed/shared";
+import { getCorrelationId, logError } from "@ship-feed/shared";
 
 function isApprove(command: "approve" | "reject" | "ship"): boolean {
   return command === "approve";
@@ -41,7 +41,7 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
         });
       }
     } catch (err) {
-      console.error(JSON.stringify({ type: "evidence_diff_failed", correlationId: getCorrelationId(), repo: payload.repository.name, pull: pull_request.number, error: err instanceof Error ? err.message : String(err) }));
+      logError({ type: "evidence_diff_failed", correlationId: getCorrelationId(), repo: payload.repository.name, pull: pull_request.number, error: err instanceof Error ? err.message : String(err) });
     }
 
     const body = renderCard({
@@ -78,7 +78,7 @@ export function pullRequestHandler(webhooks: ShipFeedWebhooks) {
         });
       }
     } catch (err) {
-      console.error(JSON.stringify({ type: "review_diff_failed", correlationId: getCorrelationId(), repo: payload.repository.name, pull: pull_request.number, error: err instanceof Error ? err.message : String(err) }));
+      logError({ type: "review_diff_failed", correlationId: getCorrelationId(), repo: payload.repository.name, pull: pull_request.number, error: err instanceof Error ? err.message : String(err) });
     }
   });
 

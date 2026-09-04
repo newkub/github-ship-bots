@@ -1,3 +1,5 @@
+import { logWarn } from "@ship-feed/shared";
+
 export type Theme = "dark" | "light";
 
 const THEMES: readonly Theme[] = ["dark", "light"];
@@ -12,7 +14,7 @@ export function getInitialTheme(): Theme {
       const saved = localStorage.getItem("sf-theme");
       if (saved && isTheme(saved)) return saved;
     } catch (error) {
-      console.warn("Failed to read theme from localStorage", error);
+      logWarn({ message: "Failed to read theme from localStorage", error: error instanceof Error ? error.message : String(error) });
     }
   }
 
@@ -29,7 +31,7 @@ export function applyTheme(theme: Theme) {
     try {
       localStorage.setItem("sf-theme", theme);
     } catch (error) {
-      console.warn("Failed to persist theme to localStorage", error);
+      logWarn({ message: "Failed to persist theme to localStorage", error: error instanceof Error ? error.message : String(error) });
     }
   }
 
