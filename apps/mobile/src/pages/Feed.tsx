@@ -19,6 +19,7 @@ export default function Feed() {
   const [showPrompt, setShowPrompt] = createSignal(false);
   const [pendingPrompt, setPendingPrompt] = createSignal<string | undefined>(undefined);
   const [lastSwipe, setLastSwipe] = createSignal<{ direction: "approve" | "reject"; previous: number } | null>(null);
+  const [swipeError, setSwipeError] = createSignal<string | null>(null);
 
   const cards = () => query.data ?? [];
 
@@ -37,22 +38,27 @@ export default function Feed() {
   };
 
   const doSwipe = async (direction: "approve" | "reject", prompt?: string) => {
+    setSwipeError(null);
     vibrate(direction === "approve" ? [20, 30, 20] : [40]);
     const list = cards();
     const i = current();
     const card = list[i];
     if (!card) return;
 
-    const result = await swipeCard({ cardId: card.id, direction, comment: prompt });
-    if ("queued" in result && result.queued) {
-      setQueued((q) => q + 1);
-    }
+    try {
+      const result = await swipeCard({ cardId: card.id, direction, comment: prompt });
+      if ("queued" in result && result.queued) {
+        setQueued((q) => q + 1);
+      }
 
-    setLastSwipe({ direction, previous: i });
-    setPendingPrompt(undefined);
-    setExpanded(false);
-    setCurrent((c) => c + 1);
-    setNudgeCount((n) => Math.max(0, n - 1));
+      setLastSwipe({ direction, previous: i });
+      setPendingPrompt(undefined);
+      setExpanded(false);
+      setCurrent((c) => c + 1);
+      setNudgeCount((n) => Math.max(0, n - 1));
+    } catch (err) {
+      setSwipeError(err instanceof Error ? err.message : "Swipe failed. Please try again.");
+    }
   };
 
   const onSwipe = (direction: "approve" | "reject") => {
@@ -68,16 +74,21 @@ export default function Feed() {
     setShowPrompt(false);
   };
 
-  const onUndo = () => {
+  const onUndo = async () => {
     const last = lastSwipe();
     if (!last) return;
 
+    setSwipeError(null);
     setCurrent(last.previous);
     setLastSwipe(null);
     const opposite = last.direction === "approve" ? "reject" : "approve";
     const card = cards()[last.previous];
     if (card) {
-      swipeCard({ cardId: card.id, direction: opposite }).catch(() => {});
+      try {
+        await swipeCard({ cardId: card.id, direction: opposite });
+      } catch (err) {
+        setSwipeError(err instanceof Error ? err.message : "Undo failed. Please try again.");
+      }
     }
   };
 
@@ -86,6 +97,12 @@ export default function Feed() {
 
   return (
     <div class="h-screen w-screen flex flex-col bg-app text-primary pt-safe">
+      <Show when={swipeError()}>
+        <div class="px-4 py-2 bg-danger/10 text-danger text-xs font-semibold border-b border-danger/30 text-center">
+          {swipeError()}
+        </div>
+      </Show>
+
       <div class="flex-1 relative overflow-hidden">
         <For each={cards()}>
           {(card, idx) => (

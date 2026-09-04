@@ -29,10 +29,19 @@ export default function Alerts() {
     const [cards, cfg] = await Promise.all([fetchNudges(), fetchConfig()]);
     return cards.map((card) => cardToNudge(card, cfg.autoApproveThreshold, cfg.autoApproveRisk));
   });
+  const [actionError, setActionError] = createSignal<string | null>(null);
 
   const handleAction = async (id: string, action: NudgeAction) => {
+    setActionError(null);
     if (action === "approve" || action === "reject") {
-      await swipeCard({ cardId: id, direction: action }).catch(() => {});
+      try {
+        const result = await swipeCard({ cardId: id, direction: action });
+        if (!result.ok) {
+          setActionError("Failed to apply action.");
+        }
+      } catch (err) {
+        setActionError(err instanceof Error ? err.message : "Action failed. Please try again.");
+      }
     }
     refetch();
   };
@@ -53,6 +62,12 @@ export default function Alerts() {
       </header>
 
       <div class="flex-1 overflow-auto p-4 no-scrollbar">
+        <Show when={actionError()}>
+          <div class="mb-4 p-3 rounded-xl bg-danger/10 text-danger text-sm border border-danger/30">
+            {actionError()}
+          </div>
+        </Show>
+
         <Show when={nudges.loading}>
           <div class="h-full flex items-center justify-center text-muted">
             <Loader size={24} class="animate-spin mr-2" />
