@@ -1,3 +1,5 @@
+import { decodePng } from "./png-decode";
+
 export function base64ToBytes(b64: string): Uint8Array {
   const clean = b64.replace(/^data:image\/[^;]+;base64,/, "");
   const bin = atob(clean);
@@ -28,17 +30,34 @@ export function byteDiffScore(a: Uint8Array, b: Uint8Array): number {
   return Math.min(1, diffs / (max * 255));
 }
 
+export function pixelDiffScore(a: Uint8Array, b: Uint8Array, width: number, height: number): number {
+  if (a.length !== b.length || a.length !== width * height * 4) return 1;
+  if (a.length === 0) return 0;
+  let diffs = 0;
+  for (let i = 0; i < a.length; i++) {
+    diffs += Math.abs((a[i] ?? 0) - (b[i] ?? 0));
+  }
+  return diffs / (a.length * 255);
+}
+
 export async function diffImages(
   a: string,
   b: string,
   threshold = 0.05,
-): Promise<{ diffScore: number; hashA: string; hashB: string; passed: boolean }> {
+): Promise<{ diffScore: number; hashA: string; hashB: string; passed: boolean; method: "pixel" | "byte" }> {
   const bytesA = base64ToBytes(a);
   const bytesB = base64ToBytes(b);
   const [hashA, hashB] = await Promise.all([sha256Hex(bytesA), sha256Hex(bytesB)]);
   if (hashA === hashB) {
-    return { diffScore: 0, hashA, hashB, passed: true };
+    return { diffScore: 0, hashA, hashB, passed: true, method: "pixel" };
   }
+
+  const [imgA, imgB] = await Promise.all([decodePng(bytesA), decodePng(bytesB)]);
+  if (imgA && imgB && imgA.width === imgB.width && imgA.height === imgB.height) {
+    const score = pixelDiffScore(imgA.data, imgB.data, imgA.width, imgA.height);
+    return { diffScore: score, hashA, hashB, passed: score < threshold, method: "pixel" };
+  }
+
   const score = byteDiffScore(bytesA, bytesB);
-  return { diffScore: score, hashA, hashB, passed: score < threshold };
+  return { diffScore: score, hashA, hashB, passed: score < threshold, method: "byte" };
 }
