@@ -35,6 +35,10 @@ function heuristicReview(diff: string): string {
   return lines.join("\n");
 }
 
+function formatReview(mode: "ai" | "heuristic", reason: string, body: string): string {
+  return `<!-- ship-feed: review-mode=${mode} reason="${reason}" -->\n\n${body}`;
+}
+
 async function openaiReview(diff: string, apiKey: string, baseUrl: string, model: string, correlationId: string): Promise<string> {
   const res = await fetchExternal("openai", "chat.completions", correlationId, `${baseUrl}/chat/completions`, {
     method: "POST",
@@ -60,31 +64,46 @@ async function openaiReview(diff: string, apiKey: string, baseUrl: string, model
   const choices = assertArray(data.choices, "choices");
   const first = choices[0];
   if (first === null || typeof first !== "object") {
-    return "AI review unavailable.";
+    throw new Error("OpenAI returned no choices");
   }
   const choice = assertRecord(first, "choice");
   if (choice.message === null || typeof choice.message !== "object") {
-    return "AI review unavailable.";
+    throw new Error("OpenAI returned no message");
   }
   const message = assertRecord(choice.message, "message");
   const content = assertOptionalString(message.content, "content");
-  return content?.trim() || "AI review unavailable.";
+  if (!content) {
+    throw new Error("OpenAI returned empty content");
+  }
+  return content.trim();
 }
 
 export async function generateReviewComment(diff: string): Promise<string> {
   const env = getBotEnv();
+  const mode = env.OPENAI_REVIEW_MODE ?? "auto";
   const baseUrl = env.OPENAI_API_URL || "https://api.openai.com/v1";
   const model = env.OPENAI_MODEL || "gpt-4o-mini";
   const correlationId = getCorrelationId();
 
+  if (mode === "heuristic") {
+    return formatReview("heuristic", "OPENAI_REVIEW_MODE=heuristic", heuristicReview(diff));
+  }
+
   if (!env.OPENAI_API_KEY) {
-    return `[AI review skipped: OPENAI_API_KEY not configured]\n\n${await heuristicReview(diff)}`;
+    if (mode === "required") {
+      throw new Error("OPENAI_API_KEY not configured and OPENAI_REVIEW_MODE=required");
+    }
+    return formatReview("heuristic", "OPENAI_API_KEY not configured", heuristicReview(diff));
   }
 
   try {
-    return await openaiReview(diff, env.OPENAI_API_KEY, baseUrl, model, correlationId);
+    const review = await openaiReview(diff, env.OPENAI_API_KEY, baseUrl, model, correlationId);
+    return formatReview("ai", "OpenAI", review);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    return `[AI review failed: ${message}]\n\n${await heuristicReview(diff)}`;
+    if (mode === "required") {
+      throw new Error(`AI review failed and OPENAI_REVIEW_MODE=required: ${message}`);
+    }
+    return formatReview("heuristic", `AI review failed: ${message}`, heuristicReview(diff));
   }
 }

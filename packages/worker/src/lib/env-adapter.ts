@@ -6,6 +6,7 @@ export interface BotEnv extends Env {
   WEBHOOK_SECRET: string;
   API_TOKEN: string;
   API_URL: string;
+  OPENAI_REVIEW_MODE?: "auto" | "heuristic" | "required";
   ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
@@ -48,6 +49,7 @@ export function toBotEnv(env: Env): BotEnvResult {
       API_TOKEN: botToken!,
       API_URL: publicAppUrl!,
       OPENAI_API_KEY: env.OPENAI_API_KEY,
+      OPENAI_REVIEW_MODE: (env.OPENAI_REVIEW_MODE as "auto" | "heuristic" | "required" | undefined) ?? "auto",
       ASSETS: env.ASSETS,
     } as BotEnv,
   };

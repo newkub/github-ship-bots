@@ -33,6 +33,7 @@ GITHUB_APP_NAME = "wrikka-ship-bot"
 VAPID_SUBJECT = "mailto:admin@newkubise.workers.dev"
 AUTO_APPROVE_THRESHOLD = "8.5"
 AUTO_APPROVE_RISK = "low"
+OPENAI_REVIEW_MODE = "auto"
 ELYSIA_AOT = "false"
 
 # Set WORKOS_CLIENT_ID, WORKOS_REDIRECT_URI, STRIPE_PRICE_TEAM, and OPENAI_API_URL via wrangler secrets or .dev.vars

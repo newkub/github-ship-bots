@@ -11,6 +11,7 @@ export interface BotEnv {
   OPENAI_API_KEY?: string;
   OPENAI_API_URL?: string;
   OPENAI_MODEL?: string;
+  OPENAI_REVIEW_MODE?: "auto" | "heuristic" | "required";
   GITHUB_API_URL?: string;
   GITHUB_WEB_URL?: string;
 }
